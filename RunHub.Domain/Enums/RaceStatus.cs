@@ -1,4 +1,4 @@
-﻿namespace RunHub.Domain.Entity.Enum
+﻿namespace RunHub.Domain.Enum
 {
     public enum RaceStatus
     {

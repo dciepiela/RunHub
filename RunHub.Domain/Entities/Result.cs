@@ -15,7 +15,7 @@
         public int? AgeGroupId { get; set; }
         public AgeGroup AgeGroup { get; set; }
 
-        public int? RaceUserId { get; set; }
-        public DistanceAttendee RaceUser { get; set; }
+        public int? DistanceAttendeeId { get; set; }
+        public DistanceAttendee DistanceAttendee { get; set; }
     }
 }

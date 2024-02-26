@@ -9,10 +9,10 @@
         public string PostalCode { get; set; }
 
         // Foreign Key
-        public int RaceId { get; set; }
+        public int? RaceId { get; set; }
         public Race Race { get; set; }
 
-        public string AppUserId { get; set; }
+        public string? AppUserId { get; set; }
         public AppUser AppUser { get; set; }
     }
 }

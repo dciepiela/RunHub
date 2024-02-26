@@ -22,6 +22,7 @@
 
         // Relation
         public ICollection<DistanceAttendee> DistanceAttendees { get; set; }
+        public ICollection<Result> Results { get; set; }
 
     }
 }

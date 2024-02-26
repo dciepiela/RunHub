@@ -1,4 +1,4 @@
-﻿using RunHub.Domain.Entity.Enum;
+﻿using RunHub.Domain.Enum;
 
 namespace RunHub.Domain.Entity
 {
@@ -6,7 +6,9 @@ namespace RunHub.Domain.Entity
     {
         public int RaceId { get; set; }
         public string Name { get; set; }
+        public string Description { get; set; }
         public DateTime CreationDate { get; set; } = DateTime.UtcNow;
+        public DateTime LastUpdateDate { get; set; } = DateTime.UtcNow;
         public DateTime RegistrationEndDate { get; set; }
         public DateTime StartDateRace { get; set; }
         public DateTime EndDateRace { get; set; }
@@ -17,7 +19,6 @@ namespace RunHub.Domain.Entity
         //relation
         public string CreatorAppUserId { get; set; }
         public AppUser CreatorAppUser { get; set; }
-        public int AddressId {  get; set; }
         public Address Address { get; set; }
 
         public ICollection<Distance> Distances { get; set; } = new List<Distance>();

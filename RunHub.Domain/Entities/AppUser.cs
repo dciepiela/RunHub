@@ -15,7 +15,6 @@ namespace RunHub.Domain.Entity
         public string Club { get; set; }
 
         //relation
-        public int AddressId { get; set; }
         public Address Address { get; set; }
         public ICollection<DistanceAttendee> DistanceAttendees { get; set; }
     }

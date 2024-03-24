@@ -60,7 +60,7 @@ namespace RunHub.API.Extensions
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials()
-                        .WithOrigins("http://localhost:5173", "https://localhost:3000");
+                        .WithOrigins("http://localhost:5174", "https://localhost:3000");
                         //.SetIsOriginAllowed(origin => true);
                 });
             });

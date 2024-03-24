@@ -9,13 +9,13 @@ namespace RunHub.Domain.Entity
         public string LastName { get; set; }
         public string Nationality { get; set; }
         public string Gender { get; set; }
-        public DateTime DateOfBirth { get; set; }
+        public DateOnly DateOfBirth { get; set; }
         public string Bio { get; set; }
         public string ContactNumber { get; set; }
         public string Club { get; set; }
 
         //relation
-        public Address Address { get; set; }
+        public Address? Address { get; set; }
         public ICollection<DistanceAttendee> DistanceAttendees { get; set; }
     }
 }

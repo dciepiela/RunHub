@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using RunHub.API.Services;
+using RunHub.Application.Core;
 using RunHub.Domain.Entity;
 using RunHub.Persistence;
 using System.Text;
@@ -11,16 +14,17 @@ namespace RunHub.API.Extensions
     {
         public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration config)
         {
-
-            services.AddIdentity<AppUser, IdentityRole>(options =>
+            services.AddIdentity<AppUser,IdentityRole> (options =>
             {
-                options.Password.RequireDigit = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequireNonAlphanumeric = true;
-                options.Password.RequiredLength = 12;
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredLength = 4;
             })
-                .AddEntityFrameworkStores<DataContext>();
+                .AddEntityFrameworkStores<DataContext>()
+                .AddSignInManager<SignInManager<AppUser>>()
+                .AddDefaultTokenProviders();
 
             var issuer = config["JWT:Issuer"];
             var audience = config["JWT:Audience"];
@@ -47,6 +51,9 @@ namespace RunHub.API.Extensions
                     IssuerSigningKey = key
                 };
             });
+
+            services.AddScoped<ITokenService, TokenService>();
+
 
             return services;
         }

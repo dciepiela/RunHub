@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using RunHub.Contracts.DTOs;
 using RunHub.Contracts.Exceptions;
-using RunHub.Contracts.Responses;
+using RunHub.Contracts.Responses.Races;
 using RunHub.Domain.Entity;
 using RunHub.Persistence;
 
@@ -21,9 +21,12 @@ namespace RunHub.Application.Queries.Races.GetRaceById
         {
             var race = await _context.Races
                 .Include(x => x.Address)
+                .Include(x => x.CreatorAppUser)
+                .Include(x => x.Distances)
+                .Include(x => x.Sponsors)
                 .FirstOrDefaultAsync(x => x.RaceId == request.RaceId, cancellationToken);
-            
-            if(race == null)
+
+            if (race == null)
             {
                 throw new NotFoundException($"{nameof(Race)} z {nameof(Race.RaceId)}: {request.RaceId}" + " nie zostało znalezione w bazie danych" );
             }

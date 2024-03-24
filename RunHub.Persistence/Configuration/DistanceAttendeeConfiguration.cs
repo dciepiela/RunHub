@@ -9,7 +9,9 @@ namespace RunHub.Persistence.Configuration
         public void Configure(EntityTypeBuilder<DistanceAttendee> eb)
         {
             // One-to-Many relationship between AppUser and DistanceAttendee
-            eb.HasKey(da => da.DistanceAttendeeId);
+            eb.HasKey(da => new { da.ParticipatorId, da.DistanceId });
+
+            //eb.HasKey(da => da.DistanceAttendeeId);
 
             eb.HasOne(da => da.Participator)
                 .WithMany(u => u.DistanceAttendees)
@@ -19,7 +21,6 @@ namespace RunHub.Persistence.Configuration
                 .WithMany(d => d.DistanceAttendees)
                 .HasForeignKey(da => da.DistanceId);
 
-            //Properties
             eb.Property(da => da.Price).HasPrecision(14, 2);
         }
     }

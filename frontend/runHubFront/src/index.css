@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body{
+    background-color: rgb(255, 255, 255);
+}
+
+@layer base {
+    li{
+        @apply p-4;
+    }
+    button{
+        @apply text-deepBlack border bg-lightYellow
+        hover:bg-transparent hover:text-lightYellow rounded-md 
+    }
+}

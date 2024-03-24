@@ -1,10 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using RunHub.Domain.Entity;
 using RunHub.Domain.Enum;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 
 namespace RunHub.Persistence
@@ -19,45 +15,52 @@ namespace RunHub.Persistence
                 {
                     new AppUser
                     {
-                        DisplayName = "jankow",
-                        FirstName = "Jan",
-                        LastName = "Kowalski",
+                        DisplayName = "JanKow",
+                        UserName = "jankow",
                         Email = "jankow02@wp.pl"
                     },
                     new AppUser
                     {
-                        DisplayName = "alejan",
-                        FirstName = "Aleksandra",
-                        LastName = "Jankowska",
+                        DisplayName = "AleJan",
+                        UserName = "alejan",
                         Email = "alekjan@gmail.com"
                     },
                     new AppUser
                     {
-                        DisplayName = "jacnow",
-                        FirstName = "Jacek",
-                        LastName = "Nowak",
+                        DisplayName = "JacNow",
+                        UserName = "jacnow",
                         Email = "jacnow@test1.pl"
                     },
-                    new AppUser
-                    {
-                        DisplayName = "zofprz",
-                        FirstName = "Zofia",
-                        LastName = "Przybysz",
-                        Email = "zofiap@test.pl"
-                    },
-                    new AppUser
-                    {
-                        DisplayName = "jestan",
-                        FirstName = "Jerzy",
-                        LastName = "Stankiewicz",
-                        Email = "jstankiewicz@test.pl"
-                    }
                 };
 
                 foreach (var user in users)
                 {
                     await userManager.CreateAsync(user, "Pa$$w0rd");
                 }
+
+
+                //distances for race
+                var distances = new List<Distance>
+                {
+                    new Distance
+                    {
+                        Name = "Barbarian Race",
+                        LengthInKilometers = 12.0,
+                        Description = "Poziom zaawansowany",
+                        AvailableSlots = 200,
+                        TotalSlots = 200,
+                        Price = 199.99m,
+                    },
+                    new Distance
+                    {
+                        Name = "Barbarian Opener",
+                        LengthInKilometers = 6.0,
+                        Description = "Dla zaczynających bieganie",
+                        AvailableSlots = 150,
+                        TotalSlots = 150,
+                        Price = 149.99m,
+                    }
+                };
 
                 //age groups
                 var ageGroups = new List<AgeGroup>
@@ -110,40 +113,40 @@ namespace RunHub.Persistence
                                AvailableSlots = 200,
                                TotalSlots = 200,
                                Price = 199.99m,
-                               DistanceAttendees = new List<DistanceAttendee>
-                               {
-                                   new DistanceAttendee
-                                   {
-                                       Participator = users[1],
-                                       IsPaid = true,
-                                       PaidDate = DateTime.UtcNow.AddDays(20),
-                                       Price = 199.99m,
-                                       Result = new Result
-                                       {
-                                            ResultOpenGroup = 1,
-                                            ResultAgeGroup = 1,
-                                            ResultGender = 1,
-                                            Time = TimeSpan.FromMinutes(25),
-                                            AgeGroup = ageGroups[1],
-                                       }
-                                   },
-                                   new DistanceAttendee
-                                   {
-                                       Participator = users[2],
-                                       IsPaid = true,
-                                       PaidDate = DateTime.UtcNow.AddDays(22),
-                                       Price = 199.99m,
-                                       Result = new Result
-                                       {
-                                            ResultOpenGroup = 2,
-                                            ResultAgeGroup = 1,
-                                            ResultGender = 2,
-                                            Time = TimeSpan.FromMinutes(28),
-                                            AgeGroup = ageGroups[0],
-                                       }
-                                   },
+                               //DistanceAttendees = new List<DistanceAttendee>
+                               //{
+                               //    new DistanceAttendee
+                               //    {
+                               //        Participator = users[1],
+                               //        IsPaid = true,
+                               //        PaidDate = DateTime.UtcNow.AddDays(20),
+                               //        Price = 199.99m,
+                               //        //Result = new Result
+                               //        //{
+                               //        //     ResultOpenGroup = 1,
+                               //        //     ResultAgeGroup = 1,
+                               //        //     ResultGender = 1,
+                               //        //     Time = TimeSpan.FromMinutes(25),
+                               //        //     AgeGroup = ageGroups[1],
+                               //        //}
+                               //    },
+                               //    new DistanceAttendee
+                               //    {
+                               //        Participator = users[2],
+                               //        IsPaid = true,
+                               //        PaidDate = DateTime.UtcNow.AddDays(22),
+                               //        Price = 199.99m,
+                               //        //Result = new Result
+                               //        //{
+                               //        //     ResultOpenGroup = 2,
+                               //        //     ResultAgeGroup = 1,
+                               //        //     ResultGender = 2,
+                               //        //     Time = TimeSpan.FromMinutes(28),
+                               //        //     AgeGroup = ageGroups[0],
+                               //        //}
+                               //    },
 
-                               }
+                               //}
                            },
                            new Distance
                            {
@@ -185,6 +188,8 @@ namespace RunHub.Persistence
                         }
                     }
                 };
+
+                await context.Users.AddRangeAsync(users);
                 await context.AgeGroups.AddRangeAsync(ageGroups);
                 await context.Races.AddRangeAsync(races);
                 await context.SaveChangesAsync();

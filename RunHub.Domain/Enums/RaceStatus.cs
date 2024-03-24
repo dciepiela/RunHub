@@ -2,10 +2,10 @@
 {
     public enum RaceStatus
     {
-        OpenToRegistration,
-        ClosedToRegistration,
-        Past,
-        Cancelled,
-        OnGoing
+        OpenToRegistration = 1,
+        ClosedToRegistration = 2,
+        Past = 3,
+        Cancelled = 4,
+        OnGoing = 5
     }
 }

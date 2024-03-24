@@ -17,7 +17,6 @@ namespace RunHub.Domain.Entity
         public RaceType RaceType { get; set; }
 
         //relation
-        public string CreatorAppUserId { get; set; }
         public AppUser CreatorAppUser { get; set; }
         public Address Address { get; set; }
 

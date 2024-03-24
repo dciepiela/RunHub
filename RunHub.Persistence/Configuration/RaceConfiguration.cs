@@ -23,9 +23,9 @@ namespace RunHub.Persistence.Configuration
 
             // Properties
 
-            eb.Property(r => r.RaceStatus).HasConversion(c => c.ToString(), c => Enum.Parse<RaceStatus>(c));
+            //eb.Property(r => r.RaceStatus).HasConversion(c => c.ToString(), c => Enum.Parse<RaceStatus>(c));
 
-            eb.Property(r => r.RaceType).HasConversion(c => c.ToString(), c => Enum.Parse<RaceType>(c));
+            //eb.Property(r => r.RaceType).HasConversion(c => c.ToString(), c => Enum.Parse<RaceType>(c));
         }
     }
 }

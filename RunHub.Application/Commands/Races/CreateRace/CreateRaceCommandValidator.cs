@@ -19,22 +19,22 @@ namespace RunHub.Application.Commands.Races.CreateRace
                 .MaximumLength(1000)
                 .WithMessage($"{nameof(Race.Description)} nie może być dłuższe niż 1000 znaków");
 
-            RuleFor(x => x.RegistrationEndDate).Must(BeOverThanActualDate);
-            RuleFor(x => x.StartDateRace).Must(BeOverThanActualDate);
-            RuleFor(x => x.EndDateRace).Must(BeOverThanActualDate);
+            //RuleFor(x => x.RegistrationEndDate).Must(BeOverThanActualDate);
+            //RuleFor(x => x.StartDateRace).Must(BeOverThanActualDate);
+            //RuleFor(x => x.EndDateRace).Must(BeOverThanActualDate);
         }
-        public bool BeOverThanActualDate(DateTime dateToCheck)
-        {
-            DateTime currentDate = DateTime.Now;
+        //public bool BeOverThanActualDate(DateTime dateToCheck)
+        //{
+        //    DateTime currentDate = DateTime.Now;
 
-            if (dateToCheck > currentDate)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
+        //    if (dateToCheck > currentDate)
+        //    {
+        //        return true;
+        //    }
+        //    else
+        //    {
+        //        return false;
+        //    }
+        //}
     }
 }

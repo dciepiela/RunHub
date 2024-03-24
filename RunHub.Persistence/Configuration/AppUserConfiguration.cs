@@ -11,7 +11,8 @@ namespace RunHub.Persistence.Configuration
             // One-to-One relationship between AppUser and Address
             eb.HasOne(a => a.Address)
                 .WithOne(u => u.AppUser)
-                .HasForeignKey<Address>(u => u.AppUserId);
+                .HasForeignKey<Address>(u => u.AppUserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using MediatR;
-using RunHub.Contracts.DTOs;
-using RunHub.Contracts.Responses;
+using RunHub.Contracts.Responses.Races;
 
 namespace RunHub.Application.Queries.Races.GetRaceById
 {

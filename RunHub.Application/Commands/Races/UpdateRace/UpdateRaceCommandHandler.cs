@@ -17,6 +17,7 @@ namespace RunHub.Application.Commands.Races.UpdateRace
         public async Task<Unit> Handle(UpdateRaceCommand request, CancellationToken cancellationToken)
         {
             var raceToUpdate = await _context.Races
+                .Include(r => r.Address)
                 .FirstOrDefaultAsync(x => x.RaceId == request.RaceId, cancellationToken);
 
             if(raceToUpdate == null)
@@ -33,7 +34,28 @@ namespace RunHub.Application.Commands.Races.UpdateRace
             raceToUpdate.Image = request.Image;
             raceToUpdate.RaceStatus = request.RaceStatus;
             raceToUpdate.RaceType = request.RaceType;
-            raceToUpdate.Address = request.Address;
+
+            // Update address details if provided
+            if (request.AddressDto != null)
+            {
+                // Map the AddressDto to Address entity
+                var updatedAddress = _context.Addresses.FirstOrDefault(a => a.AddressId == raceToUpdate.Address.AddressId);
+
+                if (updatedAddress == null)
+                {
+                    // Handle the case where the address does not exist
+                    updatedAddress = new Address();
+                    _context.Addresses.Add(updatedAddress);
+                }
+
+                updatedAddress.City = request.AddressDto.City;
+                updatedAddress.Street = request.AddressDto.Street;
+                updatedAddress.Country = request.AddressDto.Country;
+                updatedAddress.PostalCode = request.AddressDto.PostalCode;
+
+                // Update the race's address
+                raceToUpdate.Address = updatedAddress;
+            }
 
             _context.Races.Update(raceToUpdate);
             await _context.SaveChangesAsync(cancellationToken);

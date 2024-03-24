@@ -47,6 +47,20 @@ namespace RunHub.Persistence.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "4f2c20bd-e261-414e-8ad5-1529e83b6533",
+                            Name = "Competitor",
+                            NormalizedName = "COMPETITOR"
+                        },
+                        new
+                        {
+                            Id = "b60a10a7-e33e-466f-a7b0-b56c80a9e4ff",
+                            Name = "Organizer",
+                            NormalizedName = "ORGANIZER"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -157,11 +171,11 @@ namespace RunHub.Persistence.Migrations
 
             modelBuilder.Entity("RunHub.Domain.Entity.Address", b =>
                 {
-                    b.Property<int>("AddressID")
+                    b.Property<int>("AddressId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AddressID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AddressId"));
 
                     b.Property<string>("AppUserId")
                         .HasColumnType("nvarchar(450)");
@@ -181,7 +195,7 @@ namespace RunHub.Persistence.Migrations
                     b.Property<string>("Street")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("AddressID");
+                    b.HasKey("AddressId");
 
                     b.HasIndex("AppUserId")
                         .IsUnique()
@@ -240,8 +254,8 @@ namespace RunHub.Persistence.Migrations
                     b.Property<string>("ContactNumber")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("DateOfBirth")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("DateOfBirth")
+                        .HasColumnType("date");
 
                     b.Property<string>("DisplayName")
                         .HasColumnType("nvarchar(max)");
@@ -350,8 +364,8 @@ namespace RunHub.Persistence.Migrations
 
             modelBuilder.Entity("RunHub.Domain.Entity.DistanceAttendee", b =>
                 {
-                    b.Property<int>("DistanceAttendeeId")
-                        .HasColumnType("int");
+                    b.Property<string>("ParticipatorId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("DistanceId")
                         .HasColumnType("int");
@@ -362,18 +376,13 @@ namespace RunHub.Persistence.Migrations
                     b.Property<DateTime?>("PaidDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("ParticipatorId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<decimal>("Price")
+                    b.Property<decimal?>("Price")
                         .HasPrecision(14, 2)
                         .HasColumnType("decimal(14,2)");
 
-                    b.HasKey("DistanceAttendeeId");
+                    b.HasKey("ParticipatorId", "DistanceId");
 
                     b.HasIndex("DistanceId");
-
-                    b.HasIndex("ParticipatorId");
 
                     b.ToTable("DistanceAttendees");
                 });
@@ -407,13 +416,11 @@ namespace RunHub.Persistence.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("RaceStatus")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("RaceStatus")
+                        .HasColumnType("int");
 
-                    b.Property<string>("RaceType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("RaceType")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("RegistrationEndDate")
                         .HasColumnType("datetime2");
@@ -441,44 +448,6 @@ namespace RunHub.Persistence.Migrations
                     b.HasIndex("AgeGroupId");
 
                     b.ToTable("RaceAgeGroups");
-                });
-
-            modelBuilder.Entity("RunHub.Domain.Entity.Result", b =>
-                {
-                    b.Property<int>("ResultId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ResultId"));
-
-                    b.Property<int?>("AgeGroupId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("DistanceAttendeeId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("DistanceId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ResultAgeGroup")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ResultGender")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ResultOpenGroup")
-                        .HasColumnType("int");
-
-                    b.Property<TimeSpan>("Time")
-                        .HasColumnType("time");
-
-                    b.HasKey("ResultId");
-
-                    b.HasIndex("AgeGroupId");
-
-                    b.HasIndex("DistanceId");
-
-                    b.ToTable("Results");
                 });
 
             modelBuilder.Entity("RunHub.Domain.Entity.Sponsor", b =>
@@ -572,7 +541,8 @@ namespace RunHub.Persistence.Migrations
                 {
                     b.HasOne("RunHub.Domain.Entity.AppUser", "AppUser")
                         .WithOne("Address")
-                        .HasForeignKey("RunHub.Domain.Entity.Address", "AppUserId");
+                        .HasForeignKey("RunHub.Domain.Entity.Address", "AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("RunHub.Domain.Entity.Race", "Race")
                         .WithOne("Address")
@@ -597,12 +567,6 @@ namespace RunHub.Persistence.Migrations
 
             modelBuilder.Entity("RunHub.Domain.Entity.DistanceAttendee", b =>
                 {
-                    b.HasOne("RunHub.Domain.Entity.Result", "Result")
-                        .WithOne("DistanceAttendee")
-                        .HasForeignKey("RunHub.Domain.Entity.DistanceAttendee", "DistanceAttendeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("RunHub.Domain.Entity.Distance", "Distance")
                         .WithMany("DistanceAttendees")
                         .HasForeignKey("DistanceId")
@@ -611,13 +575,13 @@ namespace RunHub.Persistence.Migrations
 
                     b.HasOne("RunHub.Domain.Entity.AppUser", "Participator")
                         .WithMany("DistanceAttendees")
-                        .HasForeignKey("ParticipatorId");
+                        .HasForeignKey("ParticipatorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Distance");
 
                     b.Navigation("Participator");
-
-                    b.Navigation("Result");
                 });
 
             modelBuilder.Entity("RunHub.Domain.Entity.Race", b =>
@@ -648,19 +612,6 @@ namespace RunHub.Persistence.Migrations
                     b.Navigation("Race");
                 });
 
-            modelBuilder.Entity("RunHub.Domain.Entity.Result", b =>
-                {
-                    b.HasOne("RunHub.Domain.Entity.AgeGroup", "AgeGroup")
-                        .WithMany("Results")
-                        .HasForeignKey("AgeGroupId");
-
-                    b.HasOne("RunHub.Domain.Entity.Distance", null)
-                        .WithMany("Results")
-                        .HasForeignKey("DistanceId");
-
-                    b.Navigation("AgeGroup");
-                });
-
             modelBuilder.Entity("RunHub.Domain.Entity.Sponsor", b =>
                 {
                     b.HasOne("RunHub.Domain.Entity.Race", "Race")
@@ -675,8 +626,6 @@ namespace RunHub.Persistence.Migrations
             modelBuilder.Entity("RunHub.Domain.Entity.AgeGroup", b =>
                 {
                     b.Navigation("RaceAgeGroups");
-
-                    b.Navigation("Results");
                 });
 
             modelBuilder.Entity("RunHub.Domain.Entity.AppUser", b =>
@@ -689,8 +638,6 @@ namespace RunHub.Persistence.Migrations
             modelBuilder.Entity("RunHub.Domain.Entity.Distance", b =>
                 {
                     b.Navigation("DistanceAttendees");
-
-                    b.Navigation("Results");
                 });
 
             modelBuilder.Entity("RunHub.Domain.Entity.Race", b =>
@@ -702,11 +649,6 @@ namespace RunHub.Persistence.Migrations
                     b.Navigation("RaceAgeGroups");
 
                     b.Navigation("Sponsors");
-                });
-
-            modelBuilder.Entity("RunHub.Domain.Entity.Result", b =>
-                {
-                    b.Navigation("DistanceAttendee");
                 });
 #pragma warning restore 612, 618
         }

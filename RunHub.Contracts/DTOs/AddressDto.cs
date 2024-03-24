@@ -1,8 +1,11 @@
 ﻿namespace RunHub.Contracts.DTOs
 {
-    public record AddressDto(
-        string City, 
-        string Street, 
-        string Country, 
-        string PostalCode);
+    public class AddressDto
+    {
+        public string? City { get; set; }
+        public string? Street { get; set; }
+        public string? Country {  get; set; }
+        public string? PostalCode {  get; set; }
+    }
+       
 }

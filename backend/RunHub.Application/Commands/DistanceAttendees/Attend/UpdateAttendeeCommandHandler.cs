@@ -1,13 +1,14 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using RunHub.Application.Interfaces;
+using RunHub.Contracts.Errors;
 using RunHub.Contracts.Exceptions;
 using RunHub.Domain.Entity;
 using RunHub.Persistence;
 
 namespace RunHub.Application.Commands.DistanceAttendees.Attend
 {
-    public class UpdateAttendeeCommandHandler : IRequestHandler<UpdateAttendeeCommand, Unit>
+    public class UpdateAttendeeCommandHandler : IRequestHandler<UpdateAttendeeCommand, Result<Unit>>
     {
         private readonly DataContext _context;
         private readonly IUserAccessor _userAccessor;
@@ -17,7 +18,7 @@ namespace RunHub.Application.Commands.DistanceAttendees.Attend
             _context = context;
             _userAccessor = userAccessor;
         }
-        public async Task<Unit> Handle(UpdateAttendeeCommand request, CancellationToken cancellationToken)
+        public async Task<Result<Unit>> Handle(UpdateAttendeeCommand request, CancellationToken cancellationToken)
         {
             var race = await _context.Races
                 .Include(r => r.Distances)
@@ -25,33 +26,24 @@ namespace RunHub.Application.Commands.DistanceAttendees.Attend
                         .ThenInclude(da => da.Participator)
                 .FirstOrDefaultAsync(x => x.RaceId == request.RaceId, cancellationToken);
 
-            if (race == null)
-            {
-                throw new NotFoundException($"{nameof(Race)} z {nameof(Race.RaceId)}: {request.RaceId}" + " nie został znaleziony w bazie danych");
-            }
+            if (race == null) return null;
 
             var distance = race.Distances
                 .AsEnumerable()
                 .FirstOrDefault(x => x.DistanceId == request.DistanceId);
 
 
-            if (distance == null)
-            {
-                throw new NotFoundException($"{nameof(Distance)} z {nameof(Distance.DistanceId)}: {request.DistanceId}" + " nie zostało znalezione w bazie danych");
-            }
+            if (distance == null) return null;
 
             if(distance.AvailableSlots <= 0)
             {
-                throw new Exception("No available slots for this distance");
+                return Result<Unit>.Failure("Brak dostępnych miejsc");
             }
 
             var user = await _context.Users
                 .FirstOrDefaultAsync(x => x.UserName == _userAccessor.GetUsername());
 
-            if (user == null)
-            {
-                throw new NotFoundException($"Użytkownik o identyfikatorze nie został znaleziony w bazie danych");
-            }
+            if (user == null) return null;
 
             var distanceAttendee = distance.DistanceAttendees
                 .FirstOrDefault(da => da.Participator.UserName == user.UserName);
@@ -77,9 +69,9 @@ namespace RunHub.Application.Commands.DistanceAttendees.Attend
                 distance.AvailableSlots--;
             }
 
-            await _context.SaveChangesAsync(cancellationToken);
+            var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
-            return Unit.Value;
+            return result ? Result<Unit>.Success(Unit.Value) : Result<Unit>.Failure("Nie można dołączyć");
         }
     }
 }

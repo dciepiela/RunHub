@@ -4,11 +4,11 @@ namespace RunHub.Contracts.Exceptions
 {
     public class CustomValidationException:Exception
     {
-        public CustomValidationException(List<ValidationError> validationErrors)
+        public CustomValidationException(List<AppException> validationErrors)
         {
             ValidationErrors = validationErrors;
         }
 
-        public List<ValidationError> ValidationErrors { get; set; }
+        public List<AppException> ValidationErrors { get; set; }
     }
 }

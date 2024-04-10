@@ -89,7 +89,7 @@ function RegisterCompetitor() {
   return (
     <div>
       <div className="flex items-center justify-center min-h-screen bg-whiteNeutral">
-        <div className="relative flex flex-col m-6 space-y-8 bg-white shadow-2xl rounded-2xl md:space-y-0 mt-28 md:mt-36 pb-10">
+        <div className="relative flex flex-col m-6 space-y-8 bg-white shadow-2xl rounded-2xl md:space-y-0 mt-24 md:mt-36 pb-10">
           <h1 className="text-3xl font-bold mt-6 text-center md:text-5xl text-lightYellow">
             Zarejestruj się jako zawodnik
           </h1>

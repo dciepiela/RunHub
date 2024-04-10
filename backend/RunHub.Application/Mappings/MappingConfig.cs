@@ -1,5 +1,10 @@
 ﻿using Mapster;
 using RunHub.Contracts.DTOs;
+using RunHub.Contracts.DTOs.Distance;
+using RunHub.Contracts.DTOs.DistanceAttendee;
+using RunHub.Contracts.DTOs.Profile;
+using RunHub.Contracts.DTOs.Race;
+using RunHub.Contracts.DTOs.Sponsor;
 using RunHub.Contracts.Responses.Address;
 using RunHub.Contracts.Responses.Distances;
 using RunHub.Contracts.Responses.Races;
@@ -14,8 +19,12 @@ namespace RunHub.Application.Mappings
         {
             TypeAdapterConfig<Race, RaceDto>
                 .NewConfig()
+                .Map(dest => dest.HostUsername, src => src.CreatorAppUser.UserName)
                 .Map(dest => dest.AddressDto, src => src.Address.Adapt<AddressDto>())
-                .Map(dest => dest.AddressId, src => src.Address.AddressId);
+                .Map(dest => dest.Distances, src => src.Distances.Adapt<List<DistanceDto>>())
+                .Map(dest => dest.Sponsors, src => src.Sponsors.Adapt<List<SponsorDto>>());
+
+            //.Map(dest => dest.AddressId, src => src.Address.AddressId);
 
             //TypeAdapterConfig<Race, RaceDto>
             //.NewConfig()
@@ -34,29 +43,42 @@ namespace RunHub.Application.Mappings
             //.Map(dest => dest.Address, src => src.Address.Adapt<AddressDto>())
             //.Map(dest => dest.Distances, src => src.Distances.Adapt<List<DistanceDto>>());
 
-            TypeAdapterConfig<List<Race>, GetRacesResponse>
-                .NewConfig()
-                .Map(dest => dest.RaceDtos, src => src);
+            //TypeAdapterConfig<List<Race>, GetRacesResponse>
+            //    .NewConfig()
+            //    .Map(dest => dest.RaceDtos, src => src);
 
-            TypeAdapterConfig<Race, GetRaceByIdResponse>
-                .NewConfig()
-                .Map(dest => dest.RaceDto, src => src)
-                .Map(dest => dest.RaceDto.AddressDto, src => src.Address)
-                .Map(dest => dest.RaceDto.Distances, src => src.Distances.Adapt<List<DistanceDto>>())           
-                .Map(dest => dest.RaceDto.Sponsors, src => src.Sponsors.Adapt<List<SponsorDto>>());
+            //TypeAdapterConfig<Race, GetRaceByIdResponse>
+            //    .NewConfig()
+            //    .Map(dest => dest.RaceDto, src => src)
+            //    .Map(dest => dest.RaceDto.HostUsername, src => src.CreatorAppUser.UserName)
+            //    .Map(dest => dest.RaceDto.AddressDto, src => src.Address)
+            //    .Map(dest => dest.RaceDto.Distances, src => src.Distances.Adapt<List<DistanceDto>>())           
+            //    .Map(dest => dest.RaceDto.Sponsors, src => src.Sponsors.Adapt<List<SponsorDto>>());
+
 
             //.Map(dest => dest.RaceDto.Address, src => $"{src.Address.Street} {src.Address.PostalCode}-{src.Address.City}");
 
             //distance
+            TypeAdapterConfig<Distance, DistanceDto>
+                .NewConfig()
+                .Map(dest => dest.DistanceAttendees, src => src.DistanceAttendees.Adapt<List<DistanceAttendeeDto>>());
+
             TypeAdapterConfig<List<Distance>, GetDistancesResponse>
                 .NewConfig()
                 .Map(dest => dest.DistanceDtos, src => src);
+
+            //TypeAdapterConfig<Distance, DistanceDto>
+            //.NewConfig()
+            //.Map(dest => dest.Attendees, src => src.DistanceAttendees.Select(da => da.Participator.Adapt<ProfileDto>()).ToList());
+
 
             TypeAdapterConfig<Distance, GetDistanceByIdResponse>
                 .NewConfig()
                 .Map(dest => dest.DistanceDto, src => src);
 
-
+            TypeAdapterConfig<Distance, UpdateDistanceDto>
+                .NewConfig()
+                .Map(dest => dest, src => src);
             // Address
             TypeAdapterConfig<Address, GetAddressByIdResponse>
                 .NewConfig()
@@ -74,6 +96,61 @@ namespace RunHub.Application.Mappings
             TypeAdapterConfig<Sponsor, GetSponsorByIdResponse>
                 .NewConfig()
                 .Map(dest => dest.SponsorDto, src => src);
+
+
+            //Profile
+            //TypeAdapterConfig<DistanceAttendee, ProfileDto>
+            //    .NewConfig()
+            //    .Map(dest => dest.Username, src => src.Participator.UserName)
+            //    .Map(dest => dest.FullName, src => $"{src.Participator.FirstName} {src.Participator.LastName}")
+            //    .Map(dest => dest.Bio, src => src.Participator.Bio);
+            //.Ignore(dest => dest.Image); // Assuming Image property is not mapped
+
+
+            //attendee
+            TypeAdapterConfig<DistanceAttendee, DistanceAttendeeDto>
+                .NewConfig()
+                .Map(dest => dest.UserName, src => src.Participator.UserName)
+                .Map(dest => dest.DisplayName, src => src.Participator.DisplayName)
+                .Map(dest => dest.FirstName, src => src.Participator.FirstName)
+                .Map(dest => dest.LastName, src => src.Participator.LastName)
+                .Map(dest => dest.DateOfBirth, src => src.Participator.DateOfBirth.Year) // Mapowanie na rok urodzenia
+                .Map(dest => dest.Gender, src => src.Participator.Gender)
+                .Map(dest => dest.Club, src => src.Participator.Club)
+                .Map(dest => dest.Image, src => src.Participator.Photo.Url);
+                //.Map(dest => dest.Bio, src => src.Participator.Bio);
+            //.Map(dest => dest.ParticipatorId, src => src.ParticipatorId)
+            //.Map(dest => dest.UserName, src => src.Participator.UserName)
+            //.Map(dest => dest.ParticipatorFirstName, src => src.Participator.FirstName)
+            //.Map(dest => dest.ParticipatorLastName, src => src.Participator.LastName)
+            //.Map(dest => dest.IsPaid, src => src.IsPaid)
+            //.Map(dest => dest.PaidDate, src => src.PaidDate)
+            //.Map(dest => dest.Price, src => src.Price);
+
+            //.Ignore(dest => dest.Image); // Assuming Image property is not mapped
+
+            //profiles
+            TypeAdapterConfig<AppUser, Profile>
+              .NewConfig()
+              .Map(dest => dest.UserName, src => src.UserName)
+              .Map(dest => dest.DisplayName, src => src.DisplayName)
+              .Map(dest => dest.FirstName, src => src.FirstName)
+              .Map(dest => dest.LastName, src => src.LastName)
+              .Map(dest => dest.Bio, src => src.Bio)
+              .Map(dest => dest.Image, src => src.Photo.Url);
+
+
+            //attendee
+            //TypeAdapterConfig<AppUser, DistanceAttendeeDto>
+            //    .NewConfig()
+            //    .Map(dest => dest.UserName, src => src.UserName)
+            //    .Map(dest => dest.DisplayName, src => src.DisplayName)
+            //    .Map(dest => dest.FirstName, src => src.FirstName)
+            //    .Map(dest => dest.LastName, src => src.LastName)
+            //    .Map(dest => dest.Gender, src => src.Gender)
+            //    .Map(dest => dest.Club, src => src.Club)
+            //    .Map(dest => dest.DateOfBirth, src => src.DateOfBirth.Year) // Assuming you want to map only the year of birth
+            //    .Map(dest => dest.Image, src => src.Photo.Url);
 
         }
     }

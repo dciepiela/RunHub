@@ -1,4 +1,4 @@
-﻿using RunHub.Contracts.DTOs;
+﻿using RunHub.Contracts.DTOs.Sponsor;
 
 namespace RunHub.Contracts.Responses.Sponsors
 {

@@ -1,3 +1,4 @@
+import { observer } from "mobx-react-lite";
 import contactPhoto from "../../assets/contactPhoto.jpg";
 function Contact() {
   return (
@@ -23,4 +24,4 @@ function Contact() {
   );
 }
 
-export default Contact;
+export default observer(Contact);

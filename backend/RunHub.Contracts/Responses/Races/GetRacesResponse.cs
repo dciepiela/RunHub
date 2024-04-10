@@ -1,4 +1,4 @@
-﻿using RunHub.Contracts.DTOs;
+﻿using RunHub.Contracts.DTOs.Race;
 
 namespace RunHub.Contracts.Responses.Races
 {

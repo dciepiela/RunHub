@@ -1,6 +1,8 @@
 ﻿using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using RunHub.Contracts.DTOs;
+using RunHub.Contracts.Errors;
 using RunHub.Contracts.Exceptions;
 using RunHub.Contracts.Responses.Address;
 using RunHub.Contracts.Responses.Races;
@@ -9,7 +11,7 @@ using RunHub.Persistence;
 
 namespace RunHub.Application.Queries.Addresses.GetAddressById
 {
-    public class GetAddressByIdQueryHandler : IRequestHandler<GetAddressByIdQuery, GetAddressByIdResponse>
+    public class GetAddressByIdQueryHandler : IRequestHandler<GetAddressByIdQuery, Result<AddressDto>>
     {
         private readonly DataContext _context;
 
@@ -18,16 +20,13 @@ namespace RunHub.Application.Queries.Addresses.GetAddressById
             _context = context;
         }
 
-        public async Task<GetAddressByIdResponse> Handle(GetAddressByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Result<AddressDto>> Handle(GetAddressByIdQuery request, CancellationToken cancellationToken)
         {
             var race = await _context.Races
                 .Include(x => x.Address)
                 .SingleOrDefaultAsync(x => x.RaceId == request.RaceId, cancellationToken);
 
-            if (race == null)
-            {
-                throw new NotFoundException($"{nameof(Race)} z {nameof(Race.RaceId)}: {request.RaceId}" + " nie zostało znalezione w bazie danych");
-            }
+            if (race == null) return null;
 
             var address = race.Address;
             //if (race != null)
@@ -46,7 +45,8 @@ namespace RunHub.Application.Queries.Addresses.GetAddressById
             //    await _context.SaveChangesAsync(cancellationToken);
             //}
 
-            return address.Adapt<GetAddressByIdResponse>();
+            var addressRespone = address.Adapt<AddressDto>();
+            return Result<AddressDto>.Success(addressRespone);
 
         }
     }

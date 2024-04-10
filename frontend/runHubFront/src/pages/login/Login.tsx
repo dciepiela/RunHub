@@ -3,11 +3,10 @@ import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Logo from "../../assets/hero.jpg";
 import { FcGoogle } from "react-icons/fc";
-import { useAuth } from "../../app/context/useAuth";
 import { useForm } from "react-hook-form";
-import { IoMdSquareOutline } from "react-icons/io";
 import { useState } from "react";
 import { FaEye, FaEyeSlash, FaInfoCircle } from "react-icons/fa";
+import { useStore } from "../../app/stores/store";
 
 type LoginFormsInputs = {
   email: string;
@@ -30,7 +29,8 @@ function Login() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { loginUser } = useAuth();
+  const { userStore } = useStore();
+
   const {
     register,
     handleSubmit,
@@ -38,14 +38,14 @@ function Login() {
   } = useForm<LoginFormsInputs>({ resolver: yupResolver(validation) });
 
   const handleLogin = async (form: LoginFormsInputs) => {
-    await loginUser(form);
+    await userStore.login(form);
     navigate(location.state?.from);
   };
 
   return (
     <div>
       <div className="flex items-center justify-center min-h-screen bg-whiteNeutral">
-        <div className="relative flex flex-col m-6 space-y-8 bg-white shadow-2xl rounded-2xl md:flex-row md:space-y-0">
+        <div className="relative flex flex-col m-6 space-y-8 bg-white shadow-2xl rounded-2xl md:flex-row md:space-y-0  mt-24 md:mt-36">
           {/* <!-- left side --> */}
           <div className="flex flex-col justify-center p-8 md:p-14">
             <span className="mb-3 text-4xl font-bold">Witaj ponownie</span>

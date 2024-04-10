@@ -1,6 +1,8 @@
 ﻿using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using RunHub.Contracts.DTOs.Distance;
+using RunHub.Contracts.Errors;
 using RunHub.Contracts.Exceptions;
 using RunHub.Contracts.Responses.Distances;
 using RunHub.Domain.Entity;
@@ -8,7 +10,7 @@ using RunHub.Persistence;
 
 namespace RunHub.Application.Queries.Distances.GetDistanceById
 {
-    public class GetDistanceByIdQueryHandler : IRequestHandler<GetDistanceByIdQuery, GetDistanceByIdResponse>
+    public class GetDistanceByIdQueryHandler : IRequestHandler<GetDistanceByIdQuery, Result<DistanceDto>>
     {
         private readonly DataContext _context;
 
@@ -16,28 +18,26 @@ namespace RunHub.Application.Queries.Distances.GetDistanceById
         {
             _context = context;
         }
-        public async Task<GetDistanceByIdResponse> Handle(GetDistanceByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Result<DistanceDto>> Handle(GetDistanceByIdQuery request, CancellationToken cancellationToken)
         {
             var race = await _context.Races
                 .Include(x => x.Distances)
+                    .ThenInclude(d => d.DistanceAttendees)
+                        .ThenInclude(da => da.Participator)
                 .FirstOrDefaultAsync(x => x.RaceId == request.RaceId);
 
-            if(race == null)
-            {
-                throw new NotFoundException($"{nameof(Race)} z {nameof(Race.RaceId)}: {request.RaceId}" + " nie zostało znalezione w bazie danych");
-            }
+            if (race == null) return null;
 
             var distance = race
                 .Distances
                 .FirstOrDefault(x => x.DistanceId == request.DistanceId);
-               
 
-            if(distance == null)
-            {
-                throw new NotFoundException($"{nameof(Distance)} z {nameof(Distance.DistanceId)}: {request.DistanceId}" + " nie zostało znalezione w bazie danych");
-            }
 
-            return distance.Adapt<GetDistanceByIdResponse>();
+            if (distance == null) return null;
+
+            var distanceResponse = distance.Adapt<DistanceDto>();
+
+            return Result<DistanceDto>.Success(distanceResponse);
         }
     }
 }

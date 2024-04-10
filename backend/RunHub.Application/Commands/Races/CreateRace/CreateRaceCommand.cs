@@ -1,12 +1,8 @@
 ﻿using MediatR;
-using RunHub.Contracts.DTOs;
-using RunHub.Domain.Entity;
-using RunHub.Domain.Enum;
+using RunHub.Contracts.DTOs.Race;
+using RunHub.Contracts.Errors;
 
 namespace RunHub.Application.Commands.Races.CreateRace
 {
-    public record CreateRaceCommand(string Name, string Description, 
-        DateTime RegistrationEndDate, DateTime StartDateRace, 
-        DateTime EndDateRace, string Image, 
-        RaceStatus RaceStatus, RaceType RaceType, AddressDto AddressDto) : IRequest<int>;
+    public record CreateRaceCommand(CreateRaceDto RaceDto) : IRequest<Result<int>>;
 }

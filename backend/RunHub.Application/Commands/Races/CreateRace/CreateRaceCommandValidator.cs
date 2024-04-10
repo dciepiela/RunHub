@@ -7,13 +7,13 @@ namespace RunHub.Application.Commands.Races.CreateRace
     {
         public CreateRaceCommandValidator()
         {
-            RuleFor(x => x.Name)
+            RuleFor(x => x.RaceDto.Name)
                 .NotEmpty()
                 .WithMessage($"{nameof(Race.Name)} nie może być puste")
                 .MaximumLength(50)
                 .WithMessage($"{nameof(Race.Name)} nie może być dłuższe niż 50 znaków");
 
-            RuleFor(x => x.Description)
+            RuleFor(x => x.RaceDto.Description)
                 .NotEmpty()
                 .WithMessage($"{nameof(Race.Description)} nie może być puste")
                 .MaximumLength(1000)

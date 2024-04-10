@@ -1,6 +1,8 @@
 ﻿using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using RunHub.Contracts.DTOs.Distance;
+using RunHub.Contracts.Errors;
 using RunHub.Contracts.Exceptions;
 using RunHub.Contracts.Responses.Distances;
 using RunHub.Domain.Entity;
@@ -8,7 +10,7 @@ using RunHub.Persistence;
 
 namespace RunHub.Application.Queries.Distances.GetDistances
 {
-    public class GetDistancesQueryHandler : IRequestHandler<GetDistancesQuery, GetDistancesResponse>
+    public class GetDistancesQueryHandler : IRequestHandler<GetDistancesQuery, Result<List<DistanceDto>>>
     {
         private readonly DataContext _context;
 
@@ -16,21 +18,24 @@ namespace RunHub.Application.Queries.Distances.GetDistances
         {
             _context = context;
         }
-        public async Task<GetDistancesResponse> Handle(GetDistancesQuery request, CancellationToken cancellationToken)
+        public async Task<Result<List<DistanceDto>>> Handle(GetDistancesQuery request, CancellationToken cancellationToken)
         {
             var race = await _context.Races
                 .Include(x => x.Distances)
                 .FirstOrDefaultAsync(x => x.RaceId == request.RaceId);
 
-            if(race == null)
-            {
-                throw new NotFoundException($"{nameof(Race)} z {nameof(Race.RaceId)}: {request.RaceId}" + " nie zostało znalezione w bazie danych");
-            }
+            if (race == null) return null;
 
-            var distances = race.Distances
-                .ToList();
+            var distances = await _context.Distances
+                .Include(d => d.DistanceAttendees)
+                    .ThenInclude(da => da.Participator)
+                .Where(d => d.RaceId == request.RaceId)
+                .ToListAsync(cancellationToken);
 
-            return distances.Adapt<GetDistancesResponse>();
+
+            var result = distances.Adapt<List<DistanceDto>>();
+
+            return Result<List<DistanceDto>>.Success(result);
         }
     }
 }

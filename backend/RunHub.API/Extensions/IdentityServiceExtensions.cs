@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using RunHub.API.Services;
 using RunHub.Application.Core;
 using RunHub.Domain.Entity;
+using RunHub.Infrastructure.Security;
 using RunHub.Persistence;
 using System.Text;
 
@@ -51,6 +53,16 @@ namespace RunHub.API.Extensions
                     IssuerSigningKey = key
                 };
             });
+
+            services.AddAuthorization(opt =>
+            {
+                opt.AddPolicy("IsRaceCreator", policy =>
+                {
+                    policy.Requirements.Add(new IsCreatorRequirement());
+                });
+            });
+
+            services.AddTransient<IAuthorizationHandler, IsCreatorRequirementHandler>();
 
             services.AddScoped<ITokenService, TokenService>();
 

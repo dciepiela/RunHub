@@ -1,6 +1,6 @@
 import aboutPhoto from "../../assets/aboutPhoto.jpg";
 
-function About() {
+export default function About() {
   return (
     <div className="md:min-h-[80vh] grid md:grid-cols-2 gap-5 max-w-[1240px] mx-auto items-center">
       <div>
@@ -41,5 +41,3 @@ function About() {
     </div>
   );
 }
-
-export default About;

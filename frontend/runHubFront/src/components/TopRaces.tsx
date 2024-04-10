@@ -127,11 +127,11 @@ function TopRaces() {
           {races.map((race, index) => (
             <div
               key={index}
-              className={`relative hover:-translate-y-2 duration-150 hover:ring-[2px] hover:ring-lightYellow w-64 h-[400px] mx-auto rounded-lg shadow-lg overflow-hidden cursor-pointer`}
+              className={`relative hover:-translate-y-2 duration-150 hover:ring-[2px] hover:ring-lightYellow w-64 h-[440px] mx-auto rounded-lg shadow-lg overflow-hidden cursor-pointer`}
               onMouseEnter={() => handleHover(index)}
               onMouseLeave={() => handleHover(null)}
             >
-              <div className="relative h-60">
+              <div className="relative h-80">
                 <div
                   className={`absolute inset-0 bg-black opacity-0 transition-opacity duration-300 ${
                     hoveredCard === index ? "opacity-60" : ""

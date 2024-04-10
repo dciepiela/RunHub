@@ -1,44 +1,29 @@
-import MyFormattedDate from "../../../app/common/MyFormattedDate";
-import { RaceDto } from "../../../app/models/race";
+import { observer } from "mobx-react-lite";
 import RaceDetailsBanner from "./RaceDetailsBanner";
-import RaceDetailsDistances from "./RaceDetailsDistances";
 import RaceDetailsInfo from "./RaceDetailsInfo";
+import { useStore } from "../../../app/stores/store";
+import { useEffect } from "react";
+import { useParams } from "react-router-dom";
+import "semantic-ui-css/components/container.min.css";
+import DistanceDetails from "./DistanceDetails";
 
-interface RaceDetailsProps {
-  race: RaceDto;
-}
+export default observer(function RaceDetails() {
+  const { raceStore } = useStore();
+  const { selectedRace: race, loadRace } = raceStore;
+  const { raceId } = useParams();
 
-function RaceDetails({ race }: RaceDetailsProps) {
+  useEffect(() => {
+    if (raceId) loadRace(raceId);
+  }, [raceId, loadRace]);
+
+  // if (loadingInitial || !race) return <LoadingComponent />;
+  if (!race) return;
+
   return (
-    <div>
+    <>
       <RaceDetailsBanner race={race} />
-
       <RaceDetailsInfo race={race} />
-
-      {race.sponsors && race.sponsors.length > 0 && (
-        <>
-          <h3 className="text-xl font-bold mt-4">Sponsors:</h3>
-          <ul className="list-disc pl-4">
-            {race.sponsors.map((sponsor) => (
-              <li key={sponsor.sponsorId} className="mb-4">
-                <p>
-                  <span className="font-bold">Name:</span> {sponsor.name}
-                </p>
-                <p>
-                  <span className="font-bold">Description:</span>{" "}
-                  {sponsor.description}
-                </p>
-                <p>
-                  <span className="font-bold">Website:</span>{" "}
-                  <a href={sponsor.webPageUrl}>{sponsor.webPageUrl}</a>
-                </p>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-    </div>
+      <DistanceDetails race={race} />
+    </>
   );
-}
-
-export default RaceDetails;
+});

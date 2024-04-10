@@ -1,26 +1,27 @@
-export interface PaginationParams{
+export interface Pagination{
     currentPage: number;
     itemsPerPage: number;
     totalItems: number;
     totalPages:number;
 }
 
-export class PaginationResult<T>{
+export class PaginatedResult<T>{
     data: T;
-    paginationParams: PaginationParams | undefined;
+    pagination: Pagination;
 
-    constructor(data:T, paginationParams:PaginationParams){
+    constructor(data:T, pagination:Pagination){
         this.data = data;
-        this.paginationParams = paginationParams;
+        this.pagination = pagination;
     }
 }
 
-export class PaginationRequestParams{
-    pageSize: number;
-    pageNumber: number;
+export class PagingParams{
+    pageNumber;
+    pageSize;
 
-    constructor(pageSize:number, pageNumber:number){
-        this.pageSize = pageSize;
+
+    constructor(pageNumber=1,pageSize=3){
         this.pageNumber = pageNumber;
+        this.pageSize = pageSize;
     }
 }

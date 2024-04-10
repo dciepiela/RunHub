@@ -9,6 +9,7 @@ import {
 import React, { ChangeEvent, useEffect, useState } from "react";
 import {
   RaceDto,
+  RaceFormValues,
   raceStatusOptions,
   raceTypeOptions,
 } from "../../app/models/race";
@@ -20,8 +21,37 @@ import "react-datetime-picker/dist/DateTimePicker.css";
 import "react-calendar/dist/Calendar.css";
 import "react-clock/dist/Clock.css";
 import MyDateInput from "../../app/common/MyDate";
+import { useStore } from "../../app/stores/store";
+import LoadingComponent from "../../components/LoadingComponent";
+import { observer } from "mobx-react-lite";
 
 function UploadRace() {
+  const { raceStore } = useStore();
+  const { createRace, updateRace, loadRace, loadingInitial } = raceStore;
+
+  const { raceId } = useParams();
+  const navigate = useNavigate();
+
+  const [race, setRace] = useState<RaceFormValues>(new RaceFormValues());
+
+  useEffect(() => {
+    if (raceId)
+      loadRace(raceId).then((race) => setRace(new RaceFormValues(activity)));
+  }, [raceId, loadRace]);
+
+  function handleFormSubmit(race: RaceFormValues) {
+    if (!race.raceId) {
+      const newRace = { ...race };
+      createRace(newRace).then(() => {
+        navigate(`/races/${newRace.raceId}`);
+      });
+    } else {
+      updateRace(race).then(() => {
+        navigate(`/races/${race.raceId}`);
+      });
+    }
+  }
+
   // const [selectedRaceType, setSelectedRaceType] = useState(raceType[0]);
   // const [selectedRaceStatus, setSelectedRaceStatus] = useState(raceStatus[0]);
 
@@ -50,35 +80,32 @@ function UploadRace() {
   //     });
   // };
 
-  const { id } = useParams();
-  const navigate = useNavigate();
+  // const [race, setRace] = useState<RaceDto>({
+  //   raceId: undefined,
+  //   name: "",
+  //   description: "",
+  //   registrationEndDate: undefined,
+  //   startDateRace: undefined,
+  //   endDateRace: undefined,
+  //   image: "",
+  //   raceStatus: undefined,
+  //   raceType: undefined,
+  //   addressDto: undefined,
+  // });
 
-  const [race, setRace] = useState<RaceDto>({
-    raceId: undefined,
-    name: "",
-    description: "",
-    registrationEndDate: undefined,
-    startDateRace: undefined,
-    endDateRace: undefined,
-    image: "",
-    raceStatus: undefined,
-    raceType: undefined,
-    addressDto: undefined,
-  });
+  // useEffect(() => {
+  //   if (id) {
+  //     raceService.getRaceById(id).then((race) => {
+  //       // race!.registrationEndDate = race!.endDateRace?.split("T")[0];
+  //       // race!.startDateRace = race!.endDateRace?.split("T")[0];
+  //       // race!.endDateRace = race!.endDateRace?.split("T")[0];
+  //       // race!.creationDate = race!.endDateRace?.split("T")[0];
+  //       // race!.lastUpdateDate = race!.endDateRace?.split("T")[0];
 
-  useEffect(() => {
-    if (id) {
-      raceService.getRaceById(id).then((race) => {
-        // race!.registrationEndDate = race!.endDateRace?.split("T")[0];
-        // race!.startDateRace = race!.endDateRace?.split("T")[0];
-        // race!.endDateRace = race!.endDateRace?.split("T")[0];
-        // race!.creationDate = race!.endDateRace?.split("T")[0];
-        // race!.lastUpdateDate = race!.endDateRace?.split("T")[0];
-
-        setRace(race!);
-      });
-    }
-  }, [id]);
+  //       setRace(race!);
+  //     });
+  //   }
+  // }, [id]);
 
   // function handleSubmit() {
   //   if (!race.raceId) {
@@ -159,6 +186,8 @@ function UploadRace() {
     }
   }
 
+  if (loadingInitial) return <LoadingComponent content="Loading..." />;
+
   return (
     <div className="px-4 my-12">
       <h2 className="mb-8 text-3xl font-bold">Aktualizuj biegi</h2>
@@ -215,13 +244,13 @@ function UploadRace() {
             <div className="mb-2 block">
               <Label htmlFor="endDateRace" value="Data zakończenia biegu" />
             </div>
-            <MyDateInput
+            {/* <MyDateInput
               placeholderText="Date"
               name="date"
               showTimeSelect
               timeCaption="time"
               dateFormat="MMMM d, yyyy h:mm aa"
-            />
+            /> */}
             {/* <MyDateInput
               name="endDateRace"
               value={race.endDateRace || null}
@@ -373,4 +402,4 @@ function UploadRace() {
   );
 }
 
-export default UploadRace;
+export default observer(UploadRace);

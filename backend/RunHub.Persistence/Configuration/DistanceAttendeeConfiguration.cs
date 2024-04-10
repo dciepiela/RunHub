@@ -14,7 +14,7 @@ namespace RunHub.Persistence.Configuration
             //eb.HasKey(da => da.DistanceAttendeeId);
 
             eb.HasOne(da => da.Participator)
-                .WithMany(u => u.DistanceAttendees)
+                .WithMany(u => u.Distances)
                 .HasForeignKey(da => da.ParticipatorId);
 
             eb.HasOne(da => da.Distance)

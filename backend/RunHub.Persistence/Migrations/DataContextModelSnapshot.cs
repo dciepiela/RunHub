@@ -51,13 +51,13 @@ namespace RunHub.Persistence.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "4f2c20bd-e261-414e-8ad5-1529e83b6533",
+                            Id = "030b009a-099d-4872-9f8a-95fbaab2dd54",
                             Name = "Competitor",
                             NormalizedName = "COMPETITOR"
                         },
                         new
                         {
-                            Id = "b60a10a7-e33e-466f-a7b0-b56c80a9e4ff",
+                            Id = "46894c4f-9dc6-4498-b1f8-39ac90cce45b",
                             Name = "Organizer",
                             NormalizedName = "ORGANIZER"
                         });
@@ -167,6 +167,19 @@ namespace RunHub.Persistence.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("RunHub.Domain.Entities.Photo", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Photos");
                 });
 
             modelBuilder.Entity("RunHub.Domain.Entity.Address", b =>
@@ -302,6 +315,9 @@ namespace RunHub.Persistence.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<string>("PhotoId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -321,6 +337,8 @@ namespace RunHub.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.HasIndex("PhotoId");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -554,6 +572,15 @@ namespace RunHub.Persistence.Migrations
                     b.Navigation("Race");
                 });
 
+            modelBuilder.Entity("RunHub.Domain.Entity.AppUser", b =>
+                {
+                    b.HasOne("RunHub.Domain.Entities.Photo", "Photo")
+                        .WithMany()
+                        .HasForeignKey("PhotoId");
+
+                    b.Navigation("Photo");
+                });
+
             modelBuilder.Entity("RunHub.Domain.Entity.Distance", b =>
                 {
                     b.HasOne("RunHub.Domain.Entity.Race", "Race")
@@ -574,7 +601,7 @@ namespace RunHub.Persistence.Migrations
                         .IsRequired();
 
                     b.HasOne("RunHub.Domain.Entity.AppUser", "Participator")
-                        .WithMany("DistanceAttendees")
+                        .WithMany("Distances")
                         .HasForeignKey("ParticipatorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -632,7 +659,7 @@ namespace RunHub.Persistence.Migrations
                 {
                     b.Navigation("Address");
 
-                    b.Navigation("DistanceAttendees");
+                    b.Navigation("Distances");
                 });
 
             modelBuilder.Entity("RunHub.Domain.Entity.Distance", b =>

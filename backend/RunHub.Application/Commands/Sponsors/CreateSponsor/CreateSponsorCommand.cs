@@ -1,8 +1,8 @@
 ﻿using MediatR;
-using RunHub.Contracts.Requests.Sponsors;
+using RunHub.Contracts.DTOs.Sponsor;
+using RunHub.Contracts.Errors;
 
 namespace RunHub.Application.Commands.Sponsors.CreateSponsor
 {
-    public record CreateSponsorCommand(int RaceId, string Name, string Logo, string Description,
-        string WebPageUrl, decimal Amount, string SupportType) : IRequest<int>;
+    public record CreateSponsorCommand(int RaceId,CreateSponsorDto SponsorDto) : IRequest<Result<Unit>>;
 }

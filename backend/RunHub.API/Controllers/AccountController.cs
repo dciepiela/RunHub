@@ -35,7 +35,9 @@ namespace RunHub.API.Controllers
 
             //var user = await _userManager.Users.FirstOrDefaultAsync(u => u.UserName == loginDto.Username.ToLower());
 
-            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Email == loginDto.Email);
+            var user = await _userManager.Users
+                .Include(p => p.Photo)
+                .FirstOrDefaultAsync(x => x.Email == loginDto.Email);
 
             if (user == null)
                 return Unauthorized("Niepoprawny adres e-mail!");
@@ -69,7 +71,9 @@ namespace RunHub.API.Controllers
         [HttpGet]
         public async Task<ActionResult<NewUserDto>> GetCurrentUser()
         {
-            var user = await _userManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email));
+            var user = await _userManager.Users
+                .Include(p => p.Photo)
+                .FirstOrDefaultAsync(x => x.Email == User.FindFirstValue(ClaimTypes.Email));
 
             return CreateUserObject(user);
         }
@@ -138,6 +142,7 @@ namespace RunHub.API.Controllers
             {
                 UserName = appUser.UserName,
                 DisplayName = appUser.DisplayName,
+                Image = appUser?.Photo?.Url,
                 Token = _tokenService.CreateToken(appUser, userRoles),
                 Role = userRoles.FirstOrDefault()
             };

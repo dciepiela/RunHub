@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using RunHub.Domain.Entities;
 using RunHub.Domain.Entity;
 
 namespace RunHub.Persistence
@@ -17,6 +18,8 @@ namespace RunHub.Persistence
         public DbSet<RaceAgeGroup> RaceAgeGroups { get; set; }
         //public DbSet<Result> Results { get; set; }
         public DbSet<Sponsor> Sponsors { get; set; }
+
+        public DbSet<Photo> Photos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

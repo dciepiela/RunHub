@@ -1,12 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RunHub.Persistence;
 using RunHub.Application;
-using RunHub.API.Handlers;
+//using RunHub.API.Handlers;
 using RunHub.Application.Core;
 using RunHub.API.Services;
 using Microsoft.OpenApi.Models;
 using RunHub.Application.Interfaces;
 using RunHub.Infrastructure.Security;
+using RunHub.Infrastructure.Photos;
 
 namespace RunHub.API.Extensions
 {
@@ -60,17 +61,19 @@ namespace RunHub.API.Extensions
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials()
-                        .WithOrigins("http://localhost:5174", "https://localhost:3000");
+                        .WithOrigins("http://localhost:5173", "https://localhost:3000");
                         //.SetIsOriginAllowed(origin => true);
                 });
             });
 
             services.AddApplication();
-            services.AddExceptionHandler<ExceptionHandler>();
+            //services.AddExceptionHandler<ExceptionHandler>();
 
             services.AddScoped<ITokenService, TokenService>();
             services.AddHttpContextAccessor();
             services.AddScoped<IUserAccessor, UserAccessor>();
+            services.AddScoped<IPhotoAccessor, PhotoAccessor>();
+            services.Configure<CloudinarySettings>(config.GetSection("Cloudinary"));
 
             return services;
         }

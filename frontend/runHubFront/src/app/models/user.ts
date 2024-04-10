@@ -2,13 +2,18 @@ import { AddressDto } from "./address";
 
 export type User = {
     email: string;
-    password: string
-}
-export type UserProfileToken = {
-    userName: string;
+    userName?: string;
     displayName: string;
     token: string;
     role: string;
+
+    firstName?: string;
+    lastName?: string;
+    nationality?: string;
+    gender?: string;
+    dateOfBirth?: string;
+    contactNumber?: string;
+    club?: string;
 }
 
 export type UserFormLogin = {

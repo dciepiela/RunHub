@@ -18,5 +18,20 @@ export default {
   },
   plugins: [
     require('flowbite/plugin'),
+    // Custom plugin to add !important to utilities
+    function ({
+      addVariant
+    }) {
+      addVariant('important', ({
+        container
+      }) => {
+        container.walkRules(rule => {
+          rule.selector = `.\\!${rule.selector.slice(1)}`;
+          rule.walkDecls(decl => {
+            decl.important = true;
+          });
+        });
+      });
+    }
   ],
 }

@@ -1,13 +1,13 @@
-﻿using MediatR;
+﻿using Mapster;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
-using RunHub.Contracts.Exceptions;
+using RunHub.Contracts.Errors;
 using RunHub.Domain.Entity;
 using RunHub.Persistence;
-using System.Diagnostics;
 
 namespace RunHub.Application.Commands.Distances.CreateDistance
 {
-    public class CreateDistanceCommandHandler : IRequestHandler<CreateDistanceCommand, int>
+    public class CreateDistanceCommandHandler : IRequestHandler<CreateDistanceCommand, Result<Unit>>
     {
         private readonly DataContext _context;
 
@@ -15,30 +15,26 @@ namespace RunHub.Application.Commands.Distances.CreateDistance
         {
             _context = context;
         }
-        public async Task<int> Handle(CreateDistanceCommand request, CancellationToken cancellationToken)
+        public async Task<Result<Unit>> Handle(CreateDistanceCommand request, CancellationToken cancellationToken)
         {
-            var race = await _context.Races.FirstOrDefaultAsync(x => x.RaceId == request.RaceId);
+            var race = await _context.Races
+                .Include(r => r.Distances)
+                .FirstOrDefaultAsync(x => x.RaceId == request.RaceId);
 
-            if (race == null)
+            if (race == null) return null;
+
+            var distance = request.DistanceDto.Adapt<Distance>();
+
+            race.Distances.Add(distance);
+
+            var result = await _context.SaveChangesAsync() > 0;
+
+            if (!result)
             {
-                throw new NotFoundException("Nie ma takiego biegu");
+                return Result<Unit>.Failure("Problem z utworzeniem nowego dystansu");
             }
 
-            var distance = new Distance
-            {
-                Name = request.Name,
-                LengthInKilometers = request.LengthInKilometers,
-                Description = request.Description,
-                AvailableSlots = request.AvailableSlots,
-                TotalSlots = request.TotalSlots,
-                Price = request.Price,
-                RaceId = race.RaceId
-            };
-
-            await _context.Distances.AddAsync(distance,cancellationToken);
-            var id = await _context.SaveChangesAsync(cancellationToken);
-
-            return id;
+            return Result<Unit>.Success(Unit.Value);
         }
     }
 }

@@ -1,13 +1,16 @@
 ﻿using Mapster;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using RunHub.Application.Helpers;
 using RunHub.Contracts.DTOs;
+using RunHub.Contracts.DTOs.Race;
+using RunHub.Contracts.Errors;
 using RunHub.Contracts.Responses;
 using RunHub.Persistence;
 
 namespace RunHub.Application.Queries.Races.GetRaces
 {
-    public class GetRacesQueryHandler : IRequestHandler<GetRacesQuery, PaginetedList<RaceDto>>
+    public class GetRacesQueryHandler : IRequestHandler<GetRacesQuery, Result<PaginetedList<RaceDto>>>
     {
         private readonly DataContext _context;
 
@@ -15,13 +18,19 @@ namespace RunHub.Application.Queries.Races.GetRaces
         {
             _context = context;
         }
-        public async Task<PaginetedList<RaceDto>> Handle(GetRacesQuery request, CancellationToken cancellationToken)
+        public async Task<Result<PaginetedList<RaceDto>>> Handle(GetRacesQuery request, CancellationToken cancellationToken)
         {
             //var races = await _context.Races
             //    .Include(a => a.Address)
             //    .ToListAsync(cancellationToken);
 
-            var getRacesQuery = _context.Races.ProjectToType<RaceDto>().AsQueryable();
+            var getRacesQuery = _context.Races
+                .Include(r => r.Distances)
+                    .ThenInclude(d => d.DistanceAttendees)
+                        .ThenInclude(da => da.Participator)
+                            .ThenInclude(p => p.Photo)
+                .ProjectToType<RaceDto>()
+                .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(request.SearchName))
             {
@@ -36,10 +45,9 @@ namespace RunHub.Application.Queries.Races.GetRaces
                 }
             }
 
-            var paginatedList = await CollectionHelper<RaceDto>.ToPaginatedList(getRacesQuery,request.PaginationParams.PageNumber,request.PaginationParams.PageSize);
-
-            return paginatedList;
-            //return races.Adapt<GetRacesResponse>();
+            var paginatedList = await PaginetedList<RaceDto>.CreateAsync(getRacesQuery, request.PaginationParams.PageNumber, request.PaginationParams.PageSize); 
+            
+            return Result<PaginetedList<RaceDto>>.Success(paginatedList);
         }
     }
 }

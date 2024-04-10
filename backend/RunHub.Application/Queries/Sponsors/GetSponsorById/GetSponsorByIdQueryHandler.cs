@@ -1,15 +1,14 @@
 ﻿using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using RunHub.Contracts.Exceptions;
-using RunHub.Contracts.Responses.Distances;
-using RunHub.Contracts.Responses.Sponsors;
+using RunHub.Contracts.DTOs.Sponsor;
+using RunHub.Contracts.Errors;
 using RunHub.Domain.Entity;
 using RunHub.Persistence;
 
 namespace RunHub.Application.Queries.Sponsors.GetSponsorById
 {
-    public class GetSponsorByIdQueryHandler : IRequestHandler<GetSponsorByIdQuery, GetSponsorByIdResponse>
+    public class GetSponsorByIdQueryHandler : IRequestHandler<GetSponsorByIdQuery, Result<SponsorDto>>
     {
         private readonly DataContext _context;
 
@@ -17,28 +16,22 @@ namespace RunHub.Application.Queries.Sponsors.GetSponsorById
         {
             _context = context;
         }
-        public async Task<GetSponsorByIdResponse> Handle(GetSponsorByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Result<SponsorDto>> Handle(GetSponsorByIdQuery request, CancellationToken cancellationToken)
         {
             var race = await _context.Races
                 .Include(x => x.Sponsors)
                 .FirstOrDefaultAsync(x => x.RaceId == request.RaceId);
 
-            if (race == null)
-            {
-                throw new NotFoundException($"{nameof(Race)} z {nameof(Race.RaceId)}: {request.RaceId}" + " nie zostało znalezione w bazie danych");
-            }
+            if (race == null) return null;
 
             var sponsor = race
                 .Sponsors
                 .FirstOrDefault(x => x.SponsorId == request.SponsorId);
 
+            if (sponsor == null) return null;
 
-            if (sponsor == null)
-            {
-                throw new NotFoundException($"{nameof(Sponsor)} z {nameof(Sponsor.SponsorId)}: {request.SponsorId}" + " nie zostało znalezione w bazie danych");
-            }
-
-            return sponsor.Adapt<GetSponsorByIdResponse>();
+            var sponsorResponse = sponsor.Adapt<SponsorDto>();
+            return Result<SponsorDto>.Success(sponsorResponse);
         }
     }
 }

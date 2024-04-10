@@ -5,31 +5,19 @@ namespace RunHub.API.Extensions
 {
     public static class ResultsExtensions
     {
-        public static IResult OkPaginationResult(this IResultExtensions resultExtensions, int pageSize, 
-            int pageNumber, int totalItems, int totalPages, IEnumerable<object> items) 
+        public static void AddPaginationHeader(this HttpResponse response, int currentPage,
+           int itemsPerPage, int totalItems, int totalPages)
         {
-            ArgumentNullException.ThrowIfNull(resultExtensions);
-            return new PaginationResult(pageSize, pageNumber, totalItems, totalPages, items);
-        }
-
-        public class PaginationResult(int pageSize, int pageNumber, int totalItems, int totalPages,
-            IEnumerable<object> items) : IResult
-        {
-            public async Task ExecuteAsync(HttpContext httpContext)
+            var paginationHeader = new
             {
-                var header = new
-                {
-                    pageSize,
-                    pageNumber,
-                    totalItems,
-                    totalPages
-                };
+                currentPage,
+                itemsPerPage,
+                totalItems,
+                totalPages
+            };
 
-                httpContext.Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(header));
-                httpContext.Response.Headers.Append("Access-Control-Expose-Headers", "X-Pagination");
-                httpContext.Response.StatusCode = StatusCodes.Status200OK;
-                await httpContext.Response.WriteAsJsonAsync(items);
-            }
+            response.Headers.Append("Pagination", JsonSerializer.Serialize(paginationHeader));
+            response.Headers.Append("Access-Control-Expose-Headers", "Pagination");
         }
     }
 }

@@ -1,7 +1,8 @@
 ﻿using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using RunHub.Contracts.DTOs;
+using RunHub.Contracts.DTOs.Race;
+using RunHub.Contracts.Errors;
 using RunHub.Contracts.Exceptions;
 using RunHub.Contracts.Responses.Races;
 using RunHub.Domain.Entity;
@@ -9,7 +10,7 @@ using RunHub.Persistence;
 
 namespace RunHub.Application.Queries.Races.GetRaceById
 {
-    public class GetRaceByIdQueryHandler : IRequestHandler<GetRaceByIdQuery, GetRaceByIdResponse>
+    public class GetRaceByIdQueryHandler : IRequestHandler<GetRaceByIdQuery, Result<RaceDto>>
     {
         private readonly DataContext _context;
 
@@ -17,21 +18,23 @@ namespace RunHub.Application.Queries.Races.GetRaceById
         {
             _context = context;
         }
-        public async Task<GetRaceByIdResponse> Handle(GetRaceByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Result<RaceDto>> Handle(GetRaceByIdQuery request, CancellationToken cancellationToken)
         {
             var race = await _context.Races
                 .Include(x => x.Address)
                 .Include(x => x.CreatorAppUser)
                 .Include(x => x.Distances)
+                    .ThenInclude(d =>d.DistanceAttendees)
+                        .ThenInclude(da => da.Participator)
+                            .ThenInclude(p => p.Photo)
                 .Include(x => x.Sponsors)
                 .FirstOrDefaultAsync(x => x.RaceId == request.RaceId, cancellationToken);
 
-            if (race == null)
-            {
-                throw new NotFoundException($"{nameof(Race)} z {nameof(Race.RaceId)}: {request.RaceId}" + " nie zostało znalezione w bazie danych" );
-            }
+            if (race == null) return null;
 
-            return race.Adapt<GetRaceByIdResponse>();
+            var raceResponse = race.Adapt<RaceDto>();
+
+            return Result<RaceDto>.Success(raceResponse);
         }
     }
 }

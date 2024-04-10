@@ -1,4 +1,4 @@
-﻿using RunHub.Contracts.DTOs;
+﻿using RunHub.Contracts.DTOs.Distance;
 
 namespace RunHub.Contracts.Responses.Distances
 {

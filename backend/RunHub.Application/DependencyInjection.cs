@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
 using Mapster;
 using Microsoft.Extensions.DependencyInjection;
-using RunHub.Application.Behaviors;
 using RunHub.Application.Mappings;
 using System.Reflection;
 
@@ -15,7 +14,7 @@ namespace RunHub.Application
             {
                 config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
 
-                config.AddOpenBehavior(typeof(ValidationBehavior<,>)); //it will be generic so ,
+                //config.AddOpenBehavior(typeof(ValidationBehavior<,>)); //it will be generic so ,
             });
 
             MappingConfig.Configure();

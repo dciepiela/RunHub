@@ -1,29 +1,41 @@
-import { useState } from "react";
+import { Link } from "react-router-dom";
 import MyFormattedDate from "../../../app/common/MyFormattedDate";
 import { RaceDto } from "../../../app/models/race";
-import RaceDetailsDistances from "./RaceDetailsDistances";
 
 interface RaceDetailsInfoProps {
   race: RaceDto;
 }
 function RaceDetailsInfo({ race }: RaceDetailsInfoProps) {
-  const [registeredDistances, setRegisteredDistances] = useState<number[]>([]);
+  // const [registeredDistances, setRegisteredDistances] = useState<number[]>([]);
 
-  const handleRegister = (distanceId: number) => {
-    // Check if the distance is already registered
-    if (!registeredDistances.includes(distanceId)) {
-      // Add the distanceId to the registered distances list
-      setRegisteredDistances([...registeredDistances, distanceId]);
-      // Implement any other registration logic here, such as API calls, etc.
-      console.log(`Registered for distance with ID: ${distanceId}`);
-    } else {
-      console.log(`Already registered for distance with ID: ${distanceId}`);
-    }
-  };
+  // const handleRegister = (distanceId: number) => {
+  //   // Check if the distance is already registered
+  //   if (!registeredDistances.includes(distanceId)) {
+  //     // Add the distanceId to the registered distances list
+  //     setRegisteredDistances([...registeredDistances, distanceId]);
+  //     // Implement any other registration logic here, such as API calls, etc.
+  //     console.log(`Registered for distance with ID: ${distanceId}`);
+  //   } else {
+  //     console.log(`Already registered for distance with ID: ${distanceId}`);
+  //   }
+  // };
   return (
     <div className="w-full my-10">
       <div className="max-w-[1240px] mx-auto">
         <div className="text-center">
+          {race.isHost && (
+            <div>
+              <h2 className="text-5xl mb-8 font-bold text-green-500">
+                Hostujesz to wydarzenie
+              </h2>
+              <Link to={`/admin/dashboard/edit/${race.raceId}`}>
+                <button className="py-3 px-6 mx-auto mt-16 flex uppercase">
+                  Edytuj
+                </button>
+              </Link>
+            </div>
+          )}
+
           <h2 className="text-5xl font-bold">Szczegóły</h2>
           <h3 className="text-3xl mt-8">Opis biegu</h3>
           <p className="text-xl py-6 text-gray-500">{race.description}</p>
@@ -39,6 +51,9 @@ function RaceDetailsInfo({ race }: RaceDetailsInfoProps) {
                 className="font-bold"
                 dateString={race.registrationEndDate}
               />
+            </p>
+            <p className="text-mediumGray-400 mt-2">
+              Organizator: <b>{race.host?.userName}</b>
             </p>
           </div>
           <div className="border py-8 rounded-xl shadow-xl">
@@ -64,12 +79,6 @@ function RaceDetailsInfo({ race }: RaceDetailsInfoProps) {
               {race.addressDto?.street}
             </p>
           </div>
-        </div>
-        <div className="grid md:grid-cols-1 px-2 mt-4 justify-items-center">
-          <h3 className="text-3xl mt-8 justify-self-center">
-            Dostępne dystanse
-          </h3>
-          <RaceDetailsDistances race={race} handleRegister={handleRegister} />
         </div>
       </div>
     </div>

@@ -11,7 +11,7 @@ import { Link } from "react-router-dom";
 
 function Footer() {
   return (
-    <div className="w-full  min-h-[20vh] bg-[#F2C46D] text-[#0D0D0D] py-2 px-2">
+    <footer className="w-full bg-[#F2C46D] text-[#0D0D0D] py-2 px-2 min-h-[30vh]">
       <div className="max-w-[1240px] mx-auto border-b-2 border-gray-600 py-8 flex flex-col md:flex-row items-center justify-between">
         <div className="md:flex items-center">
           <h6 className="font-bold uppercase pt-2 text-2xl text-center md:mr-4">
@@ -20,21 +20,37 @@ function Footer() {
           <img src={logo} alt="logo" className="h-20 mx-auto" />
         </div>
 
-        <ul className="list-none flex flex-col text-center justify-center md:flex-row">
+        <ul className="list-none flex flex-col text-center justify-center md:flex-row ">
           <li className="mr-4 font-bold">
-            <Link to="/">Strona główna</Link>
+            <Link to="/" className="text-deepBlack hover:text-darkGray">
+              Strona główna
+            </Link>
           </li>
           <li className="mr-4">
-            <Link to="/races">Biegi</Link>
+            <Link to="/races" className="text-deepBlack hover:text-darkGray">
+              Biegi
+            </Link>
           </li>
           <li className="mr-4">
-            <Link to="/results">Wyniki</Link>
+            <Link
+              to="/results"
+              className="text-deepBlack hover:text-darkGray"
+            >
+              Wyniki
+            </Link>
           </li>
           <li className="mr-4">
-            <Link to="/about">O nas</Link>
+            <Link to="/about" className="text-deepBlack hover:text-darkGray">
+              O nas
+            </Link>
           </li>
           <li className="mr-4">
-            <Link to="/contact">Kontakt</Link>
+            <Link
+              to="/contact"
+              className="text-deepBlack hover:text-darkGray"
+            >
+              Kontakt
+            </Link>
           </li>
         </ul>
       </div>
@@ -51,7 +67,7 @@ function Footer() {
           <FaGithub />
         </div>
       </div>
-    </div>
+    </footer>
   );
 }
 

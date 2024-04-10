@@ -1,4 +1,4 @@
-import { RouteObject, createBrowserRouter } from "react-router-dom";
+import { Navigate, RouteObject, createBrowserRouter } from "react-router-dom";
 import App from "../../App";
 import Home from "../../pages/home/Home";
 import Events from "../../pages/races/Races";
@@ -15,6 +15,15 @@ import UploadRace from "../../pages/dashboard/UploadRace";
 import ManageRaces from "../../pages/dashboard/ManageRaces";
 import EditRaces from "../../pages/dashboard/EditRaces";
 import RaceDetailsPage from "../../pages/races/details/RaceDetailsPage";
+import TestErrors from "../../pages/errors/TestError";
+import NotFound from "../../pages/errors/NotFound";
+import ServerError from "../../pages/errors/ServerError";
+import AttendeesList from "../../pages/races/details/attendees/AttendeesList";
+import RaceDetails from "../../pages/races/details/RaceDetails";
+import Races from "../../pages/races/Races";
+import CreateRaceForm from "../../pages/dashboard/form/RaceForm";
+import FormikTest from "../../pages/dashboard/FormikTest";
+import ProfilePage from "../../pages/profiles/ProfilePage";
 
 export const routes: RouteObject[] = [
   {
@@ -27,9 +36,14 @@ export const routes: RouteObject[] = [
       },
       {
         path: "races",
-        element: <Events />,
+        element: <Races />,
       },
-      { path: "races/:raceId", element: <RaceDetailsPage /> },
+      { path: "races/:raceId", element: <RaceDetails /> },
+      { path: "profiles/:userName", element: <ProfilePage /> },
+      // {
+      //   path: "races/:raceId/:distanceId/attendees",
+      //   element: <AttendeesList />,
+      // },
 
       {
         path: "results",
@@ -38,7 +52,7 @@ export const routes: RouteObject[] = [
       {
         path: "about",
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["Organizer", "Competitor"]}>
             <About />
           </ProtectedRoute>
         ),
@@ -60,6 +74,18 @@ export const routes: RouteObject[] = [
         element: <RegisterOrganizer />,
       },
       {
+        path: "errors",
+        element: <TestErrors />,
+      },
+      {
+        path: "not-found",
+        element: <NotFound />,
+      },
+      {
+        path: "server-error",
+        element: <ServerError />,
+      },
+      {
         // path: "/dashboard",
         // element: (
         //   <ProtectedRoute>
@@ -67,24 +93,28 @@ export const routes: RouteObject[] = [
         //   </ProtectedRoute>
         // ),
       },
-      { path: "*", element: <Home /> },
+      { path: "*", element: <Navigate replace to="/not-found" /> },
     ],
   },
   {
-    path: "/admin/dashboard",
-    element: <DashboardLayout />,
+    path: `/admin/dashboard`,
+    element: (
+      // <ProtectedRoute allowedRoles={["Organizer"]}>
+      <DashboardLayout />
+      // </ProtectedRoute>
+    ),
     children: [
       {
-        path: "/admin/dashboard",
-        element: <Dashboard />,
-      },
-      {
         path: "/admin/dashboard/upload",
-        element: <UploadRace />,
+        element: <CreateRaceForm key="create" />,
       },
       {
-        path: "/admin/dashboard/manage",
-        element: <ManageRaces />,
+        path: "/admin/dashboard/edit/:raceId",
+        element: <CreateRaceForm key="edit" />,
+      },
+      {
+        path: "/admin/dashboard/formikTest",
+        element: <FormikTest />,
       },
       {
         path: "/admin/dashboard/edit-race/:id",

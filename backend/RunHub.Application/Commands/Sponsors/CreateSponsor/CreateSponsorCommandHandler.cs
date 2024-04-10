@@ -1,12 +1,14 @@
-﻿using MediatR;
+﻿using Mapster;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
+using RunHub.Contracts.Errors;
 using RunHub.Contracts.Exceptions;
 using RunHub.Domain.Entity;
 using RunHub.Persistence;
 
 namespace RunHub.Application.Commands.Sponsors.CreateSponsor
 {
-    public class CreateSponsorCommandHandler : IRequestHandler<CreateSponsorCommand, int>
+    public class CreateSponsorCommandHandler : IRequestHandler<CreateSponsorCommand, Result<Unit>>
     {
         private readonly DataContext _context;
 
@@ -14,30 +16,26 @@ namespace RunHub.Application.Commands.Sponsors.CreateSponsor
         {
             _context = context;
         }
-        public async Task<int> Handle(CreateSponsorCommand request, CancellationToken cancellationToken)
+        public async Task<Result<Unit>> Handle(CreateSponsorCommand request, CancellationToken cancellationToken)
         {
-            var race = await _context.Races.FirstOrDefaultAsync(x => x.RaceId == request.RaceId,cancellationToken);
+            var race = await _context.Races
+                .Include(x => x.Sponsors)
+                .FirstOrDefaultAsync(x => x.RaceId == request.RaceId,cancellationToken);
 
-            if(race == null)
+            if (race == null) return null;
+
+            var sponsor = request.SponsorDto.Adapt<Sponsor>();
+
+            race.Sponsors.Add(sponsor);
+
+            var result = await _context.SaveChangesAsync() > 0;
+
+            if (!result)
             {
-                throw new NotFoundException($"{nameof(Race)} z {nameof(Race.RaceId)}: {request.RaceId}" + " nie został znaleziony w bazie danych");
+                return Result<Unit>.Failure("Problem z utworzeniem nowego sponsora");
             }
 
-            var sponsor = new Sponsor
-            {
-                RaceId = request.RaceId,
-                Name = request.Name,
-                Logo = request.Logo,
-                Description = request.Description,
-                WebPageUrl = request.WebPageUrl,
-                Amount = request.Amount,
-                SupportType = request.SupportType
-            };
-
-            await _context.Sponsors.AddAsync(sponsor, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
-
-            return sponsor.RaceId;
+            return Result<Unit>.Success(Unit.Value);
         }
     }
 }

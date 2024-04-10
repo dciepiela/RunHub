@@ -1,12 +1,12 @@
-﻿using MediatR;
+﻿using Mapster;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
-using RunHub.Contracts.Exceptions;
-using RunHub.Domain.Entity;
+using RunHub.Contracts.Errors;
 using RunHub.Persistence;
 
 namespace RunHub.Application.Commands.Distances.UpdateDistance
 {
-    public class UpdateDistanceCommandHandler : IRequestHandler<UpdateDistanceCommand, Unit>
+    public class UpdateDistanceCommandHandler : IRequestHandler<UpdateDistanceCommand, Result<Unit>>
     {
         private readonly DataContext _context;
 
@@ -14,36 +14,27 @@ namespace RunHub.Application.Commands.Distances.UpdateDistance
         {
             _context = context;
         }
-        public async Task<Unit> Handle(UpdateDistanceCommand request, CancellationToken cancellationToken)
+        public async Task<Result<Unit>> Handle(UpdateDistanceCommand request, CancellationToken cancellationToken)
         {
             var race = await _context.Races
                 .Include(x => x.Distances)
                 .FirstOrDefaultAsync(x => x.RaceId == request.RaceId, cancellationToken);
 
-            if (race == null)
-            {
-                throw new NotFoundException($"Race containing ID {request.RaceId} was not found in the database");
-            }
+            if (race == null) return null;
 
-            var distanceToUpdate = race.Distances.FirstOrDefault(x => x.DistanceId == request.DistanceId);
+            var distance = race.Distances.FirstOrDefault(x => x.DistanceId == request.DistanceDto.DistanceId);
 
-            if(distanceToUpdate is null)
-            {
-                throw new NotFoundException($"Distance with ID {request.DistanceId} was not found in the race");
-            }
+            if (distance == null) return null;
 
-            distanceToUpdate.Name = request.Name;
-            distanceToUpdate.LengthInKilometers = request.LengthInKilometers;
-            distanceToUpdate.Description = request.Description;
-            distanceToUpdate.AvailableSlots = request.AvailableSlots;
-            distanceToUpdate.TotalSlots = request.TotalSlots;
-            distanceToUpdate.Price = request.Price;
+            distance = request.DistanceDto.Adapt(distance);
 
+            _context.Distances.Update(distance);
 
-            _context.Distances.Update(distanceToUpdate);
-            await _context.SaveChangesAsync(cancellationToken);
+            var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
-            return Unit.Value;
+            if (!result) return Result<Unit>.Failure("Problem z aktualizacją dystansu");
+
+            return Result<Unit>.Success(Unit.Value);
         }
     }
 }

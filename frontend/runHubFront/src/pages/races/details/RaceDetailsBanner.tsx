@@ -1,25 +1,34 @@
 import MyFormattedDate from "../../../app/common/MyFormattedDate";
 import { RaceDto } from "../../../app/models/race";
 import bgImg from "../../../assets/raceDetails.jpg";
+import defaultImage from "../../../assets/defaultImageRace.jpg";
 
 interface RaceDetailsBannerProps {
   race: RaceDto;
 }
 
+const handleImageError = (
+  event: React.SyntheticEvent<HTMLImageElement, Event>
+) => {
+  const target = event.target as HTMLImageElement;
+  target.src = defaultImage;
+};
+
 function RaceDetailsBanner({ race }: RaceDetailsBannerProps) {
   return (
     <div
-      className="bg-cover bg-center bg-no-repeat w-full h-[50vh] bg-whiteNeutral flex flex-col justify-between"
+      className="bg-cover bg-center bg-no-repeat w-full h-[50%] bg-whiteNeutral flex flex-col justify-between"
       style={{
         backgroundImage: `linear-gradient(to top, rgba(255, 163, 64), rgba(100, 100, 100, 0.4)), url(${bgImg})`,
       }}
     >
-      <div className="grid md:grid-cols-2 max-w-[1240px] m-auto pt-14 mt-8">
-        <div>
+      <div className="grid md:grid-cols-2 max-w-[1240px] m-auto p-14 mt-12 ">
+        <div className="flex justify-center items-center">
           <img
-            className=" rounded-lg shadow-lg h-[25vsh] w-[25vh] mx-auto"
-            src={race.image}
-            alt=""
+            className=" rounded-lg shadow-lg w-[60%] items-center"
+            src={race.image || defaultImage}
+            alt={race.image ? "race" : "default"}
+            onError={handleImageError}
           />
         </div>
         <div className="flex flex-col items-center justify-center md:items-start w-full px-2 py-8 text-center sm:text-left">

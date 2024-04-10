@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using RunHub.Contracts.Errors;
 using RunHub.Contracts.Exceptions;
 using RunHub.Domain.Entity;
 using RunHub.Persistence;
@@ -7,7 +8,7 @@ using System.Linq;
 
 namespace RunHub.Application.Commands.Distances.DeleteDistance
 {
-    public class DeleteDistanceCommandHandler : IRequestHandler<DeleteDistanceCommand, Unit>
+    public class DeleteDistanceCommandHandler : IRequestHandler<DeleteDistanceCommand, Result<Unit>>
     {
         private readonly DataContext _context;
 
@@ -15,29 +16,26 @@ namespace RunHub.Application.Commands.Distances.DeleteDistance
         {
             _context = context;
         }
-        public async Task<Unit> Handle(DeleteDistanceCommand request, CancellationToken cancellationToken)
+        public async Task<Result<Unit>> Handle(DeleteDistanceCommand request, CancellationToken cancellationToken)
         {
             var race = await _context.Races
                 .Include(x => x.Distances)
                 .FirstOrDefaultAsync(x => x.RaceId == request.RaceId, cancellationToken);
 
-            if (race == null)
-            {
-                throw new NotFoundException($"Bieg o Id: {request.RaceId} nie został znaleziony w bazie danych");
-            }
+            if (race == null) return null;
 
             var distanceToDelete = race.Distances
                 .FirstOrDefault(x => x.DistanceId == request.DistanceId);
 
-            if(distanceToDelete == null)
-            {
-                throw new NotFoundException($"Bieg o Id: {request.RaceId} z {nameof(Distance.DistanceId)}: {request.DistanceId}" + " nie został znaleziony w bazie danych");
-            }
+            if (distanceToDelete == null) return null;
 
             _context.Distances.Remove(distanceToDelete);
-            await _context.SaveChangesAsync(cancellationToken);
 
-            return Unit.Value;
+            var result = await _context.SaveChangesAsync(cancellationToken) > 0;
+
+            if (!result) return Result<Unit>.Failure("Problem z usunięciem dystansu");
+
+            return Result<Unit>.Success(Unit.Value);
         }
     }
 }

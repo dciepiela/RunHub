@@ -1,7 +1,8 @@
 ﻿using MediatR;
+using RunHub.Contracts.DTOs.Distance;
+using RunHub.Contracts.Errors;
 
 namespace RunHub.Application.Commands.Distances.UpdateDistance
 {
-    public record UpdateDistanceCommand (int RaceId, int DistanceId, string Name, double LengthInKilometers,
-       string Description, int AvailableSlots, int TotalSlots, decimal Price) : IRequest<Unit>;
+    public record UpdateDistanceCommand (int RaceId, UpdateDistanceDto DistanceDto) : IRequest<Result<Unit>>;
 }

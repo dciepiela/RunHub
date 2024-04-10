@@ -4,12 +4,25 @@
 
 body{
     background-color: rgb(255, 255, 255);
+    /* font-family:'Inter', sans-serif; */
+    min-height: 100vh;    
+    display: flex;
+    flex-direction: column;
 }
 
-@layer base {
-    li{
-        @apply p-4;
+@layer components{
+    button{
+        @apply text-deepBlack border bg-lightYellow
+        hover:bg-transparent hover:text-lightYellow rounded-md 
     }
+}
+@layer base {
+    
+    li{
+        @apply p-4 ;
+    }
+    
+
     button{
         @apply text-deepBlack border bg-lightYellow
         hover:bg-transparent hover:text-lightYellow rounded-md 

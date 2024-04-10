@@ -21,7 +21,7 @@
         public Race Race { get; set; }
 
         // Relation
-        public ICollection<DistanceAttendee> DistanceAttendees { get; set; }
+        public ICollection<DistanceAttendee> DistanceAttendees { get; set; } = new List<DistanceAttendee>();
         //public ICollection<Result> Results { get; set; }
 
     }

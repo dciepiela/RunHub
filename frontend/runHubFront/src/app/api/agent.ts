@@ -2,12 +2,13 @@ import axios, { AxiosError, AxiosResponse } from "axios";
 import { DistanceDto } from "../models/distance";
 import { PaginatedResult } from "../models/pagination";
 import { RaceDto, RaceFormValues } from "../models/race";
-import { User, UserFormLogin, UserFormRegister } from "../models/user";
+import { ChangePasswordDto, ForgotPasswordDto, ResetPasswordDto, User, UserFormLogin, UserFormRegister } from "../models/user";
 import { DistanceAttendee } from "../models/distanceAttendee";
 import { store } from "../stores/store";
 import { router } from "../routes/Router";
 import { toast } from "react-toastify";
-import { Profile } from "../models/profile";
+import { Photo, Profile, UserDistance } from "../models/profile";
+import { SponsorDto } from "../models/sponsor";
 
 const sleep = (delay: number) => {
     return new Promise((resolve) => {
@@ -24,7 +25,7 @@ axios.interceptors.request.use(config => {
 })
 
 axios.interceptors.response.use(async response =>{
-    await sleep(1000);
+    await sleep(500);
     const pagination = response.headers["pagination"];
     if(pagination){
         response.data = new PaginatedResult(response.data, JSON.parse(pagination))
@@ -35,7 +36,7 @@ axios.interceptors.response.use(async response =>{
     const {data, status, config} = error.response as AxiosResponse;
     switch(status) {
         case 400:
-            if(config.method === 'get' && Object.prototype.hasOwnProperty.call(data.errors, 'raceId')){
+            if(config.method === 'get' && Object.prototype.hasOwnProperty.call(data.errors, 'id')){
                 router.navigate('/not-found')
             }
             if(data.errors){
@@ -51,13 +52,16 @@ axios.interceptors.response.use(async response =>{
             }
             break;
         case 401:
-            toast.error('Brak autoryzacji')
+            toast.error('Błędne dane')
             break;
         case 403:
             toast.error('Zakazane')
             break;
         case 404:
             router.navigate('/not-found')
+            break;
+        case 405:
+            toast.error('Zakazane')
             break;
         case 500:
             store.commonStore.setServerError(data);
@@ -81,6 +85,9 @@ const Account = {
     login: (user:UserFormLogin) => requests.post<User>('/account/login', user),
     registerCompetitor: (user:UserFormRegister) => requests.post<User>('account/registerCompetitor', user),
     registerOrganizer: (user:UserFormRegister) => requests.post<User>('account/registerOrganizer', user),
+    changePassword: (changePasswordDto: ChangePasswordDto) => requests.post<void>(`account/changePassword`, changePasswordDto),
+    forgotPassword: (forgotPasswordDto: ForgotPasswordDto) => requests.post<void>('/account/forgotPassword', forgotPasswordDto),
+    resetPassword: (resetPasswordDto: ResetPasswordDto) => requests.post<void>('/account/resetPassword', resetPasswordDto),
 }
 
 const Races = {
@@ -90,7 +97,9 @@ const Races = {
     update: (race:RaceFormValues) => requests.put<void>(`/races/${race.raceId}`, race),
     delete: (raceId:number) => requests.delete<void>(`/races/${raceId}}`),
     updateDistance: (raceId:number, distanceId:number, distanceData:DistanceDto) =>
-        requests.put(`/distances/${raceId}/${distanceId}`, distanceData)
+        requests.put(`/distances/${raceId}/${distanceId}`, distanceData),
+    updateSponsor: (raceId:number, sponsorId:number, sponsorData:SponsorDto) =>
+        requests.put(`/races/${raceId}/sponsor/${sponsorId}`, sponsorData),
 }
 
 const Distances = {
@@ -100,12 +109,26 @@ const Distances = {
     update: (raceId:number, distance:DistanceDto) => requests.put<void>(`/distances/${raceId}/${distance.distanceId}`, distance),
     delete: (raceId:number, distanceId:number) => requests.delete<void>(`/distances/${raceId}/${distanceId}`),
     attend: (raceId:number, distanceId:number) => requests.post<void>(`/distances/${raceId}/${distanceId}/attend`, {}),
-    allAttendees: (raceId:number, distanceId:number) => axios.get<DistanceAttendee[]>( `/distances/${raceId}/${distanceId}/attendees`).then(responseBody)
+    allAttendees: (raceId:number, distanceId:number) => axios.get<DistanceAttendee[]>( `/distances/${raceId}/${distanceId}/attendees`).then(responseBody),
+
+    attendWithPayment: (raceId: number, distanceId: number, paymentDetails: { stripeToken: string, amount: number }) => {
+        return requests.post<void>(`/distances/${raceId}/${distanceId}/attendWithPayment`, paymentDetails);
+    },
     // listRaces: () => requests.get<RaceDto[]>(`/races?pageSize=${4}&pageNumber=${1}`)
 }
 
 const Profiles = {
-    get: (userName:string) => requests.get<Profile>(`/profiles/${userName}`)
+    get: (userName:string) => requests.get<Profile>(`/profiles/${userName}`),
+    uploadPhoto: (file:Blob) => {
+        const formData = new FormData();
+        formData.append('File', file);
+        return axios.post<Photo>('photos', formData, {
+            headers: {'Content-Type': 'multipart/form-data'}
+        })
+    },
+    deletePhoto: (id:string) => requests.delete(`/photos/${id}`),
+    updateProfile: (profile:Partial<Profile>) => requests.put(`/profiles`, profile),
+    listDistances: (userName:string, predicate:string) => requests.get<UserDistance[]>(`/profiles/${userName}/distances?predicate=${predicate}`)
 }
 
 const agent = {

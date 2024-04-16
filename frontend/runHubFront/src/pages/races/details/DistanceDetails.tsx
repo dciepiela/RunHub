@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { RaceDto, RaceStatus } from "../../../app/models/race";
 import AttendeesList from "./attendees/AttendeesList";
 import { useStore } from "../../../app/stores/store";
 import { observer } from "mobx-react-lite";
 import SponsorsList from "./sponsors/SponsorsList";
+import LoadingButton from "../../../components/button/LoadingButton";
+import CheckoutForm from "../../../components/payment/CheckoutForm";
 
 interface Props {
   race: RaceDto;
@@ -18,6 +20,8 @@ export default observer(function DistanceDetails({ race }: Props) {
   const { raceStore } = useStore();
   const { updateAttendance, selectDistance } = raceStore;
 
+  const [loadingStates, setLoadingStates] = useState({});
+
   const handleAttendeesButtonClick = (distanceId: number) => {
     selectDistance(distanceId); // Highlight the distance in the store
     setSelectedDistance(selectedDistance === distanceId ? null : distanceId);
@@ -27,13 +31,29 @@ export default observer(function DistanceDetails({ race }: Props) {
     setActiveTab(tabId);
   };
 
-  const handleSelectDistance = (distanceId: number) => {
-    setSelectedDistance(distanceId);
-  };
+  // const handleSelectDistance = (distanceId: number) => {
+  //   setSelectedDistance(distanceId);
+  // };
+
+  // const handleUpdateAttendance = async (distanceId: number) => {
+  //   setLoadingStates({ ...loadingStates, [distanceId]: true }); // Set loading state to true for the clicked distance
+  //   await updateAttendance(distanceId);
+  //   setLoadingStates({ ...loadingStates, [distanceId]: false }); // Set loading state to false after update
+  // };
 
   const selectedDistanceDetails = race.distances?.find(
     (distance) => distance.distanceId === selectedDistance
   );
+
+  //dodane
+  useEffect(() => {
+    if (raceStore.selectedDistance) {
+      setLoadingStates({
+        ...loadingStates,
+        [raceStore.selectedDistance.distanceId]: false,
+      });
+    }
+  }, [raceStore.selectedDistance, loadingStates]);
 
   return (
     <div className="w-full my-6">
@@ -120,18 +140,34 @@ export default observer(function DistanceDetails({ race }: Props) {
                           </td>
                           {race.raceStatus === RaceStatus.RegistrationOpen && (
                             <td className="border px-2 md:px-4 py-2 text-center">
-                              <button
-                                className="text-deepBlack font-bold py-2 px-4 rounded"
+                              {/* <LoadingButton
+                                className="text-deepBlack font-bold py-2 px-4"
                                 onClick={() => {
-                                  updateAttendance(distance.distanceId);
+                                  handleUpdateAttendance(distance.distanceId);
                                   // selectDistance(distance.distanceId);
                                 }}
-                                // disabled={loading}
-                                disabled={raceStore.loading}
-                                type="button"
-                              >
-                                {distance.isGoing ? "Wypisz się" : "Dołącz"}
-                              </button>
+                                disabled={loadingStates[distance.distanceId]} // Disable button based on its loading state
+                                loading={loadingStates[distance.distanceId]} // Pass loading state to LoadingButton component
+
+                                title={
+                                  distance.isGoing ? "Wypisz się" : "Dołącz"
+                                }
+                                size={15}
+                              />
+                               */}
+                              {selectedDistance === distance.distanceId && (
+                                <CheckoutForm
+                                  raceId={race.raceId}
+                                  distanceId={distance.distanceId}
+                                  price={distance.price}
+                                />
+                              )}
+                                <button onClick={() => setSelectedDistance(distance.distanceId)}>
+            {selectedDistance === distance.distanceId ? "Hide Form" : "Show Form"}
+          </button>
+
+                              {/* {distance.isGoing ? "Wypisz się" : "Dołącz"}
+                              </LoadingButton> */}
                             </td>
                           )}
                           <td className="border px-2 md:px-4 py-2 text-center">

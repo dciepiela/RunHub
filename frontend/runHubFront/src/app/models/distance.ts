@@ -1,7 +1,7 @@
 import { Profile } from "./profile";
 
 export interface DistanceDto {
-    distanceId?: number;
+    distanceId: number; //?
     name: string;
     lengthInKilometers: number;
     description: string;

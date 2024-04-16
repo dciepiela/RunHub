@@ -1,12 +1,11 @@
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useRef, useState } from "react";
 import logo from "../assets/logo.svg";
-import avatar from "../assets/avatar.jpg";
 import { NavLink } from "react-router-dom";
 import { useStore } from "../app/stores/store";
 import { observer } from "mobx-react-lite";
 import { useMediaQuery } from "react-responsive";
-import userStore from "../app/stores/userStore";
+import { DEFAULT_PHOTO_URL } from "../config";
 
 const navLinks = [
   { name: "Strona główna", route: "/" },
@@ -38,7 +37,7 @@ export default observer(function Navbar() {
   });
 
   const userMenuMobile = [
-    { name: "Profil", route: "/races" },
+    { name: "Profil", route: `/profiles/${user?.userName}` },
     { name: "Panel organizatora", route: "/admin/dashboard" },
     { name: "Ustawienia", route: "/settings" },
     { name: "Wyloguj", route: "/logout" },
@@ -50,8 +49,8 @@ export default observer(function Navbar() {
   ];
   return (
     <div className="w-screen h-[80px] z-10 bg-whiteNeutral fixed top-0 drop-shadow-lg">
-      <div className="px-2 flex justify-between items-center w-full h-full sm:text-xs md:text-xl text-lightYellow font-bold">
-        <div className="flex items-center ">
+      <div className="px-2 flex justify-between items-center gap-4 w-full h-full sm:text-xs md:text-xl text-lightYellow font-bold">
+        <div className="flex items-center">
           <NavLink to="/">
             <h1 className="text-3xl font-bold mr-4 text-black">RunHub</h1>
           </NavLink>
@@ -93,7 +92,7 @@ export default observer(function Navbar() {
               <img
                 ref={imgRef}
                 onClick={() => setOpen(!open)}
-                src={avatar}
+                src={user?.image ? user?.image : DEFAULT_PHOTO_URL}
                 alt="user"
                 className="h-[40px] w-[40px] border-2 rounded-full border-lightYellow cursor-pointer"
               />

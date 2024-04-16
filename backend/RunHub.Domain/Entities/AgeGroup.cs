@@ -11,5 +11,6 @@
         // Navigation property
         public ICollection<RaceAgeGroup> RaceAgeGroups { get; set; }
         //public ICollection<Result> Results { get; set; }
+
     }
 }

@@ -8,6 +8,8 @@ using Microsoft.OpenApi.Models;
 using RunHub.Application.Interfaces;
 using RunHub.Infrastructure.Security;
 using RunHub.Infrastructure.Photos;
+using RunHub.Infrastructure.Email;
+using RunHub.Infrastructure.Payment;
 
 namespace RunHub.API.Extensions
 {
@@ -41,7 +43,7 @@ namespace RunHub.API.Extensions
                                 Id="Bearer"
                             }
                         },
-                        new string[]{}
+                        Array.Empty<string>()
                     }
                 });
             });
@@ -61,7 +63,7 @@ namespace RunHub.API.Extensions
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials()
-                        .WithOrigins("http://localhost:5173", "https://localhost:3000");
+                        .WithOrigins("http://localhost:3000");
                         //.SetIsOriginAllowed(origin => true);
                 });
             });
@@ -69,10 +71,15 @@ namespace RunHub.API.Extensions
             services.AddApplication();
             //services.AddExceptionHandler<ExceptionHandler>();
 
+            //STRIPE
+            services.AddScoped<IStripeService, StripeService>();
+
             services.AddScoped<ITokenService, TokenService>();
             services.AddHttpContextAccessor();
             services.AddScoped<IUserAccessor, UserAccessor>();
             services.AddScoped<IPhotoAccessor, PhotoAccessor>();
+            services.AddScoped<EmailSender>();
+
             services.Configure<CloudinarySettings>(config.GetSection("Cloudinary"));
 
             return services;

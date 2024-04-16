@@ -118,7 +118,7 @@ namespace RunHub.Application.Mappings
                 .Map(dest => dest.Gender, src => src.Participator.Gender)
                 .Map(dest => dest.Club, src => src.Participator.Club)
                 .Map(dest => dest.Image, src => src.Participator.Photo.Url);
-                //.Map(dest => dest.Bio, src => src.Participator.Bio);
+            //.Map(dest => dest.Bio, src => src.Participator.Bio);
             //.Map(dest => dest.ParticipatorId, src => src.ParticipatorId)
             //.Map(dest => dest.UserName, src => src.Participator.UserName)
             //.Map(dest => dest.ParticipatorFirstName, src => src.Participator.FirstName)
@@ -136,6 +136,8 @@ namespace RunHub.Application.Mappings
               .Map(dest => dest.DisplayName, src => src.DisplayName)
               .Map(dest => dest.FirstName, src => src.FirstName)
               .Map(dest => dest.LastName, src => src.LastName)
+              .Map(dest => dest.DateOfBirth, src => src.DateOfBirth.Year)
+              .Map(dest => dest.Club, src => src.Club)
               .Map(dest => dest.Bio, src => src.Bio)
               .Map(dest => dest.Image, src => src.Photo.Url);
 
@@ -151,6 +153,19 @@ namespace RunHub.Application.Mappings
             //    .Map(dest => dest.Club, src => src.Club)
             //    .Map(dest => dest.DateOfBirth, src => src.DateOfBirth.Year) // Assuming you want to map only the year of birth
             //    .Map(dest => dest.Image, src => src.Photo.Url);
+
+
+            //UserDistanceDto
+            TypeAdapterConfig<DistanceAttendee, UserDistanceDto>
+            .NewConfig()
+            .Map(dest => dest.DistanceId, src => src.DistanceId)
+            .Map(dest => dest.RaceId, src => src.Distance.RaceId)
+            .Map(dest => dest.Image, src => src.Distance.Race.Image)
+            .Map(dest => dest.Name, src => src.Distance.Name)
+            .Map(dest => dest.Date, src => src.Distance.Race.StartDateRace)
+            .Map(dest => dest.RaceType, src => src.Distance.Race.RaceType)
+            .Map(dest => dest.HostUsername, src => src.Distance.Race.CreatorAppUser.UserName);
+
 
         }
     }

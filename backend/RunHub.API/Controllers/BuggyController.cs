@@ -27,5 +27,6 @@ namespace RunHub.API.Controllers
         {
             return Unauthorized();
         }
+
     }
 }

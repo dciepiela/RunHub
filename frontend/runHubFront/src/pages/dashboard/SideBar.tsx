@@ -23,15 +23,18 @@ function SideBar() {
           <Sidebar.Item href="/admin/dashboard" icon={HiChartPie}>
             <p>Panel zarządzania</p>
           </Sidebar.Item>
-          <Sidebar.Item href="/admin/dashboard/manage" icon={FaRunning}>
+          <Sidebar.Item href="/admin/dashboard/list" icon={FaRunning}>
+            <p>Lista biegów</p>
+          </Sidebar.Item>
+          <Sidebar.Item href="/admin/dashboard/create" icon={FaRunning}>
             <p>Utwórz bieg</p>
           </Sidebar.Item>
-          <Sidebar.Item href="/admin/dashboard/formikTest" icon={FaEtsy}>
+          {/* <Sidebar.Item href="/admin/dashboard/formikTest" icon={FaEtsy}>
             <p>Test Formik</p>
-          </Sidebar.Item>
-          <Sidebar.Item href="/admin/dashboard/upload" icon={FaEdit}>
+          </Sidebar.Item> */}
+          {/* <Sidebar.Item href="/admin/dashboard/upload" icon={FaEdit}>
             <p>Zarządzaj biegami</p>
-          </Sidebar.Item>
+          </Sidebar.Item> */}
 
           <Sidebar.Item href="/" icon={HiHome}>
             <p>Strona główna</p>

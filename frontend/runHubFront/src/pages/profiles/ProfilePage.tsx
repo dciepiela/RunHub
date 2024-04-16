@@ -15,16 +15,16 @@ export default observer(function ProfilePage() {
     if (userName) loadProfile(userName);
   }, [loadProfile, userName]);
 
-  if (loadingProfile)
-    return <LoadingComponent content="Ładowanie profilu użytkownika" />;
+  // if (loadingProfile)
+  //   return <LoadingComponent content="Ładowanie profilu użytkownika" />;
 
   return (
-    <div className="mt-28 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="mt-16 max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="grid grid-cols-1 gap-8">
         {profile && (
           <>
             <ProfileHeader profile={profile} />
-            <ProfileContent />
+            <ProfileContent profile={profile} />
           </>
         )}
       </div>

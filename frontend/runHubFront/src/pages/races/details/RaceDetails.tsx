@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import "semantic-ui-css/components/container.min.css";
 import DistanceDetails from "./DistanceDetails";
+import DistanceDetails2 from "./DistanceDetails2";
 
 export default observer(function RaceDetails() {
   const { raceStore } = useStore();
@@ -23,7 +24,7 @@ export default observer(function RaceDetails() {
     <>
       <RaceDetailsBanner race={race} />
       <RaceDetailsInfo race={race} />
-      <DistanceDetails race={race} />
+      <DistanceDetails2 race={race} />
     </>
   );
 });

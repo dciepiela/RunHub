@@ -20,8 +20,8 @@ export default function TestErrors() {
     axios.get("buggy/unauthorised").catch((err) => console.log(err.response));
   }
 
-  function handleBadGuid() {
-    axios.get("races/notaid").catch((err) => console.log(err.response));
+  function handleForbidden() {
+    axios.get("races/2/sponsor/1").catch((err) => console.log(err.response));
   }
 
   function handleValidationError() {
@@ -41,7 +41,7 @@ export default function TestErrors() {
             <button onClick={handleValidationError}>Validation Error</button>
             <button onClick={handleServerError}>Server Error</button>
             <button onClick={handleUnauthorised}>Unauthorised</button>
-            <button onClick={handleBadGuid}>Bad Guid</button>
+            <button onClick={handleForbidden}>Forbidden</button>
           </div>
         </div>
         {/* {errors && <ValidationError errors={errors} />} */}

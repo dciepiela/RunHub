@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using RunHub.Application.Core;
 using RunHub.Contracts.DTOs.UserDtos;
 using RunHub.Domain.Entity;
+using RunHub.Infrastructure.Email;
+using Serilog;
 using System.Security.Claims;
 
 namespace RunHub.API.Controllers
@@ -18,11 +20,13 @@ namespace RunHub.API.Controllers
         private readonly SignInManager<AppUser> _signInManager;
         private readonly IServiceProvider _serviceProvider;
 
-        public AccountController(UserManager<AppUser> userManager, ITokenService tokenService, SignInManager<AppUser> signInManager, IServiceProvider serviceProvider)
+
+        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService, 
+            IServiceProvider serviceProvider)
         {
             _userManager = userManager;
-            _tokenService = tokenService;
             _signInManager = signInManager;
+            _tokenService = tokenService;
             _serviceProvider = serviceProvider;
         }
 
@@ -131,6 +135,86 @@ namespace RunHub.API.Controllers
             else
             {
                 return StatusCode(500, createdUser.Errors);
+            }
+        }
+
+        [Authorize]
+        [HttpPost("changePassword")]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDto changePasswordDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            // Get the currently logged-in user
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized("User not found.");
+
+            // Change the user's password
+            var result = await _userManager.ChangePasswordAsync(user, changePasswordDto.CurrentPassword, changePasswordDto.NewPassword);
+
+            // Check if the operation succeeded
+            if (result.Succeeded)
+            {
+                return Ok("Hasło zostało zmienione pomyślnie");
+            }
+            else
+            {
+                // If it failed, add the errors to the ModelState and return it
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                return BadRequest(ModelState);
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpPost("forgotPassword")]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordDto forgotPasswordDto)
+        {
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var user = await _userManager.FindByEmailAsync(forgotPasswordDto.Email);
+            if (user == null)
+                // Optionally, consider returning Ok() to avoid enumeration attacks
+                return Ok("If an account with this email exists, a reset link has been sent.");
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            // Encode the token to be URL safe
+            var encodedToken = Uri.EscapeDataString(token);
+
+            // Debug log the token
+            Log.Information("Received Token for Validation => {@encodedToken}", encodedToken);
+            var emailSender = _serviceProvider.GetRequiredService<EmailSender>();
+            await emailSender.SendPasswordResetEmailAsync(user.Email, encodedToken);
+
+            return Ok("A reset link has been sent.");
+        }
+
+        [AllowAnonymous]
+        [HttpPost("resetPassword")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordDto resetPasswordDto)
+        {
+            var user = await _userManager.FindByEmailAsync(resetPasswordDto.Email);
+            if (user == null) return BadRequest("Invalid request");
+
+            // Decode the token received from the request
+            var decodedToken = Uri.UnescapeDataString(resetPasswordDto.Token);
+
+            //Log.Information($"Received Token for Validation: {decodedToken}");
+            Log.Information("Received Token for Validation => {@decodedToken}",decodedToken);
+            //_logger.LogInformation($"Received Token for Validation: {decodedToken}");
+
+            var result = await _userManager.ResetPasswordAsync(user, decodedToken, resetPasswordDto.NewPassword);
+            if (result.Succeeded)
+            {
+                return Ok("Password has been reset successfully");
+            }
+            else
+            {
+                return BadRequest(result.Errors);
             }
         }
 

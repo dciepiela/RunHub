@@ -1,9 +1,10 @@
 "use client";
 
 import { Button, Checkbox, Label, TextInput } from "flowbite-react";
+import { Link } from "react-router-dom";
 // import Link from "next/link";
 
-function EditRaces() {
+function DashboardEditRaces() {
   return (
     <div className="px-4 my-12">
       <h2 className="mb-8 text-3xl font-bold">Aktualizuj biegi</h2>
@@ -51,4 +52,4 @@ function EditRaces() {
   );
 }
 
-export default EditRaces;
+export default DashboardEditRaces;

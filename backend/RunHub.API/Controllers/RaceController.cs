@@ -1,16 +1,19 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RunHub.Application.Commands.Addresses.UpdateAddress;
+using RunHub.Application.Commands.Distances.UpdateDistance;
 using RunHub.Application.Commands.Races.CreateRace;
 using RunHub.Application.Commands.Races.DeleteRace;
 using RunHub.Application.Commands.Races.UpdateRace;
 using RunHub.Application.Commands.Sponsors.CreateSponsor;
+using RunHub.Application.Commands.Sponsors.UpdateSponsor;
 using RunHub.Application.Queries.Addresses.GetAddressById;
 using RunHub.Application.Queries.Races.GetRaceById;
 using RunHub.Application.Queries.Races.GetRaces;
 using RunHub.Application.Queries.Sponsors.GetSponsorById;
 using RunHub.Application.Queries.Sponsors.GetSponsors;
 using RunHub.Contracts.DTOs;
+using RunHub.Contracts.DTOs.Distance;
 using RunHub.Contracts.DTOs.Race;
 using RunHub.Contracts.DTOs.Sponsor;
 using RunHub.Contracts.Requests;
@@ -116,6 +119,20 @@ namespace RunHub.API.Controllers
             var command = new CreateSponsorCommand(raceId, sponsorDto);
 
             var result = await Mediator.Send(command, ct);
+
+            return HandleResult(result);
+        }
+
+
+
+        [Authorize(Policy = "IsRaceCreator")]
+        [HttpPut("{raceId}/sponsor/{sponsorId}")]
+        public async Task<IActionResult> EditDistance(int raceId, int sponsorId, UpdateSponsorDto sponsorDto, CancellationToken ct)
+        {
+            sponsorDto.SponsorId = sponsorId;
+            var updateCommand = new UpdateSponsorCommand(raceId, sponsorDto);
+
+            var result = await Mediator.Send(updateCommand, ct);
 
             return HandleResult(result);
         }

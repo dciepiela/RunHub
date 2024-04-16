@@ -27,4 +27,8 @@ body{
         @apply text-deepBlack border bg-lightYellow
         hover:bg-transparent hover:text-lightYellow rounded-md 
     }
+
+    .no-hover {
+        @apply text-deepBlack border bg-lightYellow rounded-md !important;
+      }
 }

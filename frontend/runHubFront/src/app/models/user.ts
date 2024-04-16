@@ -6,12 +6,14 @@ export type User = {
     displayName: string;
     token: string;
     role: string;
+    image?: string;
+
 
     firstName?: string;
     lastName?: string;
     nationality?: string;
     gender?: string;
-    dateOfBirth?: string;
+    dateOfBirth?: Date;
     contactNumber?: string;
     club?: string;
 }
@@ -37,8 +39,28 @@ export type UserFormRegister = {
     lastName?: string;
     nationality?: string;
     gender?: string;
-    dateOfBirth?: string;
+    dateOfBirth?: Date;
     contactNumber?: string;
     club?: string;
     addressDto?: AddressDto;
+}
+
+export interface ChangePasswordDto {
+    currentPassword: string
+    newPassword: string
+  }
+
+export interface ForgotPasswordDto {
+    email:string;
+}
+
+export interface ResetPasswordDto {
+    token: string;
+    email: string;
+    newPassword: string;
+}
+
+export interface ResetPasswordFormDto{
+    password:string;
+    confirmPassword:string;
 }

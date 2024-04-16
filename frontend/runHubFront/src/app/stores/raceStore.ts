@@ -1,10 +1,12 @@
 import { makeAutoObservable, reaction, runInAction } from "mobx";
 import { RaceDto, RaceFormValues } from "../models/race";
 import agent from "../api/agent";
-import { Pagination, PaginationRequestParams, PagingParams } from "../models/pagination";
+import { Pagination, PagingParams } from "../models/pagination";
 import { store } from "./store";
 import { Profile } from "../models/profile";
 import { DistanceDto } from "../models/distance";
+import { SponsorDto } from "../models/sponsor";
+import { router } from "../routes/Router";
 
 export default class RaceStore {
     raceRegistry = new Map<number, RaceDto>();
@@ -307,7 +309,7 @@ export default class RaceStore {
             // Assuming you want to update the local state upon a successful API call
             let race = this.raceRegistry.get(raceId);
             if (race) {
-              const distances = race.distances.map(d => 
+              const distances = race.distances!.map(d => 
                 d.distanceId === distanceId ? {...d, ...distanceData} : d
               );
               race = {...race, distances}; // Update race with new distances array
@@ -324,4 +326,91 @@ export default class RaceStore {
           throw error; // rethrow if you need further error handling by the caller
         }
       };
+
+      //updateSponsor
+      updateSponsor = async (raceId: number, sponsorId: number, sponsorData: SponsorDto) => {
+        this.loading = true;
+        try {
+            // Assuming an agent method exists that can update sponsor details
+            await agent.Races.updateSponsor(raceId, sponsorId, sponsorData);
+            runInAction(() => {
+                // Find the race and update the specific sponsor in the race's sponsors array
+                let race = this.raceRegistry.get(raceId);
+                if (race) {
+                    const sponsors = race.sponsors!.map(s => 
+                        s.sponsorId === sponsorId ? {...s, ...sponsorData} : s
+                    );
+                    race = {...race, sponsors}; // Update race with new sponsors array
+                    this.raceRegistry.set(raceId, race); // Update the race in the registry
+                    if (this.selectedRace?.raceId === raceId) {
+                        this.selectedRace = race; // Update selectedRace if it's the one being edited
+                    }
+                }
+                this.loading = false;
+            });
+        } catch (error) {
+            console.error('Failed to update sponsor', error);
+            runInAction(() => this.loading = false);
+            throw error; // rethrow if you need further error handling by the caller
+        }
+    };
+
+
+    // Add a method in RaceStore for handling payments
+// updateAttendanceWithPayment = async (raceId, distanceId, stripeToken, amount) => {
+//   this.loading = true;
+//   try {
+//     // This should match your backend API route for payment
+//     await agent.Distances.attendWithPayment(raceId, distanceId, { stripeToken, amount });
+//     runInAction(() => {
+//       this.selectDistance(distanceId);
+//       if (this.selectedDistance) {
+//         this.selectedDistance.isGoing = true;
+//         this.distanceRegistry.set(distanceId, this.selectedDistance);
+//       }
+//       this.loading = false;
+//     });
+//   } catch (error) {
+//     runInAction(() => this.loading = false);
+//     console.error("Payment or attendance update failed", error);
+//   }
+// }
+
+registerAttendeeWithPayment = async (raceId:number, distanceId:number, stripeToken:string, amount:number) => {
+  try {
+      this.loading = true;
+      const paymentDetails = { stripeToken, amount };
+      const attendee = await agent.Distances.attendWithPayment(raceId, distanceId, paymentDetails);
+      runInAction(() => {
+          const race = this.raceRegistry.get(raceId);
+          if (race) {
+            if(race.distances){
+              const distanceIndex = race.distances.findIndex(d => d.distanceId === distanceId);
+              if (distanceIndex !== -1) {
+                // Decrease available slots by 1
+                race.distances[distanceIndex].availableSlots -= 1;
+                // Add new attendee to the distanceAttendees list
+                race.distances[distanceIndex].distanceAttendees!.push({
+                    // Assuming the backend returns the full attendee object
+                    ...attendee,
+                    isPaid: true,
+                    paidDate: new Date().toISOString() // Assuming payment date is now
+                });
+                console.log(amount);
+                // Update the race in the registry to trigger observers
+                this.raceRegistry.set(raceId, race);
+            }
+            }
+          }
+          this.loading = false;
+          router.navigate('/payment-success', { state: { message: 'Płatność pomyślna, zostałeś zapisany na bieg!' } });
+        });
+  } catch (error) {
+      runInAction(() => {
+          this.loading = false;
+          console.error("Failed to register attendee with payment", error);
+      });
+  }
+}
+    
 }

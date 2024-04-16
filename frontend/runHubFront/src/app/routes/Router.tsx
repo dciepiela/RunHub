@@ -1,35 +1,44 @@
 import { Navigate, RouteObject, createBrowserRouter } from "react-router-dom";
 import App from "../../App";
 import Home from "../../pages/home/Home";
-import Events from "../../pages/races/Races";
 import Contact from "../../pages/contact/Contact";
 import About from "../../pages/about/About";
 import Results from "../../pages/results/Results";
 import Login from "../../pages/login/Login";
 import RegisterCompetitor from "../../pages/register/RegisterCompetitor";
-import Dashboard from "../../pages/dashboard/Dashboard";
 import ProtectedRoute from "./ProtectedRoute";
 import RegisterOrganizer from "../../pages/register/RegisterOrganizer";
 import DashboardLayout from "../../pages/dashboard/DashboardLayout";
-import UploadRace from "../../pages/dashboard/UploadRace";
-import ManageRaces from "../../pages/dashboard/ManageRaces";
-import EditRaces from "../../pages/dashboard/EditRaces";
-import RaceDetailsPage from "../../pages/races/details/RaceDetailsPage";
+import EditRaces from "../../pages/dashboard/DashboardEditRaces";
 import TestErrors from "../../pages/errors/TestError";
 import NotFound from "../../pages/errors/NotFound";
 import ServerError from "../../pages/errors/ServerError";
-import AttendeesList from "../../pages/races/details/attendees/AttendeesList";
 import RaceDetails from "../../pages/races/details/RaceDetails";
 import Races from "../../pages/races/Races";
 import CreateRaceForm from "../../pages/dashboard/form/RaceForm";
 import FormikTest from "../../pages/dashboard/FormikTest";
 import ProfilePage from "../../pages/profiles/ProfilePage";
+import RequireAuth from "./RequireAuth";
+import DashboardListRaces from "../../pages/dashboard/DashboardListRaces";
+import ResetPasswordForm from "../../pages/login/ResetPasswordForm";
+import ForgotPasswordForm from "../../pages/login/ForgotPasswordForm";
+import PaymentForm from "../../components/payment/PaymentForm";
+import PaymentSuccessPage from "../../components/payment/PaymentSuccessPage";
 
 export const routes: RouteObject[] = [
   {
     path: "/",
     element: <App />,
     children: [
+      {
+        element: <RequireAuth />,
+        children: [
+          {
+            path: "contact",
+            element: <Contact />,
+          },
+        ],
+      },
       {
         path: "/",
         element: <Home />,
@@ -58,12 +67,17 @@ export const routes: RouteObject[] = [
         ),
       },
       {
-        path: "contact",
-        element: <Contact />,
-      },
-      {
         path: "login",
         element: <Login />,
+      },
+      {
+        path: "forgot-password",
+        element: <ForgotPasswordForm />,
+      },
+
+      {
+        path: "reset-password",
+        element: <ResetPasswordForm />,
       },
       {
         path: "registerCompetitor",
@@ -86,6 +100,10 @@ export const routes: RouteObject[] = [
         element: <ServerError />,
       },
       {
+        path: "payment-success",
+        element: <PaymentSuccessPage />,
+      },
+      {
         // path: "/dashboard",
         // element: (
         //   <ProtectedRoute>
@@ -93,6 +111,7 @@ export const routes: RouteObject[] = [
         //   </ProtectedRoute>
         // ),
       },
+
       { path: "*", element: <Navigate replace to="/not-found" /> },
     ],
   },
@@ -105,7 +124,11 @@ export const routes: RouteObject[] = [
     ),
     children: [
       {
-        path: "/admin/dashboard/upload",
+        path: "/admin/dashboard/list",
+        element: <DashboardListRaces />,
+      },
+      {
+        path: "/admin/dashboard/create",
         element: <CreateRaceForm key="create" />,
       },
       {

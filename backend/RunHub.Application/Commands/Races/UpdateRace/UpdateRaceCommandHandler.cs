@@ -1,9 +1,6 @@
 ﻿using Mapster;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using RunHub.Contracts.Errors;
-using RunHub.Contracts.Exceptions;
-using RunHub.Domain.Entity;
 using RunHub.Persistence;
 
 namespace RunHub.Application.Commands.Races.UpdateRace

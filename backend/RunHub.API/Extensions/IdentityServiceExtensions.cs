@@ -23,6 +23,9 @@ namespace RunHub.API.Extensions
                 options.Password.RequireUppercase = false;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequiredLength = 4;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.AllowedForNewUsers = true;
             })
                 .AddEntityFrameworkStores<DataContext>()
                 .AddSignInManager<SignInManager<AppUser>>()
@@ -32,6 +35,9 @@ namespace RunHub.API.Extensions
             var audience = config["JWT:Audience"];
             var tokenKey = config.GetSection("JWT:SigningKey").Value;
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKey));
+
+            services.Configure<DataProtectionTokenProviderOptions>(opt => opt.TokenLifespan = TimeSpan.FromHours(3)); // Adjust according to need
+
 
             services.AddAuthentication(options =>
             {
@@ -45,12 +51,13 @@ namespace RunHub.API.Extensions
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = true,
+                    ValidateIssuer = false,
                     ValidIssuer = issuer,
-                    ValidateAudience = true,
+                    ValidateAudience = false,
                     ValidAudience = audience,
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = key
+                    IssuerSigningKey = key,
+                    ValidateLifetime = true,
                 };
             });
 
@@ -62,10 +69,11 @@ namespace RunHub.API.Extensions
                 });
             });
 
+            services.Configure<DataProtectionTokenProviderOptions>(opt => opt.TokenLifespan = TimeSpan.FromHours(3)); // Adjust according to need
+
             services.AddTransient<IAuthorizationHandler, IsCreatorRequirementHandler>();
 
             services.AddScoped<ITokenService, TokenService>();
-
 
             return services;
         }

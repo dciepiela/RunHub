@@ -1,6 +1,5 @@
 import { observer } from "mobx-react-lite";
 import { Link } from "react-router-dom";
-import { DistanceAttendee } from "../../../../app/models/distanceAttendee";
 import { DistanceDto } from "../../../../app/models/distance";
 import { useState } from "react";
 import {
@@ -20,21 +19,11 @@ export default observer(function AttendeesList({ attendees, distance }: Props) {
   const [currentPage, setCurrentPage] = useState(1);
   const attendeesPerPage = 10;
 
-  // if (!distance || !distance.name) {
-  //   return <div>Błąd: brak nazwy dystansu.</div>;
-  // }
-
-  // if (!attendees || attendees.length === 0 || !Array.isArray(attendees)) {
-  //   return (
-  //     <div className="bg-white shadow-md rounded-md p-4 mx-auto max-w-sm mt-10 ">
-  //       <p>Nikt jeszcze nie jest zapisany na ten dystans {distance.name}.</p>
-  //     </div>
-  //   );
-  // }
-
   if (!attendees.length) {
     return (
-      <div>Nikt jeszcze nie jest zapisany na ten dystans {distance.name}.</div>
+      <div className="mt-2 flex justify-center">
+        Nikt jeszcze nie jest zapisany na ten dystans {distance.name}.
+      </div>
     );
   }
 
@@ -75,7 +64,7 @@ export default observer(function AttendeesList({ attendees, distance }: Props) {
                   Rok urodzenia
                 </th>
                 <th className="px-4 py-2 border hidden sm:table-cell">Płeć</th>
-                <th className="px-4 py-2 border">Punkty</th>
+                {/* <th className="px-4 py-2 border">Punkty</th> */}
               </tr>
             </thead>
             <tbody className="mx-auto">
@@ -87,20 +76,20 @@ export default observer(function AttendeesList({ attendees, distance }: Props) {
                   <td className="px-4 py-2 border">
                     <Link
                       to={`/profiles/${attendee.userName}`}
-                      className="flex  gap-2"
+                      className="flex gap-2"
                     >
                       <img
-                        src={"https://via.placeholder.com/48"}
+                        src={attendee.image || "https://via.placeholder.com/48"}
                         alt="User Avatar"
                         className="w-8 h-8 rounded-full mr-2"
                       />
-                      <span className="text-gray-800 font-semibold">
-                        {attendee.firstName || "ssss"} {attendee.lastName}
+                      <span className="text-gray-800 font-semibold flex items-center">
+                        {attendee.firstName} {attendee.lastName}
                       </span>
                     </Link>
                   </td>
                   <td className="px-4 py-2 border hidden sm:table-cell">
-                    {attendee.userName}
+                    {attendee.club || "Brak klubu"}
                   </td>
                   <td className="px-4 py-2 border hidden sm:table-cell">
                     {attendee.dateOfBirth}
@@ -108,9 +97,9 @@ export default observer(function AttendeesList({ attendees, distance }: Props) {
                   <td className="px-4 py-2 border hidden sm:table-cell">
                     {attendee.gender}
                   </td>
-                  <td className="px-4 py-2 text-green-500 font-semibold border">
+                  {/* <td className="px-4 py-2 text-green-500 font-semibold border">
                     {attendee.userName}
-                  </td>
+                  </td> */}
                 </tr>
               ))}
             </tbody>

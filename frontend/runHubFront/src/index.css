@@ -10,6 +10,10 @@ body{
     flex-direction: column;
 }
 
+.react-datepicker-wrapper{
+    width:100%;
+}
+
 @layer components{
     button{
         @apply text-deepBlack border bg-lightYellow
@@ -22,7 +26,6 @@ body{
         @apply p-4 ;
     }
     
-
     button{
         @apply text-deepBlack border bg-lightYellow
         hover:bg-transparent hover:text-lightYellow rounded-md 
@@ -30,5 +33,6 @@ body{
 
     .no-hover {
         @apply text-deepBlack border bg-lightYellow rounded-md !important;
+        
       }
 }

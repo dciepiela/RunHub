@@ -1,17 +1,15 @@
-import { makeAutoObservable, reaction, runInAction } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 import { RaceDto, RaceFormValues } from "../models/race";
 import agent from "../api/agent";
 import { Pagination, PagingParams } from "../models/pagination";
 import { store } from "./store";
-import { Profile } from "../models/profile";
+import { Photo, Profile } from "../models/profile";
 import { DistanceDto } from "../models/distance";
-import { SponsorDto } from "../models/sponsor";
 import { router } from "../routes/Router";
 
 export default class RaceStore {
     raceRegistry = new Map<number, RaceDto>();
     distanceRegistry = new Map<number, DistanceDto>();
-    // races: RaceDto[] = [];
     selectedRace: RaceDto | undefined = undefined;
     selectedDistance: DistanceDto | undefined = undefined;
 
@@ -24,16 +22,6 @@ export default class RaceStore {
 
     constructor() {
         makeAutoObservable(this);
-        reaction(
-          () => this.selectedRace?.distances.map(d => d.distanceId),
-          (distanceIds) => {
-              if (distanceIds) {
-                  console.log("Distances updated: ", distanceIds);
-                  // Perform any additional actions here
-                  // For example, you could re-fetch the race details to ensure the UI is in sync with the backend
-              }
-          }
-      );
     }
 
     setPagingParams = (pagingParams: PagingParams) => {
@@ -47,10 +35,40 @@ export default class RaceStore {
       return params;
     }
 
+    // get racesByDate(){
+    //   return Array.from(this.raceRegistry.values()).sort((a,b) => Date.parse(a.startDateRace!) - Date.parse(b.startDateRace!));
+    // }
+    
     get racesByDate(){
-      return Array.from(this.raceRegistry.values()).sort((a,b) => Date.parse(a.startDateRace!) - Date.parse(b.startDateRace!));
+      return Array.from(this.raceRegistry.values()).sort((a,b) => a.startDateRace!.getTime() - b.startDateRace!.getTime());
     }
 
+    get races(){
+      return Array.from(this.raceRegistry.values());
+    }
+
+    get hostRaces(){
+      const user = store.userStore.user;
+
+      if (!user) return []; // Return empty array if user is not logged in
+
+      // Filter races where the current user is the host
+      console.log(user.userName)
+      return this.races.filter(race => race.hostUsername == user.userName);
+    }
+    
+    get threeRaces() {
+      // Sort races by start date in ascending order
+      const sortedRaces = this.racesByDate;
+  
+      // If there are fewer than 3 races, return all races
+      if (sortedRaces.length <= 3) {
+          return sortedRaces;
+      }
+  
+      // Return the first three races
+      return sortedRaces.slice(0, 3);
+  }
 
     loadRaces = async () => {
         this.loadingInitial = true;
@@ -62,9 +80,7 @@ export default class RaceStore {
             result.data.forEach(race => {
                 this.setRace(race);
             });
-            // this.raceRegistry = races.data;
             this.setPagination(result.pagination);
-            // this.pagination = races.paginationParams;
             this.loadingInitial = false;
           });
         } catch (error) {
@@ -79,6 +95,25 @@ export default class RaceStore {
       this.pagination = pagination;
     }
 
+    loadHostingRaces = async() =>{
+      this.loadingInitial = true;
+      try {
+        const hostingRaces = await agent.Races.allHostingRaces();
+        runInAction(() =>{
+          this.raceRegistry.clear();
+          hostingRaces.forEach(race => {
+            this.setRace(race);
+        });
+        this.loadingInitial =false;
+        })
+      } catch (error) {
+        console.log(error);
+          runInAction(() => {
+            this.loadingInitial = false;
+          });
+      }
+    }
+
     loadRace = async (id:number)=>{
         let race = this.getRace(id);
         if(race){
@@ -88,8 +123,9 @@ export default class RaceStore {
             this.loadingInitial = true;
             try {
                 race = await agent.Races.details(id);
-                this.setRace(race!);
                 runInAction(() =>{
+                    this.raceRegistry.clear();
+                    this.setRace(race!); 
                     this.selectedRace = race;
                     this.loadingInitial = false;
                 })
@@ -103,97 +139,133 @@ export default class RaceStore {
         }
     }
 
-    // private setRace = (race:RaceDto) =>{
-    //     const user = store.userStore.user;
-    //     if(user){
-    //         race.distances?.forEach(distance => {
-    //             distance.isGoing = distance.distanceAttendees?.some(
-    //                 a => a.userName === user.userName
-    //             ) ?? false;
-    //         })
-
-    //         const hostProfile = new Profile({
-    //             userName: race.hostUsername
-    //         })
-    //         race.isHost = race.hostUsername === user.userName;
-    //         race.host = hostProfile
-
-    //         // console.log(race.isHost)
-    //         // race.host = race.hostUsername;
-    //     }
-    //     // race.startDateRace = new Date(race.startDateRace!);
-
-    //     this.raceRegistry.set(race.raceId!, race)
-    // }
-
     private setRace = (race: RaceDto) => {
       const user = store.userStore.user;
-      
-      // Check if the race has an ID before trying to set it in the registry
-      if (race.raceId !== undefined) {
-          if (user) {
-              // Assuming distances and attendees are optional, check if they exist before trying to access them
-              race.distances?.forEach(distance => {
-                  distance.isGoing = distance.distanceAttendees?.some(a => a.userName === user.userName) ?? false;
-              });
-  
-              // Create a host profile and determine if the current user is the host
-              const hostProfile = new Profile({
-                  userName: race.hostUsername,
-                  // Include other necessary properties for the Profile
-              });
-              race.isHost = race.hostUsername === user.userName;
-              race.host = hostProfile;
-          }
-  
-          // Add the race to the registry
-          this.raceRegistry.set(race.raceId, race);
-      } else {
-          // Handle the case where raceId is undefined (e.g., log an error or throw an exception)
-          console.error('Attempting to set a race without an ID:', race);
+
+      if (!race.raceId) {
+        return;
       }
+
+      if(user){
+        race.isHost = race.hostUsername === user?.userName;
+
+        race.host = new Profile({
+        userName: race.host?.userName,
+        displayName: user?.displayName,
+        firstName: user?.firstName,
+        lastName: user?.lastName,
+        gender: user?.gender,
+        dateOfBirth: user?.dateOfBirth,
+        club: user?.club,
+        image: user?.image
+      });
+      }
+
+      race.registrationEndDate = new Date(race.registrationEndDate!);
+      race.startDateRace = new Date(race.startDateRace!);
+      race.endDateRace = new Date(race.endDateRace!);
+      this.selectedRace = race;
+      this.raceRegistry.set(race.raceId, race);
   }
 
     private getRace = (id:number)=>{
         return this.raceRegistry.get(id);
     }
-    
 
-
-    createRace = async (race: RaceFormValues): Promise<number> => {
+    createRace = async (race: RaceFormValues) : Promise<number> => {
+      const user = store.userStore.user;
       try {
-        // Send the race data to the backend and expect a new race ID in response
         const newRaceId = await agent.Races.create(race);
+        const newRace = new RaceDto(race);
+        newRace.hostUsername = user!.userName!;
+        this.setRace(newRace);
         runInAction(() => {
-          // Create a full RaceDto object including the new race ID
-          const newRaceDto: RaceDto = {
-            ...race,
-            raceId: newRaceId
-            // Add additional properties or adjustments as necessary
-          };
-          this.setRace(newRaceDto);
-          this.selectedRace = newRaceDto;
+
+          this.selectedRace = newRace;
+          router.navigate(`/races/${newRaceId}`)
         });
-        return newRaceId; // Return the new race ID for navigation
+        return newRaceId;
       } catch (error) {
         console.error('Error creating race:', error);
-        throw error; // Rethrow the error to be handled in handleFormSubmit
+        throw error;
       }
     };
-    
+
+    uploadPhoto = async (raceId: number, file: Blob) => {
+      this.loading = true;
+      try {
+          const response = await agent.Races.uploadPhoto(raceId, file);
+          const photo = response.data as Photo;
+          runInAction(() => {
+            if (this.selectedRace && this.selectedRace.raceId === raceId) {
+              this.selectedRace.photo = photo;
+              this.setRace({...this.selectedRace});
+          }
+              this.loading = false;
+          });
+      } catch (error) {
+          console.error(error);
+          runInAction(() => this.loading = false);
+      }
+  };
+
+  deletePhoto = async (photoId: string) => {
+    this.loading = true;
+    try {
+        await agent.Races.deletePhoto(photoId);
+        runInAction(() => {
+            if (this.selectedRace && this.selectedRace.photo && this.selectedRace.photo.id === photoId) {
+                this.selectedRace.photo = null;
+            }
+            this.loading = false;
+        });
+    } catch (error) {
+        runInAction(() => {
+            this.loading = false;
+            console.error(error);
+        });
+    }
+};
+
+getPhoto = async (raceId: number) => {
+  let race = this.getRace(raceId);
+  if (race && race.photo) {
+      return race.photo;
+  } else {
+      this.loadingInitial = true;
+      try {
+          race = await agent.Races.details(raceId);
+          runInAction(() => {
+              if (race) {
+                  this.setRace(race);
+              }
+              this.loadingInitial = false;
+          });
+          return race?.photo;
+      } catch (error) {
+          console.error(error);
+          runInAction(() => {
+              this.loadingInitial = false;
+          });
+          return null;
+      }
+  }
+};
+
+  setImage = (image: string) => {
+    if(this.selectedRace){
+        this.selectedRace.photo!.url = image;
+    }
+}
     updateRace = async (race: RaceFormValues) => {
       try {
         await agent.Races.update(race);
         runInAction(() => {
           if (race.raceId) {
-            // Find the existing race and update it
-            let existingRace = this.raceRegistry.get(race.raceId);
+            const existingRace = this.raceRegistry.get(race.raceId);
             if (existingRace) {
-              // Update distances - you might need a more complex logic here
-              // if distances have IDs
               existingRace.distances = race.distances;
     
-              // Update the rest of the race details
               Object.assign(existingRace, race);
               this.raceRegistry.set(race.raceId, existingRace);
               this.selectedRace = existingRace;
@@ -201,12 +273,29 @@ export default class RaceStore {
           }
         });
       } catch (error) {
-        console.error('Error updating race:', error);
+        console.error(error);
         throw error;
       }
     };
 
-    deleteRace = async (id:string) =>{
+
+    updateRace2 = async (raceId: number, raceData: any) => {
+      try {
+          const updatedRace = await agent.Races.updateRace2(raceId, raceData);
+          runInAction(() => {
+              if (this.raceRegistry.has(raceId)) {
+                  const existingRace = this.raceRegistry.get(raceId);
+                  this.distanceRegistry.set(raceId, { ...existingRace, ...updatedRace });
+              }
+          });
+      } catch (error) {
+          console.error(error);
+          throw error;
+      }
+  };
+  
+  
+    deleteRace = async (id:number) =>{
         try {
             await agent.Races.delete(id);
             runInAction(() => {
@@ -217,7 +306,6 @@ export default class RaceStore {
         }
     }
 
-    //distance
     selectDistance = (distanceId: number) => {
         if (!this.selectedRace) return;
       
@@ -227,190 +315,109 @@ export default class RaceStore {
         });
       };
 
-      // Update attendance method
-      updateAttendance = async (distanceId: number) => {
-        const user = store.userStore.user;
-        // if (!user) return;
-        this.loading = true;
-        try {
-          // Toggling attendance on the server
-          await agent.Distances.attend(this.selectedRace!.raceId!, distanceId);
-          runInAction(() => {
-            // Using selectDistance to set the selected distance in the store
-            this.selectDistance(distanceId);
-            
-            // Ensure selectedDistance is now set and matches the distanceId
-            if (this.selectedDistance?.isGoing && this.selectedDistance.distanceId === distanceId) {
-              // Toggle isGoing and update the distanceAttendees list accordingly
-              const isGoing = this.selectedDistance.isGoing;
-              if (isGoing) {
-                // User is currently attending, remove them from the list
-                this.selectedDistance.distanceAttendees = this.selectedDistance.distanceAttendees?.filter(a => a.userName !== user?.userName);
-              } else {
-                // User is not currently attending, add them to the list
-                const attendeeProfile = new Profile(user!);
-                this.selectedDistance?.distanceAttendees?.push(attendeeProfile);
-                this.selectedDistance.isGoing = true;
-              }
-              // Toggle the isGoing state
-            //   this.raceRegistry.set(this.selectedRace!.raceId!, this.selectedRace!);
-              this.distanceRegistry.set(this.selectedDistance!.distanceId, this.selectedDistance!)
-
-      
-              // Trigger the observer by updating the raceRegistry
-              if (this.selectedRace) {
-                this.raceRegistry.set(this.selectedRace.raceId!, {...this.selectedRace});
-              }
-            }
-            this.loading = false;
-          });
-
-        } catch (error) {
-          runInAction(() => {
-            this.loading = false;
-          });
-          console.error("Failed to update attendance", error);
-        }
-      };
-
-
-      // updateAttendance2 = async (distanceId: number) => {
-      //   const user = store.userStore.user;
+      // updateDistance = async (raceId: number, distanceId: number, distanceData: DistanceDto) => {
       //   this.loading = true;
       //   try {
-      //       await agent.Distances.attend(this.selectedRace!.raceId, distanceId);
-      //       runInAction(() => {
-      //           if(this.selectedDistance?.isGoing){
-      //               this.selectedDistance.distanceAttendees = 
-      //                   this.selectedDistance.distanceAttendees?.filter(a => a.userName != user?.userName);
-      //               this.selectedDistance.isGoing = false;
-      //           }else{
-      //               const attendee = new Profile(user!);
-      //               this.selectedDistance?.distanceAttendees?.push(attendee);
-      //               this.selectedDistance!.isGoing = true;
-      //           }
-      //           this.distanceRegistry.set(this.selectedDistance!.distanceId, this.selectedDistance!);
-      //       })
+      //     await agent.Races.updateDistance(raceId, distanceId, distanceData);
+      //     runInAction(() => {
+      //       // Assuming you want to update the local state upon a successful API call
+      //       let race = this.raceRegistry.get(raceId);
+      //       if (race) {
+      //         const distances = race.distances!.map(d => 
+      //           d.distanceId === distanceId ? {...d, ...distanceData} : d
+      //         );
+      //         race = {...race, distances}; // Update race with new distances array
+      //         this.raceRegistry.set(raceId, race); // Update the race in the registry
+      //         if (this.selectedRace?.raceId === raceId) {
+      //           this.selectedRace = race; // Update selectedRace if it's the one being edited
+      //         }
+      //       }
+      //       this.loading = false;
+      //     });
       //   } catch (error) {
-      //       console.log(error);
-      //   }finally{
-      //       runInAction(() => this.loading = false);
+      //     console.error('Failed to update distance', error);
+      //     runInAction(() => this.loading = false);
+      //     throw error; // rethrow if you need further error handling by the caller
       //   }
       // };
 
-
-
-      //update distance:
-      updateDistance = async (raceId: number, distanceId: number, distanceData: DistanceDto) => {
-        this.loading = true;
-        try {
-          await agent.Races.updateDistance(raceId, distanceId, distanceData);
-          runInAction(() => {
-            // Assuming you want to update the local state upon a successful API call
-            let race = this.raceRegistry.get(raceId);
-            if (race) {
-              const distances = race.distances!.map(d => 
-                d.distanceId === distanceId ? {...d, ...distanceData} : d
-              );
-              race = {...race, distances}; // Update race with new distances array
-              this.raceRegistry.set(raceId, race); // Update the race in the registry
-              if (this.selectedRace?.raceId === raceId) {
-                this.selectedRace = race; // Update selectedRace if it's the one being edited
-              }
-            }
-            this.loading = false;
-          });
-        } catch (error) {
-          console.error('Failed to update distance', error);
-          runInAction(() => this.loading = false);
-          throw error; // rethrow if you need further error handling by the caller
-        }
-      };
-
       //updateSponsor
-      updateSponsor = async (raceId: number, sponsorId: number, sponsorData: SponsorDto) => {
-        this.loading = true;
-        try {
-            // Assuming an agent method exists that can update sponsor details
-            await agent.Races.updateSponsor(raceId, sponsorId, sponsorData);
-            runInAction(() => {
-                // Find the race and update the specific sponsor in the race's sponsors array
-                let race = this.raceRegistry.get(raceId);
-                if (race) {
-                    const sponsors = race.sponsors!.map(s => 
-                        s.sponsorId === sponsorId ? {...s, ...sponsorData} : s
-                    );
-                    race = {...race, sponsors}; // Update race with new sponsors array
-                    this.raceRegistry.set(raceId, race); // Update the race in the registry
-                    if (this.selectedRace?.raceId === raceId) {
-                        this.selectedRace = race; // Update selectedRace if it's the one being edited
-                    }
-                }
-                this.loading = false;
-            });
-        } catch (error) {
-            console.error('Failed to update sponsor', error);
-            runInAction(() => this.loading = false);
-            throw error; // rethrow if you need further error handling by the caller
-        }
-    };
+    //   updateSponsor = async (raceId: number, sponsorId: number, sponsorData: SponsorDto) => {
+    //     this.loading = true;
+    //     try {
+    //         // Assuming an agent method exists that can update sponsor details
+    //         await agent.Races.updateSponsor(raceId, sponsorId, sponsorData);
+    //         runInAction(() => {
+    //             // Find the race and update the specific sponsor in the race's sponsors array
+    //             let race = this.raceRegistry.get(raceId);
+    //             if (race) {
+    //                 const sponsors = race.sponsors!.map(s => 
+    //                     s.sponsorId === sponsorId ? {...s, ...sponsorData} : s
+    //                 );
+    //                 race = {...race, sponsors}; // Update race with new sponsors array
+    //                 this.raceRegistry.set(raceId, race); // Update the race in the registry
+    //                 if (this.selectedRace?.raceId === raceId) {
+    //                     this.selectedRace = race; // Update selectedRace if it's the one being edited
+    //                 }
+    //             }
+    //             this.loading = false;
+    //         });
+    //     } catch (error) {
+    //         console.error('Failed to update sponsor', error);
+    //         runInAction(() => this.loading = false);
+    //         throw error; // rethrow if you need further error handling by the caller
+    //     }
+    // };
 
 
-    // Add a method in RaceStore for handling payments
-// updateAttendanceWithPayment = async (raceId, distanceId, stripeToken, amount) => {
+// registerAttendeeWithPayment = async (raceId: number, distanceId: number, stripeToken: string, amount: number) => {
+//   const user = store.userStore.user;
 //   this.loading = true;
 //   try {
-//     // This should match your backend API route for payment
-//     await agent.Distances.attendWithPayment(raceId, distanceId, { stripeToken, amount });
-//     runInAction(() => {
-//       this.selectDistance(distanceId);
-//       if (this.selectedDistance) {
-//         this.selectedDistance.isGoing = true;
-//         this.distanceRegistry.set(distanceId, this.selectedDistance);
+//       if (!distanceId) {
+//           throw new Error("No selected distance available for registration.");
 //       }
-//       this.loading = false;
-//     });
+
+//       const paymentDetails = { stripeToken, amount };
+
+//       await agent.Distances.attendWithPayment(raceId, distanceId, paymentDetails);
+      
+//       runInAction(() => {
+//           if (this.selectedDistance) {
+//               if (this.selectedDistance.isGoing) {
+//                   this.selectedDistance.distanceAttendees = this.selectedDistance.distanceAttendees?.filter(a => a.userName !== user?.userName);
+//                   this.selectedDistance.isGoing = false;
+//               } else {
+//                   const attendee = new Profile(user!);
+//                   this.selectedDistance.distanceAttendees = [...this.selectedDistance.distanceAttendees || [], attendee];
+//                   this.selectedDistance.isGoing = true;
+//               }
+//               this.distanceRegistry.set(distanceId, this.selectedDistance);
+//           }
+//       });
+      
+//       router.navigate('/payment-success', { state: { message: 'Płatność pomyślna, zostałeś zapisany na bieg!' } });
 //   } catch (error) {
-//     runInAction(() => this.loading = false);
-//     console.error("Payment or attendance update failed", error);
+//       console.error("Error during payment registration:", error);
+//   } finally {
+//       runInAction(() => this.loading = false);
 //   }
 // }
 
-registerAttendeeWithPayment = async (raceId:number, distanceId:number, stripeToken:string, amount:number) => {
+updateRaceStatus = async (raceId:number, status:number) => {
   try {
-      this.loading = true;
-      const paymentDetails = { stripeToken, amount };
-      const attendee = await agent.Distances.attendWithPayment(raceId, distanceId, paymentDetails);
-      runInAction(() => {
-          const race = this.raceRegistry.get(raceId);
-          if (race) {
-            if(race.distances){
-              const distanceIndex = race.distances.findIndex(d => d.distanceId === distanceId);
-              if (distanceIndex !== -1) {
-                // Decrease available slots by 1
-                race.distances[distanceIndex].availableSlots -= 1;
-                // Add new attendee to the distanceAttendees list
-                race.distances[distanceIndex].distanceAttendees!.push({
-                    // Assuming the backend returns the full attendee object
-                    ...attendee,
-                    isPaid: true,
-                    paidDate: new Date().toISOString() // Assuming payment date is now
-                });
-                console.log(amount);
-                // Update the race in the registry to trigger observers
-                this.raceRegistry.set(raceId, race);
-            }
-            }
-          }
-          this.loading = false;
-          router.navigate('/payment-success', { state: { message: 'Płatność pomyślna, zostałeś zapisany na bieg!' } });
-        });
+    await agent.Races.changeStatus(raceId, status);
+    runInAction(() => {
+      const race = this.raceRegistry.get(raceId);
+      if (race) {
+        race.status! = status;
+        this.raceRegistry.set(raceId, race);
+      }
+    });
   } catch (error) {
-      runInAction(() => {
-          this.loading = false;
-          console.error("Failed to register attendee with payment", error);
-      });
+    console.error('Failed to update race status:', error);
+    throw error;
   }
-}
+};
     
 }

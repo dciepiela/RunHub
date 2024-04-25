@@ -31,10 +31,10 @@ namespace RunHub.Infrastructure.Email
 
         public async Task SendPasswordResetEmailAsync(string userEmail, string resetToken)
         {
-            var emailSubject = "Reset Your Password";
+            var emailSubject = "Zresetuj swoje hasło";
             // Ensure you use the correct domain and protocol (http or https)
-            var resetLink = $"http://localhost:5173/reset-password?token={resetToken}&email={userEmail}";
-            var message = $"Please reset your password by clicking on this link: <a href='{resetLink}'>{resetLink}</a>";
+            var resetLink = $"http://localhost:3000/reset-password?token={resetToken}&email={userEmail}";
+            var message = $"Proszę zresetuj swoje hasło za pomocą linku: <a href='{resetLink}'>{resetLink}</a>";
 
             await SendEmailAsync(userEmail, emailSubject, message);
         }

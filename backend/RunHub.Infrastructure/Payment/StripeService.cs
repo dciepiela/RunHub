@@ -15,68 +15,49 @@ namespace RunHub.Infrastructure.Payment
             _logger = logger;
         }
 
-        public async Task<string> CreateCustomerAsync(string token, string email, string firstName, string lastName)
+        public async Task<string> CreateOrUpdateCustomerAsync(string stripeToken, string email, string firstName, string lastName)
         {
             try
             {
-                // First, try to retrieve the customer based on the email
-                var existingCustomer = await RetrieveCustomerByEmailAsync(email);
+                var options = new CustomerCreateOptions
+                {
+                    Email = email,
+                    Name = $"{firstName} {lastName}",
+                    Source = stripeToken // This might be updated based on Stripe API changes to use PaymentMethod
+                };
 
-                if (existingCustomer != null)
-                {
-                    // If the customer already exists, return their ID
-                    return existingCustomer.Id;
-                }
-                else
-                {
-                    // If the customer doesn't exist, create a new one
-                    var options = new CustomerCreateOptions
-                    {
-                        Email = email,
-                        Name = $"{firstName} {lastName}",
-                        Source = token
-                    };
-                    var service = new CustomerService();
-                    var customer = await service.CreateAsync(options);
-                    return customer.Id;
-                }
+                var service = new CustomerService();
+                Customer customer = await service.CreateAsync(options);
+                return customer?.Id;
             }
             catch (StripeException ex)
             {
-                _logger.LogError($"Stripe error on creating or retrieving customer: {ex.Message}");
+                _logger.LogError(ex, "Error creating/updating Stripe customer");
                 throw;
             }
         }
 
-        public async Task<bool> ProcessPaymentAsync(string token, decimal amount, string email, string firstName, string lastName, string currency = "pln")
+        public async Task<bool> ChargeCustomerAsync(string customerId, decimal amount, string description)
         {
             try
             {
-                var customerId = await CreateCustomerAsync(token, email, firstName, lastName);
                 var options = new ChargeCreateOptions
                 {
-                    Amount = (long)(amount * 100),
-                    Currency = currency,
-                    Customer = customerId,
-                    Description = "Payment for registration"
+                    Amount = (long)(amount * 100), // convert amount to cents
+                    Currency = "usd",
+                    Description = description,
+                    Customer = customerId
                 };
 
                 var service = new ChargeService();
-                var charge = await service.CreateAsync(options);
+                Charge charge = await service.CreateAsync(options);
                 return charge.Paid;
             }
             catch (StripeException ex)
             {
-                _logger.LogError($"Stripe error on processing payment: {ex.Message}");
-                return false;
+                _logger.LogError(ex, "Error charging Stripe customer");
+                throw;
             }
-        }
-
-        private async Task<Customer> RetrieveCustomerByEmailAsync(string email)
-        {
-            var service = new CustomerService();
-            var customers = await service.ListAsync(new CustomerListOptions { Email = email });
-            return customers.FirstOrDefault();
         }
     }
 }

@@ -14,12 +14,12 @@ const CustomInput: React.FC<CustomInputProps> = ({ label, name, ...props }) => {
 
   return (
     <>
-      <label className="block text-gray-700">{label}</label>
+      <label className="block font-bold text-deepBlack">{label}</label>
       <input
         {...field}
         {...props}
         className={
-          "mt-1 p-2 w-full border border-gray-300 rounded-md " +
+          "w-full px-4 py-2 border border-black rounded-md focus:outline-none focus:ring-2 focus:ring-lightYellow focus:border-none" +
           (meta.touched && meta.error ? "input-error" : "")
         }
       />

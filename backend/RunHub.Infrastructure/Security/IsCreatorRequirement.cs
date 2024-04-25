@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using RunHub.Persistence;
 using System.Security.Claims;
 
@@ -15,48 +16,33 @@ namespace RunHub.Infrastructure.Security
         private readonly DataContext _dbContext;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
+
         public IsCreatorRequirementHandler(DataContext dbContext, IHttpContextAccessor httpContextAccessor)
         {
             _dbContext = dbContext;
             _httpContextAccessor = httpContextAccessor;
         }
-        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, IsCreatorRequirement requirement)
+        protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, IsCreatorRequirement requirement)
         {
             var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (userId == null)
-            {
-                return Task.CompletedTask;
-            }
+            if (userId == null) return;
 
             var request = _httpContextAccessor.HttpContext?.Request.Path.Value;
+            if (string.IsNullOrEmpty(request)) return;
 
-            
-            var raceIdString = request.TrimStart('/').Split('/')[2];
+            var segments = request.TrimStart('/').Split('/');
+            if (segments.Length < 3 || !int.TryParse(segments[2], out int raceId)) return;
 
+                var isCreator = await _dbContext.Races
+                    .AsNoTracking()
+                    .Where(r => r.RaceId == raceId)
+                    .Select(r => r.CreatorAppUser.Id)
+                    .SingleOrDefaultAsync() == userId;
 
-            if(!int.TryParse(raceIdString, out int raceId))
-            {
-                return Task.CompletedTask;
-            }
-
-
-            var race = _dbContext.Races
-                .AsNoTracking()
-                .Include(r => r.CreatorAppUser)
-                .SingleOrDefault(r => r.RaceId == raceId);
-
-            if (race == null)
-            {
-                return Task.CompletedTask;
-            }
-
-            if (race.CreatorAppUser != null && race.CreatorAppUser.Id == userId)
+            if (isCreator)
             {
                 context.Succeed(requirement);
             }
-
-            return Task.CompletedTask;
         }
     }
 }

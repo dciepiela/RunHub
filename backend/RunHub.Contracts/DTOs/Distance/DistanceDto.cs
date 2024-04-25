@@ -1,5 +1,6 @@
 ﻿using RunHub.Contracts.DTOs.DistanceAttendee;
-using RunHub.Domain.Entity;
+using RunHub.Contracts.DTOs.Result;
+using RunHub.Domain.Enums;
 
 namespace RunHub.Contracts.DTOs.Distance
 {
@@ -12,7 +13,14 @@ namespace RunHub.Contracts.DTOs.Distance
         public int AvailableSlots { get; set; }
         public int TotalSlots { get; set; }
         public decimal Price { get; set; }
+        public string HostUsername { get; set; }
+        public int RegisteredUser {  get; set; }
+        public DistanceStatus Status { get; set; } = DistanceStatus.Active;
+        public bool IsReadyToShow { get; set; }
+        public DateTime Date { get; set; }
+
         public ICollection<DistanceAttendeeDto> DistanceAttendees { get; set; }
+        public ICollection<ResultDto> Results { get; set; }
     }
 
     //// Relation

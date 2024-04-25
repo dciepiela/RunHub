@@ -1,5 +1,6 @@
 ﻿using Mapster;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using RunHub.Contracts.Errors;
 using RunHub.Persistence;
 
@@ -22,7 +23,8 @@ namespace RunHub.Application.Commands.Races.UpdateRace
             //    .FirstOrDefaultAsync(x => x.RaceId == request.RaceId, cancellationToken);
 
             var race = await _context.Races
-                .FindAsync(request.RaceDto.RaceId);
+                .Include(r => r.Address)
+                .FirstOrDefaultAsync(r=> r.RaceId == request.RaceDto.RaceId);
 
             if (race == null) return null;
 

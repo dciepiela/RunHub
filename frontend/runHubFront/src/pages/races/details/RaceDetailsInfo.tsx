@@ -1,35 +1,26 @@
 import { Link } from "react-router-dom";
-import MyFormattedDate from "../../../app/common/MyFormattedDate";
 import { RaceDto } from "../../../app/models/race";
+import { pl } from "date-fns/locale";
+import { format } from "date-fns";
+import { observer } from "mobx-react-lite";
 
 interface RaceDetailsInfoProps {
   race: RaceDto;
 }
-function RaceDetailsInfo({ race }: RaceDetailsInfoProps) {
-  // const [registeredDistances, setRegisteredDistances] = useState<number[]>([]);
-
-  // const handleRegister = (distanceId: number) => {
-  //   // Check if the distance is already registered
-  //   if (!registeredDistances.includes(distanceId)) {
-  //     // Add the distanceId to the registered distances list
-  //     setRegisteredDistances([...registeredDistances, distanceId]);
-  //     // Implement any other registration logic here, such as API calls, etc.
-  //     console.log(`Registered for distance with ID: ${distanceId}`);
-  //   } else {
-  //     console.log(`Already registered for distance with ID: ${distanceId}`);
-  //   }
-  // };
+export default observer(function RaceDetailsInfo({
+  race,
+}: RaceDetailsInfoProps) {
   return (
     <div className="w-full my-10">
       <div className="max-w-[1240px] mx-auto">
         <div className="text-center">
           {race.isHost && (
             <div>
-              <h2 className="text-5xl mb-8 font-bold text-green-500">
-                Hostujesz to wydarzenie
+              <h2 className="text-2xl mb-2 font-bold text-green-500">
+                Jesteś organizatorem tego wydarzenia
               </h2>
-              <Link to={`/admin/dashboard/edit/${race.raceId}`}>
-                <button className="py-3 px-6 mx-auto mt-16 flex uppercase">
+              <Link to={`/admin/dashboard/races/edit/${race.raceId}`}>
+                <button className="px-2 py-2 mx-auto uppercase mb-2">
                   Edytuj
                 </button>
               </Link>
@@ -44,45 +35,64 @@ function RaceDetailsInfo({ race }: RaceDetailsInfoProps) {
         <div className="grid md:grid-cols-3 gap-1 px-2 text-center">
           <div className="border py-8 rounded-xl shadow-xl">
             <p className="text-3xl font-bold text-lightYellow">Informacje</p>
-            <p className="text-mediumGray-400 mt-2">{race.name}</p>
             <p className="text-mediumGray-400 mt-2">
+              Nazwa: <span className="font-bold"> {race.name}</span>
+            </p>
+            <p className="text-mediumGray-400 mt-2 ">
               Koniec rejestracji:{" "}
-              <MyFormattedDate
-                className="font-bold"
-                dateString={race.registrationEndDate}
-              />
+              <span className="font-bold">
+                {format(
+                  race.registrationEndDate!,
+                  "dd MMM yyyy', godz.' HH:mm",
+                  {
+                    locale: pl,
+                  }
+                )}
+              </span>
             </p>
             <p className="text-mediumGray-400 mt-2">
-              Organizator: <b>{race.host?.userName}</b>
+              Organizator: <b>{race.hostUsername}</b>
             </p>
           </div>
           <div className="border py-8 rounded-xl shadow-xl">
             <p className="text-3xl font-bold text-lightYellow">
               Termin wydarzenia
             </p>
-            <p className="text-mediumGray-400 mt-2">
-              <MyFormattedDate
-                className="font-bold"
-                dateString={race.startDateRace}
-              />
+            <div className="text-mediumGray-400 mt-2 flex flex-col">
+              {format(race.startDateRace!, "dd MMM yyyy 'godz.' HH:mm", {
+                locale: pl,
+              })}
               <span className="mx-2">-</span>
-              <MyFormattedDate
-                className="font-bold"
-                dateString={race.endDateRace}
-              />
-            </p>
+              {format(race.endDateRace!, "dd MMM yyyy 'godz.' HH:mm", {
+                locale: pl,
+              })}
+            </div>
           </div>
           <div className="border py-8 rounded-xl shadow-xl">
             <p className="text-3xl font-bold text-lightYellow">Lokalizacja</p>
             <p className="text-mediumGray-400 mt-2">
-              {race.addressDto?.postalCode} {race.addressDto?.city},{" "}
-              {race.addressDto?.street}
+              {race.addressDto && (
+                <>
+                  <a
+                    href={`https://maps.google.com/maps?q=${encodeURIComponent(
+                      race.addressDto.postalCode +
+                        " " +
+                        race.addressDto.city +
+                        " " +
+                        race.addressDto.street
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {race.addressDto.postalCode} {race.addressDto.city},{" "}
+                    {race.addressDto.street}
+                  </a>
+                </>
+              )}
             </p>
           </div>
         </div>
       </div>
     </div>
   );
-}
-
-export default RaceDetailsInfo;
+});

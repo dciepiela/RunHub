@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RunHub.Contracts.Errors;
 using RunHub.Contracts.Exceptions;
 using RunHub.Domain.Entity;
+using RunHub.Domain.Enums;
 using RunHub.Persistence;
 using System.Linq;
 
@@ -20,16 +21,24 @@ namespace RunHub.Application.Commands.Distances.DeleteDistance
         {
             var race = await _context.Races
                 .Include(x => x.Distances)
+                   .ThenInclude(d => d.DistanceAttendees)
                 .FirstOrDefaultAsync(x => x.RaceId == request.RaceId, cancellationToken);
 
             if (race == null) return null;
 
-            var distanceToDelete = race.Distances
+            var distance = race.Distances
                 .FirstOrDefault(x => x.DistanceId == request.DistanceId);
 
-            if (distanceToDelete == null) return null;
+            if (distance == null) return null;
 
-            _context.Distances.Remove(distanceToDelete);
+            if (distance.DistanceAttendees.Any())
+            {
+                distance.Status = DistanceStatus.Cancelled;
+            }
+            else
+            {
+                _context.Distances.Remove(distance);
+            }
 
             var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 

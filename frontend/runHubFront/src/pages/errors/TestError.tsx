@@ -2,7 +2,7 @@ import axios from "axios";
 import { useState } from "react";
 
 export default function TestErrors() {
-  const [errors, setErrors] = useState(null);
+  const [, setErrors] = useState(null);
 
   function handleNotFound() {
     axios.get("buggy/not-found").catch((err) => console.log(err.response));

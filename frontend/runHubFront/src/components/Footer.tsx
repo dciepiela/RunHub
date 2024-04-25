@@ -10,6 +10,7 @@ import logo from "../assets/logo.svg";
 import { Link } from "react-router-dom";
 
 function Footer() {
+
   return (
     <footer className="w-full bg-[#F2C46D] text-[#0D0D0D] py-2 px-2 min-h-[30vh]">
       <div className="max-w-[1240px] mx-auto border-b-2 border-gray-600 py-8 flex flex-col md:flex-row items-center justify-between">
@@ -32,10 +33,7 @@ function Footer() {
             </Link>
           </li>
           <li className="mr-4">
-            <Link
-              to="/results"
-              className="text-deepBlack hover:text-darkGray"
-            >
+            <Link to="/results" className="text-deepBlack hover:text-darkGray">
               Wyniki
             </Link>
           </li>
@@ -45,10 +43,7 @@ function Footer() {
             </Link>
           </li>
           <li className="mr-4">
-            <Link
-              to="/contact"
-              className="text-deepBlack hover:text-darkGray"
-            >
+            <Link to="/contact" className="text-deepBlack hover:text-darkGray">
               Kontakt
             </Link>
           </li>

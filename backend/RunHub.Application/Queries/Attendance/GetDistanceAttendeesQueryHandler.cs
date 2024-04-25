@@ -1,15 +1,9 @@
 ﻿using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using RunHub.Application.Queries.Races.GetRaces;
-using RunHub.Contracts.DTOs.Distance;
 using RunHub.Contracts.DTOs.DistanceAttendee;
 using RunHub.Contracts.Errors;
-using RunHub.Contracts.Responses;
-using RunHub.Contracts.Responses.Attendees;
-using RunHub.Domain.Entity;
 using RunHub.Persistence;
-using System.Linq;
 
 namespace RunHub.Application.Queries.Attendance
 {

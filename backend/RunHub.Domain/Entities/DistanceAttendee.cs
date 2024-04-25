@@ -2,7 +2,6 @@
 {
     public class DistanceAttendee
     {
-        //public Guid DistanceAttendeeId { get; set; }
         public string ParticipatorId { get; set; }
         public AppUser Participator { get; set; }
 

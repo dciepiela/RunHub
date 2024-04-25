@@ -3,9 +3,6 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using RunHub.Contracts.DTOs.Race;
 using RunHub.Contracts.Errors;
-using RunHub.Contracts.Exceptions;
-using RunHub.Contracts.Responses.Races;
-using RunHub.Domain.Entity;
 using RunHub.Persistence;
 
 namespace RunHub.Application.Queries.Races.GetRaceById
@@ -22,6 +19,7 @@ namespace RunHub.Application.Queries.Races.GetRaceById
         {
             var race = await _context.Races
                 .Include(x => x.Address)
+                .Include(x => x.Photo)
                 .Include(x => x.CreatorAppUser)
                 .Include(x => x.Distances)
                     .ThenInclude(d =>d.DistanceAttendees)

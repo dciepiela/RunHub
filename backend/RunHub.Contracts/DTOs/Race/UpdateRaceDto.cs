@@ -12,7 +12,6 @@ namespace RunHub.Contracts.DTOs.Race
         public DateTime RegistrationEndDate { get; set; }
         public DateTime StartDateRace { get; set; }
         public DateTime EndDateRace { get; set; }
-        public string? Image { get; set; }
         public RaceStatus RaceStatus { get; set; }
         public RaceType RaceType { get; set; }
         public AddressDto? AddressDto { get; set; }

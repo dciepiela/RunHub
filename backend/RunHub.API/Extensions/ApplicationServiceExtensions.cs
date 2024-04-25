@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RunHub.Persistence;
 using RunHub.Application;
-//using RunHub.API.Handlers;
 using RunHub.Application.Core;
 using RunHub.API.Services;
 using Microsoft.OpenApi.Models;
@@ -63,7 +62,7 @@ namespace RunHub.API.Extensions
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials()
-                        .WithOrigins("http://localhost:3000");
+                        .WithOrigins("http://localhost:3001", "http://localhost:3000");
                         //.SetIsOriginAllowed(origin => true);
                 });
             });

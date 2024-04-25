@@ -1,6 +1,6 @@
 import { AddressDto } from "./address";
 import { DistanceDto } from "./distance";
-import { Profile } from "./profile";
+import { Photo, Profile } from "./profile";
 import { SponsorDto } from "./sponsor";
 
 
@@ -11,10 +11,10 @@ export interface IRaceDto{
   registrationEndDate: Date | null,
   startDateRace: Date | null,
   endDateRace: Date | null,
-  image?: string,
+
   raceStatus?: RaceStatus,
   raceType?: RaceType,
-  hostUsername?: string,
+  hostUsername: string,
   addressId?: number,
   addressDto?: AddressDto,
   distances?: DistanceDto[],
@@ -22,9 +22,27 @@ export interface IRaceDto{
   //extra property
   isHost?:boolean,
   host?:Profile,
+  photo?:Photo | null;
+  status:number;
 }
 
 export class RaceDto implements IRaceDto {
+  constructor(init: RaceFormValues) {
+    this.raceId = init.raceId || 0;
+    this.name = init.name || '';
+    this.description = init.description || '';
+    this.registrationEndDate = init.registrationEndDate || null;
+    this.startDateRace = init.startDateRace || null;
+    this.endDateRace = init.endDateRace || null;
+    this.hostUsername = init.hostUsername || "";
+    this.image = init.image || '';
+    this.raceStatus = init.raceStatus || 1;
+    this.raceType = init.raceType || 1;
+    this.addressDto = { ...(init.addressDto || {}) };
+    this.distances = init.distances ? init.distances.map(distance => ({ ...distance })) : [];
+    this.sponsors = init.sponsors ? init.sponsors.map(sponsor => ({ ...sponsor })) : [];
+  }
+
   raceId: number;
   name: string;
   description: string;
@@ -34,27 +52,15 @@ export class RaceDto implements IRaceDto {
   image?: string;
   raceStatus?: RaceStatus;
   raceType?: RaceType;
-  hostUsername?: string = '';
+  hostUsername: string;
   addressDto?: AddressDto;
   distances?: DistanceDto[] = [];
   sponsors?: SponsorDto[] = [];
   isHost?: boolean = false;
+  status: number = 0;
   host?: Profile;
+  photo?:Photo | null;
 
-  constructor(init: RaceFormValues) {
-    this.raceId = init.raceId || 0;
-    this.name = init.name || '';
-    this.description = init.description || '';
-    this.registrationEndDate = init.registrationEndDate || null;
-    this.startDateRace = init.startDateRace || null;
-    this.endDateRace = init.endDateRace || null;
-    this.image = init.image || '';
-    this.raceStatus = init.raceStatus || 1;
-    this.raceType = init.raceType || 1;
-    this.addressDto = { ...(init.addressDto || {}) };
-    this.distances = init.distances ? init.distances.map(distance => ({ ...distance })) : [];
-    this.sponsors = init.sponsors ? init.sponsors.map(sponsor => ({ ...sponsor })) : [];
-  }
 }
 
 export class RaceFormValues {
@@ -65,22 +71,24 @@ export class RaceFormValues {
   startDateRace: Date | null = null;
   endDateRace: Date | null = null;
   image: string = '';
+  hostUsername: string = '';
   raceStatus: RaceStatus = RaceStatus.RegistrationOpen;
   raceType: RaceType = RaceType.Street;
   addressDto: AddressDto = {
     city: '',
     street: '',
-    country: '',
     postalCode: '',
   };
   distances: DistanceDto[] = [];
   sponsors: SponsorDto[] = [];
 
-  constructor(race?: RaceFormValues) {
-    if (race) {
-      Object.assign(this, race);
-      this.distances = race.distances.map(distance => ({ ...distance }));
-      this.sponsors = race.sponsors.map(sponsor => ({ ...sponsor }));
+  constructor(init?: RaceFormValues) {
+    if (init) {
+      Object.assign(this, init);
+      this.distances = init.distances.map(distance => ({ ...distance }));
+      this.sponsors = init.sponsors.map(sponsor => ({ ...sponsor }));
+      // this.distances = init.distances || [];
+      // this.sponsors = init.sponsors || [];
     }
   }
 }
@@ -118,3 +126,20 @@ export const raceStatusOptions = [
     { text: 'Odwołane', value: RaceStatus.Cancelled },
     { text: 'W trakcie', value: RaceStatus.InProgress },
 ];
+
+
+export interface CreateRacePhotoDto {
+  Name?: string;
+  Description?: string;
+  RegistrationEndDate?: Date | null;
+  StartDateRace?: Date | null;
+  EndDateRace?: Date | null;
+  Image: string;
+  RaceStatus: RaceStatus;
+  RaceType: RaceType;
+  AddressDto?: AddressDto;
+  Distances?: DistanceDto[];
+  Sponsors?: SponsorDto[];
+  imageFile: File;
+
+}

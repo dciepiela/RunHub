@@ -2,68 +2,33 @@
 import image from "../assets/races.jpg";
 import { Link } from "react-router-dom";
 import { Transition } from "@headlessui/react";
-import useAxiosFetch from "../app/hooks/useAxiosFetch";
 import { useEffect, useState } from "react";
-import photo from "../assets/avatar.jpg";
+import defaultImage from "../assets/defaultImageRace.jpg";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../app/stores/store";
+import { raceTypeOptions } from "../app/models/race";
+import { format } from "date-fns";
+import { pl } from "date-fns/locale";
 
-interface Race {
-  raceId: number;
-  image: string;
-  name: string;
-  raceType: RaceType;
-  registrationEndDate: string;
-  startDateRace: string;
-  addressDto: {
-    city: string;
-  };
-}
-
-enum RaceType {
-  Street = 1,
-  Mountain = 2,
-  OCR = 3,
-  Ultra = 4,
-  Trail = 5,
-  Other = 6,
-}
-
-// const raceTypeLabels = {
-//   1: "Bieg uliczny",
-//   2: "Bieg góski",
-//   3: "OCR",
-//   4: "Ultra",
-//   5: "Trail",
-//   6: "Inny",
-// };
-
-const raceTypeLabels: Record<RaceType, string> = {
-  [RaceType.Street]: "Bieg uliczny",
-  [RaceType.Mountain]: "Bieg górski",
-  [RaceType.OCR]: "OCR",
-  [RaceType.Ultra]: "Bieg ultra",
-  [RaceType.Trail]: "Bieg trailowy",
-  [RaceType.Other]: "Inny",
-};
-
-function TopRaces() {
-  const axiosFetch = useAxiosFetch();
+export default observer(function TopRaces() {
+  const { raceStore } = useStore();
+  const { loadRaces, threeRaces } = raceStore;
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
-  const [races, setRaces] = useState<Race[]>([]);
 
   const handleHover = (index: any) => {
     setHoveredCard(index);
   };
 
-  const fetchData = async () => {
-    await axiosFetch
-      .get("/races?pageSize=3&pageNumber=1&SortBy=startDateRace")
-      .then((res) => setRaces(res.data))
-      .catch((err) => console.log(err));
-  };
-
   useEffect(() => {
-    fetchData();
-  }, []);
+    loadRaces();
+  }, [loadRaces]);
+
+  const handleImageError = (
+    event: React.SyntheticEvent<HTMLImageElement, Event>
+  ) => {
+    const target = event.target as HTMLImageElement;
+    target.src = defaultImage;
+  };
 
   return (
     <div className="w-full mt-24 flex justify-center">
@@ -80,10 +45,10 @@ function TopRaces() {
           <h2 className="text-3xl pt-8 text-mediumGray uppercase text-center">
             Aktualne wydarzenia
           </h2>
-          <h3 className="text-5xl font-bold py-6 text-center uppercase">
+          <h3 className="text-4xl font-bold py-6 text-center uppercase">
             Dopasuj bieg do własnych predyspozycji
           </h3>
-          <p className="py-4 text-3xl text-mediumGray text-center">
+          <p className="py-4 text-2xl text-mediumGray text-center">
             Nasza platforma oferuje aktualne biegi dostosowane do Twoich
             predyspozycji fizycznych. Znajdziesz tutaj różnorodne trasy i
             wydarzenia sportowe, które pomogą Ci efektywnie rozwijać swoje
@@ -91,43 +56,11 @@ function TopRaces() {
           </p>
         </div>
 
-        {/* <div className="grid grid-cols-1 lg:grid-cols-3 relative gap-x-8 gap-y-16 px-4 pt-12 sm:pt-20 text-black ">
-          <div
-            className="bg-white rounded-xl shadow-2xl relative min-h-[400px] bg-cover bg-center"
-            style={{
-              backgroundImage: `url(${image})`,
-            }}
-          >
-            <div className="p-8 flex flex-col items-center">
-              <h3 className="bg-lightYellow rounded-lg font-bold text-2xl my-2">
-                20-05-2024
-              </h3>
-              <h3 className="bg-lightYellow rounded-lg font-bold text-2xl">
-                Warszawa
-              </h3>
-            </div>
-            <div className="flex flex-row items-end justify-center mt-10 text-center">
-              <h3 className="bg-lightYellow rounded-xl shadow-2xl font-bold text-2xl ">
-                Bieg Niepodległości
-              </h3>
-            </div>
-            <div className="absolute bottom-0 left-0 right-0 bg-gray-200 py-4 text-center">
-              <p className="flex items-center justify-center uppercase">
-                <Link to="/details">
-                  <button className="py-3 px-6 mx-auto flex uppercase">
-                    Pokaż szczegóły
-                    <GiClick className="ml-2 size-6" />
-                  </button>
-                </Link>
-              </p>
-            </div>
-          </div>
-          */}
         <div className="grid grid-cols-1 lg:grid-cols-3 relative gap-x-8 gap-y-16 px-4 pt-12 sm:pt-20 text-black">
-          {races.map((race, index) => (
+          {threeRaces.map((race, index) => (
             <div
               key={index}
-              className={`relative hover:-translate-y-2 duration-150 hover:ring-[2px] hover:ring-lightYellow w-64 h-[440px] mx-auto rounded-lg shadow-lg overflow-hidden cursor-pointer`}
+              className={`relative hover:-translate-y-2 duration-150 hover:ring-[2px] hover:ring-lightYellow w-64 h-[100%] mx-auto rounded-lg shadow-lg overflow-hidden cursor-pointer`}
               onMouseEnter={() => handleHover(index)}
               onMouseLeave={() => handleHover(null)}
             >
@@ -138,8 +71,9 @@ function TopRaces() {
                   }`}
                 />
                 <img
-                  src={race.image || photo}
-                  alt=""
+                  src={race.image || defaultImage}
+                  alt={race.image ? race.name : defaultImage}
+                  onError={handleImageError}
                   className="object-cover h-full w-full"
                 />
                 <Transition
@@ -164,33 +98,34 @@ function TopRaces() {
               <div className="px-6 py-2">
                 <h3 className="font-semibold mb-1">{race.name}</h3>
                 <p className="text-mediumGray text-xs">
-                  Lokalizacja: {race.addressDto.city}
+                  Lokalizacja:{" "}
+                  {race.addressDto?.city ? race.addressDto!.city : ""}
                 </p>
                 <div className="flex items-center justify-between mt-4">
                   <span className="text-darkGray text-xs">
-                    {race.startDateRace.slice(0, 10)}
+                    {format(race.startDateRace!, "dd MMM yyyy h:mm", {
+                      locale: pl,
+                    })}
                   </span>
                   <span className="text-mediumGray font-semibold">
-                    {raceTypeLabels[race.raceType]}
+                    {raceTypeOptions.find(
+                      (option) => option.value === race.raceType
+                    )?.text || "Nieznany status"}{" "}
                   </span>
                 </div>
-                <div className="flex items-center justify-between mt-8">
+                <div className="flex items-center mt-8">
                   <span className="text-darkGray text-xs">
                     Koniec zapisów:{" "}
-                    {race.registrationEndDate.slice(0, 10) +
-                      " " +
-                      race.registrationEndDate.slice(11, 16)}
+                    {format(race.registrationEndDate!, "dd MMM yyyy h:mm", {
+                      locale: pl,
+                    })}
                   </span>
                 </div>
               </div>
             </div>
-            // <div>
-            //   <Card key={index} item={race} />
-            // </div>
           ))}
         </div>
         <Link to="/races">
-          {" "}
           <button className="py-3 px-6 mx-auto mt-16 flex uppercase">
             Pokaż więcej biegów...
           </button>
@@ -198,6 +133,4 @@ function TopRaces() {
       </div>
     </div>
   );
-}
-
-export default TopRaces;
+});

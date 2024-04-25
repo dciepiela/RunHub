@@ -4,19 +4,15 @@ import ProfileContent from "./ProfileContent";
 import { useParams } from "react-router-dom";
 import { useStore } from "../../app/stores/store";
 import { useEffect } from "react";
-import LoadingComponent from "../../components/LoadingComponent";
 
 export default observer(function ProfilePage() {
   const { userName } = useParams<{ userName: string }>();
   const { profileStore } = useStore();
-  const { loadingProfile, loadProfile, profile } = profileStore;
+  const { loadProfile, profile } = profileStore;
 
   useEffect(() => {
     if (userName) loadProfile(userName);
   }, [loadProfile, userName]);
-
-  // if (loadingProfile)
-  //   return <LoadingComponent content="Ładowanie profilu użytkownika" />;
 
   return (
     <div className="mt-16 max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8 py-10">

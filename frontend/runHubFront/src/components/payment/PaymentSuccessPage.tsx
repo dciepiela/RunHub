@@ -1,11 +1,11 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const PaymentSuccessPage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const message =
     location.state?.message ||
     "Transakcja przebiegła pomyślnie, zostałeś zapisany na bieg!";
-
   return (
     <div className="success-page flex items-center justify-center min-h-[70vh] bg-whiteNeutral">
       <div className="relative flex flex-col m-6 space-y-8 bg-white shadow-2xl rounded-2xl md:flex-row md:space-y-0  ">
@@ -14,9 +14,11 @@ const PaymentSuccessPage = () => {
           <p>{message}</p>
           <button
             className="mt-4 px-2 py-2"
-            onClick={() => window.history.back()}
+            onClick={() => {
+              navigate(`/`);
+            }}
           >
-            Powrót
+            Przejdź do strony głównej
           </button>
         </div>
       </div>

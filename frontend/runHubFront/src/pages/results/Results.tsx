@@ -1,44 +1,27 @@
-import photo from "../../assets/image3.jpg";
 import { useStore } from "../../app/stores/store";
+import { observer } from "mobx-react-lite";
+import LoadingComponent from "../../components/LoadingComponent";
+import { useEffect } from "react";
+import DistanceTable from "./distances/DistanceTable";
 
-function Results() {
-  const { raceStore } = useStore();
-  const { racesByDate } = raceStore;
+export default observer(function Results() {
+  const { distanceStore } = useStore();
+  const {
+    loadAllExitsDistances,
+    distancesWithReadyResults,
+    setDistance,
+    loadingInitial,
+  } = distanceStore;
+
+  useEffect(() => {
+    loadAllExitsDistances().then((distance) => setDistance(distance!)); // Load distances when component mounts
+  }, [loadAllExitsDistances, setDistance]);
+
+  if (loadingInitial) return <LoadingComponent content="Loading profile..." />;
 
   return (
-    <div className="md:min-h-[80vh] grid md:grid-cols-2 gap-5 max-w-[1240px] mx-auto items-center">
-      {/* <h2>{distanceStore.title}</h2> */}
-      <div>
-        <img src={photo} alt="photo" />
-      </div>
-
-      <div className="max-w-[1240px] mx-auto text-whiteNeutral relative">
-        <div className="px-2 py-12">
-          <h2 className="text-3xl pt-8 text-deepBlack text-center uppercase py-12">
-            RunHub - portal dla sportowców
-          </h2>
-          <p className="py-4 text-2xl sm:text-3xl text-darkGray text-center"></p>
-        </div>
-      </div>
-      {/* <div>
-        <ul>
-          {distances.map((distance) => (
-            <li key={distance.distanceId}>{distance.name} </li>
-          ))}
-        </ul>
-      </div> */}
-
-      <div>
-        <ul>
-          {racesByDate.map((race) => (
-            <li key={race.raceId}>
-              {race.name}, data: {race.startDateRace}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
+    <>
+      <DistanceTable distances={distancesWithReadyResults} />
+    </>
   );
-}
-
-export default Results;
+});

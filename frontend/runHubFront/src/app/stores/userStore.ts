@@ -1,5 +1,5 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import { ChangePasswordDto, ForgotPasswordDto, ResetPasswordDto, User, UserFormLogin } from "../models/user";
+import { ChangePasswordDto, ForgotPasswordDto, ResetPasswordDto, User, UserFormLogin, UserFormRegister } from "../models/user";
 import agent from "../api/agent";
 import { store } from "./store";
 import { router } from "../routes/Router";
@@ -28,6 +28,27 @@ export default class UserStore {
             console.log(user);
     }
 
+    registerUser = async (
+        user: UserFormRegister,
+        registrationType: "Organizer" | "Competitor"
+      ) => {
+        try {
+            if (registrationType === "Competitor") {
+                await agent.Account.registerCompetitor(user);
+                router.navigate("/");
+                toast.success("Zarejestrowano");
+            } else if (registrationType === "Organizer") {
+                await agent.Account.registerOrganizer(user);
+                router.navigate("/");
+                toast.success("Zarejestrowano");
+
+            }    
+        } catch (error) {
+            console.log(error)
+            throw error;
+        }
+      };
+    
     logout = () =>{
         store.commonStore.setToken(null);
         this.user = null;

@@ -9,25 +9,31 @@ import {
 import LoadingButton from "../button/LoadingButton";
 import { StripeCardNumberElement } from "@stripe/stripe-js";
 import { useStore } from "../../app/stores/store";
+import { observer } from "mobx-react-lite";
+
 interface Props {
   raceId: number;
   distanceId: number;
   price: number;
 }
 
-export default function CheckoutForm({ raceId, distanceId, price }: Props) {
+export default observer(function CheckoutForm({
+  raceId,
+  distanceId,
+  price,
+}: Props) {
   const stripe = useStripe();
   const elements = useElements();
   const {
-    raceStore: { registerAttendeeWithPayment },
+    distanceStore: { registerAttendeeWithPayment },
   } = useStore();
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!stripe || !elements) {
-      setErrorMessage("Stripe has not loaded yet.");
+    if (!stripe || !elements || !distanceId) {
+      setErrorMessage("Nieprawidłowe dane do płatności");
       return;
     }
 
@@ -54,54 +60,54 @@ export default function CheckoutForm({ raceId, distanceId, price }: Props) {
             <label
               htmlFor="card-nr"
               id="card-nr"
-              className="block text-sm font-medium mb-1"
+              className="block text-md font-bold mb-1"
             >
-              Card Number
+              Numer karty
             </label>
             <CardNumberElement
               id="card-nr"
-              className="text-sm text-gry-600 bg-white border border-gray-300 rounded px-3 py-2"
+              className="text-sm text-deepBlack bg-white border border-darkGray rounded px-3 py-2"
             />
           </div>
           <div>
             <label
               htmlFor="card-exp"
               id="card-exp"
-              className="block text-sm font-medium mb-1"
+              className="block text-md font-bold mb-1"
             >
-              Card Number
+              Data ważności karty
             </label>
             <CardExpiryElement
               id="card-exp"
-              className="text-sm text-gry-600 bg-white border border-gray-300 rounded px-3 py-2"
+              className="text-sm text-deepBlack bg-white border border-darkGray rounded px-3 py-2"
             />
           </div>
           <div>
             <label
               htmlFor="card-cvc"
               id="card-cvc"
-              className="block text-sm font-medium mb-1"
+              className="block text-md font-bold mb-1"
             >
-              Card CVC
+              CVC
             </label>
             <CardCvcElement
               id="card-cvc"
-              className="text-sm text-gry-600 bg-white border border-gray-300 rounded px-3 py-2"
+              className="text-sm text-deepBlack bg-white border border-darkGray rounded px-3 py-2"
             />
           </div>
           {errorMessage && (
-            <label className="my-2 text-xs text-red-500">{errorMessage}</label>
+            <label className="error-message">{errorMessage}</label>
           )}
           <div className="flex items-center justify-between">
             <LoadingButton
               disabled={loading || !stripe}
-              title={loading ? "Przetwarzanie..." : "Zapłać teraz"}
+              title={loading ? "Przetwarzanie..." : `Zapłać ${price} zł`}
               type="submit"
-              className="flex items-center justify-center bg-lightYellow px-3 py-2 text-white rounded w-full text-center"
+              className="flex items-center justify-center bg-lightYellow px-3 py-2 text-whiteNeutral rounded w-full text-center"
             />
           </div>
         </form>
       </div>
     </div>
   );
-}
+});

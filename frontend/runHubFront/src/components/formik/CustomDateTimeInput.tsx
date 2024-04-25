@@ -1,49 +1,36 @@
 import { useField } from "formik";
-import React from "react";
+import DatePicker, {
+  ReactDatePickerProps,
+  registerLocale,
+} from "react-datepicker";
+import { pl } from "date-fns/locale/pl";
+registerLocale("pl", pl);
 
-interface CustomDateTimeInputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string;
-  name: string;
+interface CustomDateTimeInputProps extends Partial<ReactDatePickerProps> {
+  labelText?: string;
 }
 
-const CustomDateTimeInput: React.FC<CustomDateTimeInputProps> = ({
-  label,
-  name,
-  ...props
-}) => {
-  const [field, meta] = useField({ name, ...props });
-
-  // Function to format the date string
-  const formatDateString = (dateString: string) => {
-    const date = new Date(dateString);
-    const formattedDateString = date.toISOString().slice(0, 16); // Format as yyyy-MM-ddThh:mm
-    return formattedDateString;
-  };
+export default function CustomDateTimeInput(props: CustomDateTimeInputProps) {
+  const { labelText } = props;
+  const [field, meta, helpers] = useField(props.name!);
 
   return (
-    <div className="mb-4">
-      <label htmlFor={name} className="block text-gray-700">
-        {label}
-      </label>
-      <input
-        id={name}
+    <>
+      <label className="block font-bold text-deepBlack">{labelText}</label>
+      <DatePicker
         {...field}
         {...props}
-        type="datetime-local"
-        value={field.value ? formatDateString(field.value) : ""} // Format the value before passing it
-        onChange={(e) => {
-          field.onChange(e);
-        }}
-        className={`mt-1 p-2 w-full border border-gray-300 rounded-md ${
-          meta.touched && meta.error ? "input-error" : ""
-        }`}
+        selected={(field.value && new Date(field.value)) || null}
+        onChange={(value) => helpers.setValue(value)}
+        locale="pl"
+        className={
+          "w-full px-4 py-2 border border-black rounded-md focus:outline-none focus:ring-2 focus:ring-lightYellow focus:border-none" +
+          (meta.touched && meta.error ? "input-error" : "")
+        }
       />
       {meta.touched && meta.error && (
         <div className="error-message">{meta.error}</div>
       )}
-    </div>
+    </>
   );
-};
-
-export default CustomDateTimeInput;
+}

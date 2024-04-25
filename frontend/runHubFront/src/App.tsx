@@ -1,9 +1,10 @@
-import { Outlet, ScrollRestoration } from "react-router-dom";
+import { Outlet, ScrollRestoration, useLocation } from "react-router-dom";
 import "./App.css";
 import Footer from "./components/Footer";
 import Navbar from "./components/Navbar";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "react-datepicker/dist/react-datepicker.css";
 import { UserProvider } from "./app/context/useAuth";
 import { useStore } from "./app/stores/store";
 import { useEffect } from "react";
@@ -17,6 +18,8 @@ const stripePromise = loadStripe(
 
 function App() {
   const { commonStore, userStore } = useStore();
+  const location = useLocation();
+  const isDashboardActive = location.pathname.startsWith("/admin/dashboard");
 
   useEffect(() => {
     if (commonStore.token) {
@@ -30,20 +33,18 @@ function App() {
   //   return <LoadingComponent content="Ładowanie aplikacji.." />;
   // }
 
-  console.log("Stripe Key:", stripePromise);
-
   return (
     <>
       <ScrollRestoration />
       <ToastContainer position="bottom-right" hideProgressBar theme="colored" />
       <UserProvider>
         <Elements stripe={stripePromise}>
-          <Navbar />
+          {!isDashboardActive && <Navbar />}
           <main>
             <Outlet />
           </main>
           {/* <Outlet /> */}
-          <Footer />
+          {!isDashboardActive && <Footer />}
         </Elements>
       </UserProvider>
     </>

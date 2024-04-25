@@ -9,7 +9,7 @@ namespace RunHub.Persistence
     {
         public static async Task SeedData(DataContext context, UserManager<AppUser> userManager)
         {
-            if (!userManager.Users.Any() && !context.Races.Any() && !context.AgeGroups.Any())
+            if (!userManager.Users.Any() && !context.Races.Any())
             {
                 var users = new List<AppUser>
                 {
@@ -62,25 +62,6 @@ namespace RunHub.Persistence
                     }
                 };
 
-                //age groups
-                var ageGroups = new List<AgeGroup>
-                {
-                    new AgeGroup
-                    {
-                        GroupName = "Sample Group 1",
-                        MinAge = 18,
-                        MaxAge = 30,
-                        Gender = "Male"
-                    },
-                    new AgeGroup
-                    {
-                        GroupName = "Sample Group 2",
-                        MinAge = 31,
-                        MaxAge = 50,
-                        Gender = "Female"
-                    },
-                };
-
                 //races
                 var races = new List<Race>
                 {
@@ -88,11 +69,9 @@ namespace RunHub.Persistence
                     {
                         Name = "Barbarian Race",
                         Description = "Opis",
-                        CreationDate = DateTime.UtcNow,
                         RegistrationEndDate = DateTime.UtcNow.AddDays(55),
                         StartDateRace = DateTime.UtcNow.AddDays(60),
                         EndDateRace = DateTime.UtcNow.AddDays(62),
-                        Image = "sample.jpg",
                         RaceStatus = RaceStatus.OpenToRegistration,
                         RaceType = RaceType.Street,
                         CreatorAppUser = users[0],
@@ -100,7 +79,6 @@ namespace RunHub.Persistence
                         {
                             City = "Warszawa",
                             Street = "Marszałkowska 3",
-                            Country = "Polska",
                             PostalCode = "00-259"
                         },
                         Distances = new List<Distance>
@@ -175,22 +153,11 @@ namespace RunHub.Persistence
                                 WebPageUrl = "http://www.samplesponsor2.com"
                             }
                         },
-                        RaceAgeGroups = new List<RaceAgeGroup>
-                        {
-                            new RaceAgeGroup
-                            {
-                                AgeGroup = ageGroups[0]
-                            },
-                            new RaceAgeGroup
-                            {
-                                AgeGroup = ageGroups[1]
-                            }
-                        }
                     }
                 };
 
                 await context.Users.AddRangeAsync(users);
-                await context.AgeGroups.AddRangeAsync(ageGroups);
+                //await context.AgeGroups.AddRangeAsync(ageGroups);
                 await context.Races.AddRangeAsync(races);
                 await context.SaveChangesAsync();
             }

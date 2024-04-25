@@ -49,7 +49,7 @@ export const UserProvider = ({ children }: Props) => {
   ) => {
     if (registrationType === "Competitor") {
       await registerCompetitorAPI(user)
-        .then((res) => {
+        .then((res: any) => {
           if (res) {
             localStorage.setItem("token", res?.data.token);
             const userObj = {
@@ -67,7 +67,7 @@ export const UserProvider = ({ children }: Props) => {
         .catch(() => toast.warning("Błąd serwera"));
     } else if (registrationType === "Organizer") {
       await registerOrganizerAPI(user)
-        .then((res) => {
+        .then((res: any) => {
           if (res) {
             localStorage.setItem("token", res?.data.token);
             const userObj = {

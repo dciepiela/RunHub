@@ -1,6 +1,6 @@
 import { observer } from "mobx-react-lite";
 import { Link } from "react-router-dom";
-import { DistanceDto } from "../../../../app/models/distance";
+import { IDistanceDto } from "../../../../app/models/distance";
 import { useState } from "react";
 import {
   MdFirstPage,
@@ -11,7 +11,7 @@ import {
 import { Profile } from "../../../../app/models/profile";
 
 interface Props {
-  distance: DistanceDto;
+  distance: IDistanceDto;
   attendees: Profile[];
 }
 

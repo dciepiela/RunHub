@@ -13,7 +13,8 @@ const navLinks = [
   { name: "Wyniki", route: "/results" },
   { name: "O nas", route: "/about" },
   { name: "Kontakt", route: "/contact" },
-  { name: "Błędy", route: "/errors" },
+  // { name: "Błędy", route: "/errors" },
+  // { name: "Tests", route: "/tests" },
 ];
 
 export default observer(function Navbar() {
@@ -39,14 +40,13 @@ export default observer(function Navbar() {
   const userMenuMobile = [
     { name: "Profil", route: `/profiles/${user?.userName}` },
     { name: "Panel organizatora", route: "/admin/dashboard" },
-    { name: "Ustawienia", route: "/settings" },
     { name: "Wyloguj", route: "/logout" },
   ];
 
   const userMenuDesktop = [
     { name: "Profil", route: `/profiles/${user?.userName}` },
-    { name: "Ustawienia", route: "/settings" },
   ];
+
   return (
     <div className="w-screen h-[80px] z-10 bg-whiteNeutral fixed top-0 drop-shadow-lg">
       <div className="px-2 flex justify-between items-center gap-4 w-full h-full sm:text-xs md:text-xl text-lightYellow font-bold">
@@ -59,7 +59,7 @@ export default observer(function Navbar() {
           </NavLink>
 
           {/* desktop */}
-          <ul className="hidden lg:flex ml-4 justify-between ">
+          <ul className="hidden lg:flex ml-4 md:ml-10 justify-between ">
             {navLinks.map((link) => (
               <li key={link.route}>
                 <NavLink

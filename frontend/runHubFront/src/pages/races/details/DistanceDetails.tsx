@@ -1,63 +1,25 @@
-import React, { useEffect, useState } from "react";
-import { RaceDto, RaceStatus } from "../../../app/models/race";
-import AttendeesList from "./attendees/AttendeesList";
-import { useStore } from "../../../app/stores/store";
+import { useState } from "react";
 import { observer } from "mobx-react-lite";
+import { RaceDto } from "../../../app/models/race";
 import SponsorsList from "./sponsors/SponsorsList";
-import LoadingButton from "../../../components/button/LoadingButton";
-import CheckoutForm from "../../../components/payment/CheckoutForm";
+import { IDistanceDto } from "../../../app/models/distance";
+import DistancesList from "./DistancesList/DistancesList";
 
 interface Props {
   race: RaceDto;
+  distances: IDistanceDto[];
 }
 
-export default observer(function DistanceDetails({ race }: Props) {
+export default observer(function DistanceDetails({ race, distances }: Props) {
+  // const { selectedDistance, setSelectedDistance } = distanceStore;
+
   const [activeTab, setActiveTab] = useState<"distance" | "sponsor">(
     "distance"
   );
 
-  const [selectedDistance, setSelectedDistance] = useState<number | null>(null);
-  const { raceStore } = useStore();
-  const { updateAttendance, selectDistance } = raceStore;
-
-  const [loadingStates, setLoadingStates] = useState({});
-
-  const handleAttendeesButtonClick = (distanceId: number) => {
-    selectDistance(distanceId); // Highlight the distance in the store
-    setSelectedDistance(selectedDistance === distanceId ? null : distanceId);
-  };
-
-  const handleTabClick = (tabId: "distance" | "sponsor") => {
-    setActiveTab(tabId);
-  };
-
-  // const handleSelectDistance = (distanceId: number) => {
-  //   setSelectedDistance(distanceId);
-  // };
-
-  // const handleUpdateAttendance = async (distanceId: number) => {
-  //   setLoadingStates({ ...loadingStates, [distanceId]: true }); // Set loading state to true for the clicked distance
-  //   await updateAttendance(distanceId);
-  //   setLoadingStates({ ...loadingStates, [distanceId]: false }); // Set loading state to false after update
-  // };
-
-  const selectedDistanceDetails = race.distances?.find(
-    (distance) => distance.distanceId === selectedDistance
-  );
-
-  //dodane
-  useEffect(() => {
-    if (raceStore.selectedDistance) {
-      setLoadingStates({
-        ...loadingStates,
-        [raceStore.selectedDistance.distanceId]: false,
-      });
-    }
-  }, [raceStore.selectedDistance, loadingStates]);
-
   return (
     <div className="w-full my-6">
-      {race.distances!.length > 0 && (
+      {distances.length > 0 && (
         <div className="max-w-[1240px] mx-auto">
           <div className="mb-4 border-b border-gray-200 dark:border-gray-700">
             <ul
@@ -71,7 +33,7 @@ export default observer(function DistanceDetails({ race }: Props) {
                       ? "border-mediumGray"
                       : "border-transparent"
                   }`}
-                  onClick={() => handleTabClick("distance")}
+                  onClick={() => setActiveTab("distance")}
                   aria-selected={activeTab === "distance"}
                 >
                   Dystanse
@@ -84,7 +46,7 @@ export default observer(function DistanceDetails({ race }: Props) {
                       ? "border-mediumGray"
                       : "border-transparent"
                   }`}
-                  onClick={() => handleTabClick("sponsor")}
+                  onClick={() => setActiveTab("sponsor")}
                   aria-selected={activeTab === "sponsor"}
                 >
                   Sponsorzy
@@ -93,126 +55,21 @@ export default observer(function DistanceDetails({ race }: Props) {
             </ul>
           </div>
 
-          {/* Distance details */}
           <div id="default-tab-content">
             <div
               className={`p-4 rounded-lg ${
                 activeTab === "distance" ? "block" : "hidden"
               } dark:bg-darkGray`}
             >
-              <div className="mt-4">
-                <table className="mx-auto text-xs md:text-sm">
-                  <thead>
-                    <tr>
-                      <th className="px-2 md:px-4 py-2">Nazwa</th>
-                      <th className="px-2 md:px-4 py-2 hidden md:block">
-                        Opis
-                      </th>
-                      <th className="px-2 md:px-4 py-2">Dystans (km)</th>
-                      <th className="px-2 md:px-4 py-2 hidden md:block">
-                        Dostępne miejsca
-                      </th>
-                      <th className="px-2 md:px-4 py-2">Cena</th>
-                      {race.raceStatus === RaceStatus.RegistrationOpen && (
-                        <th className="px-2 md:px-4 py-2">Zapisz się</th>
-                      )}
-                      <th className="px-2 md:px-4 py-2">Lista startowa</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {race.distances &&
-                      race.distances.map((distance) => (
-                        <tr key={distance.distanceId}>
-                          <td className="border px-2 md:px-4 py-2 bg-gray-100">
-                            {distance.name}
-                          </td>
-                          <td className="border px-2 md:px-4 py-2 hidden md:table-cell">
-                            {distance.description}
-                          </td>
-                          <td className="border px-2 md:px-4 py-2 text-center">
-                            {distance.lengthInKilometers}
-                          </td>
-                          <td className="border px-2 md:px-4 py-2 text-center hidden md:table-cell">
-                            {distance.availableSlots}/{distance.totalSlots}
-                          </td>
-                          <td className="border px-2 md:px-4 py-2 text-center">
-                            ${distance.price}
-                          </td>
-                          {race.raceStatus === RaceStatus.RegistrationOpen && (
-                            <td className="border px-2 md:px-4 py-2 text-center">
-                              {/* <LoadingButton
-                                className="text-deepBlack font-bold py-2 px-4"
-                                onClick={() => {
-                                  handleUpdateAttendance(distance.distanceId);
-                                  // selectDistance(distance.distanceId);
-                                }}
-                                disabled={loadingStates[distance.distanceId]} // Disable button based on its loading state
-                                loading={loadingStates[distance.distanceId]} // Pass loading state to LoadingButton component
-
-                                title={
-                                  distance.isGoing ? "Wypisz się" : "Dołącz"
-                                }
-                                size={15}
-                              />
-                               */}
-                              {selectedDistance === distance.distanceId && (
-                                <CheckoutForm
-                                  raceId={race.raceId}
-                                  distanceId={distance.distanceId}
-                                  price={distance.price}
-                                />
-                              )}
-                                <button onClick={() => setSelectedDistance(distance.distanceId)}>
-            {selectedDistance === distance.distanceId ? "Hide Form" : "Show Form"}
-          </button>
-
-                              {/* {distance.isGoing ? "Wypisz się" : "Dołącz"}
-                              </LoadingButton> */}
-                            </td>
-                          )}
-                          <td className="border px-2 md:px-4 py-2 text-center">
-                            <button
-                              onClick={() => {
-                                handleAttendeesButtonClick(distance.distanceId);
-                              }}
-                              className={`text-deepBlack font-bold py-2 px-4 rounded w-full ${
-                                selectedDistance === distance.distanceId
-                                  ? "bg-mediumGray"
-                                  : ""
-                              }`}
-                              style={{ whiteSpace: "nowrap" }}
-                            >
-                              {selectedDistance === distance.distanceId
-                                ? "Schowaj"
-                                : "Lista startowa"}
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-                {selectedDistance && (
-                  // race.distances?.map((distance) => (
-                  <AttendeesList
-                    key={selectedDistanceDetails!.distanceId}
-                    distance={selectedDistanceDetails}
-                    attendees={selectedDistanceDetails.distanceAttendees || []}
-                  />
-                )}
-                {/* <AttendeesList
-                    key={selectedDistance.distanceId}
-                    distance={distance}
-                    attendees={selectedDistance.distanceAttendees || []}
-                  /> */}
-                {/* )} */}
-              </div>
+              <DistancesList race={race} distances={distances} />
             </div>
+
             <div
               className={`p-4 rounded-lg ${
                 activeTab === "sponsor" ? "block" : "hidden"
               }`}
             >
-              <SponsorsList race={race} />
+              <SponsorsList sponsors={race.sponsors || []} />
             </div>
           </div>
         </div>

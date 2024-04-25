@@ -1,14 +1,20 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RunHub.Application.Commands.DistanceAttendees.Attend;
+using RunHub.Application.Commands.DistanceAttendees.AttendManually;
 using RunHub.Application.Commands.DistanceAttendees.AttendWithPayment;
 using RunHub.Application.Commands.Distances.CreateDistance;
 using RunHub.Application.Commands.Distances.DeleteDistance;
+using RunHub.Application.Commands.Distances.DisplayDistanceResult;
+using RunHub.Application.Commands.Distances.GenerateDistanceIncomeReport;
 using RunHub.Application.Commands.Distances.UpdateDistance;
 using RunHub.Application.Queries.Attendance;
+using RunHub.Application.Queries.Distances.GetAllDistances;
 using RunHub.Application.Queries.Distances.GetDistanceById;
 using RunHub.Application.Queries.Distances.GetDistances;
+using RunHub.Application.Queries.Results.GetResultsForDistance;
 using RunHub.Contracts.DTOs.Distance;
+using RunHub.Contracts.DTOs.DistanceAttendee.Manually;
 using RunHub.Contracts.DTOs.Payments;
 
 namespace RunHub.API.Controllers
@@ -22,13 +28,19 @@ namespace RunHub.API.Controllers
         {
 
             _logger = logger;
-
         }
-        // GET: api/<DistanceController>
+
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<IActionResult> GetAllDistances(CancellationToken ct)
+        {
+            var distances = await Mediator.Send(new GetAllDistancesQuery(), ct);
+            return HandleResult(distances);
+        }
 
         [AllowAnonymous]
         [HttpGet("{raceId}")]
-        public async Task<IActionResult> GetDistances(int raceId, CancellationToken ct)
+        public async Task<IActionResult> GetDistancesForRace(int raceId, CancellationToken ct)
         {
             var distances = await Mediator.Send(new GetDistancesQuery(raceId), ct);
             return HandleResult(distances);
@@ -65,7 +77,7 @@ namespace RunHub.API.Controllers
             return HandleResult(result);
         }
 
-
+        [Authorize(Policy = "IsRaceCreator")]
         [HttpDelete("{raceId}/{distanceId}")]
         public async Task<IActionResult> DeleteDistance([FromRoute] int raceId,[FromRoute] int distanceId, CancellationToken ct)
         {
@@ -117,17 +129,36 @@ namespace RunHub.API.Controllers
 
             var command = new UpdateAttendeePaymentCommand(raceId, distanceId, paymentDto.StripeToken, paymentDto.Amount);
             var result = await Mediator.Send(command);
+            return HandleResult(result);
 
-            if (result.IsSuccess)
-            {
-                _logger.LogInformation("Registration and payment for race {RaceId}, distance {DistanceId} successful.", raceId, distanceId);
-                return Ok("Registration and payment successful.");
-            }
-            else
-            {
-                _logger.LogError("Failed to process registration and payment: {Error}", result.Error);
-                return BadRequest(result.Error);
-            }
+        }
+
+        [HttpPost("{raceId}/{distanceId}/attendManually")]
+        public async Task<IActionResult> ManualRegistration(int raceId, int distanceId, ManualRegistrationDto registrationDto)
+        {
+            var command = new UpdateAttendeeManullyCommand(raceId, distanceId, registrationDto);
+            var result = await Mediator.Send(command);
+
+            return HandleResult(result);
+        }
+
+        [AllowAnonymous]
+        [HttpPut("{distanceId}/show")]
+        public async Task<IActionResult> ToggleIsReadyToShow(int distanceId, UpdateIsReadyToShowDto showDto, CancellationToken ct)
+        {
+            var command = new UpdateIsReadyToShowCommand(distanceId, showDto.IsReadyToShow);
+            var result = await Mediator.Send(command, ct);
+            return HandleResult(result);
+        }
+
+        //generateReportIncome
+        [AllowAnonymous]
+        [HttpPost("{distanceId}/generateReportIncome")]
+        public async Task<IActionResult> GenerateDistanceIncomeReport(int distanceId, CancellationToken ct)
+        {
+            var command = new GenerateDistanceIncomeReportCommand(distanceId);
+            var result = await Mediator.Send(command, ct);
+            return HandleResult(result);
         }
 
     }

@@ -10,13 +10,27 @@ import "semantic-ui-css/components/menu.min.css";
 import "semantic-ui-css/components/transition.min.css";
 import { Dropdown, Pagination } from "semantic-ui-react";
 import { useStore } from "../../app/stores/store";
-import { RaceStatus, raceTypeOptions } from "../../app/models/race";
+import {
+  RaceStatus,
+  raceStatusOptions,
+  raceTypeOptions,
+} from "../../app/models/race";
 import LoadingComponent from "../../components/LoadingComponent";
+import { format } from "date-fns";
+import { pl } from "date-fns/locale";
 
-const Races = observer(function Races() {
+export default observer(function Races() {
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(6); // Default pageSize
+  const [pageSize, setPageSize] = useState(6);
+
+  //search
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState<string | undefined>("");
+
+  //date
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const { raceStore } = useStore();
   const {
@@ -27,20 +41,6 @@ const Races = observer(function Races() {
     loadingInitial,
   } = raceStore;
 
-  // const handleGetNext = () => {
-  //   setLoadingNext(true);
-  //   const nextPage = pagination!.currentPage + 1;
-  //   setPagingParams(new PagingParams(nextPage));
-  //   loadRaces().then(() => setLoadingNext(false));
-  // };
-
-  // const handleGetBack = () => {
-  //   setLoadingBack(true);
-  //   const previousPage = pagination!.currentPage - 1;
-  //   setPagingParams(new PagingParams(previousPage));
-  //   loadRaces().then(() => setLoadingBack(false));
-  // };
-
   const handleHover = (index: any) => {
     setHoveredCard(index);
   };
@@ -50,44 +50,18 @@ const Races = observer(function Races() {
     loadRaces();
   }, [currentPage, pageSize, setPagingParams, loadRaces]);
 
-  const formatTimeDifference = (endDate: string) => {
-    const now = new Date();
-    const endDateTime = new Date(endDate).getTime();
-    const timeDifference = endDateTime - now.getTime();
+  const filteredRaces = racesByDate.filter((race) => {
+    const raceDate = new Date(race.startDateRace!);
+    const start = startDate ? new Date(startDate) : new Date(-8640000000000000); // Use a very early date if no start date is set
+    const end = endDate ? new Date(endDate) : new Date(8640000000000000); // Use a very late date if no end date is set
 
-    const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-    const hours = Math.floor(
-      (timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+    return (
+      race.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      (selectedStatus === "" || race.raceType === selectedStatus) &&
+      raceDate >= start &&
+      raceDate <= end
     );
-    const minutes = Math.floor(
-      (timeDifference % (1000 * 60 * 60)) / (1000 * 60)
-    );
-
-    if (days > 0) {
-      return `${days} dni`;
-    } else if (hours > 0) {
-      return `${hours} godzin i ${minutes} minut`;
-    } else {
-      return `${minutes} minut`;
-    }
-  };
-
-  const getStatusText = (status: RaceStatus): string => {
-    switch (status) {
-      case RaceStatus.RegistrationOpen:
-        return "Rejestracja otwarta";
-      case RaceStatus.RegistrationClosed:
-        return "Zamknięta rejestracja";
-      case RaceStatus.Completed:
-        return "Odbyte";
-      case RaceStatus.Cancelled:
-        return "Odwołane";
-      case RaceStatus.InProgress:
-        return "W trakcie";
-      default:
-        return "Unknown";
-    }
-  };
+  });
 
   const handleImageError = (
     event: React.SyntheticEvent<HTMLImageElement, Event>
@@ -106,8 +80,44 @@ const Races = observer(function Races() {
             Aktualne wydarzenia
           </h1>
 
+          <div className="mt-5 mb-5 flex flex-col gap-2 md:flex-row justify-center items-center">
+            <input
+              type="text"
+              placeholder="Szukaj biegu"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="input input-bordered w-full max-w-xs rounded"
+            />
+            <Dropdown
+              selection
+              placeholder="Wybierz rodzaj"
+              options={[
+                { key: "all", text: "Wszystkie", value: "" },
+                ...raceTypeOptions,
+              ]}
+              value={selectedStatus}
+              onChange={(_, { value }) =>
+                setSelectedStatus((value as string) ?? "")
+              }
+              className="ml-4 mr-4"
+            />
+            <div className="flex flex-col md:flex-row gap-2">
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="input input-bordered rounded"
+              />
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="input input-bordered rounded"
+              />
+            </div>
+          </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 px-2 py-12 ">
-            {racesByDate.map((race, index) => (
+            {filteredRaces.map((race, index) => (
               <div
                 key={race.raceId}
                 className={`bg-white relative hover:-translate-y-2 duration-150 hover:ring-[2px] hover:ring-lightYellow w-64 h-[360px] mx-auto rounded-lg shadow-lg overflow-hidden cursor-pointer`}
@@ -122,7 +132,7 @@ const Races = observer(function Races() {
                   />
 
                   <img
-                    src={race.image || defaultImage}
+                    src={race.photo ? race.photo?.url : defaultImage}
                     alt={race.image ? race.name : defaultImage}
                     onError={handleImageError}
                     className="object-cover h-full w-full"
@@ -140,7 +150,9 @@ const Races = observer(function Races() {
                             : ""
                         }`}
                       >
-                        {getStatusText(race.raceStatus)}
+                        {raceStatusOptions.find(
+                          (option) => option.value === race.raceStatus
+                        )?.text || "Unknown Status"}
                       </span>
                     </div>
                   )}
@@ -168,56 +180,35 @@ const Races = observer(function Races() {
                 <div className="px-6 py-2">
                   <h3 className="font-semibold mb-1">{race.name}</h3>
                   <p className="text-mediumGray text-xs">
-                    Lokalizacja: {race.addressDto!.city}
+                    Lokalizacja:{" "}
+                    {race.addressDto ? race.addressDto.city : "Brak"}
                   </p>
                   <div className="flex items-center justify-between mt-4">
                     <span className="text-darkGray text-xs">
-                      {race.startDateRace!.slice(0, 10)}
+                      {format(race.startDateRace!, "dd MMM yyyy HH:mm", {
+                        locale: pl,
+                      })}
                     </span>
                     <span className="text-mediumGray font-semibold">
                       {raceTypeOptions.find(
                         (option) => option.value === race.raceType
-                      )?.text || "Unknown Type"}{" "}
+                      )?.text || "Unknown Type"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between mt-4">
                     <span className="text-darkGray text-xs">
-                      Pozostały czas rejestracji:{" "}
-                      {formatTimeDifference(race.registrationEndDate!)}
+                      Koniec zapisów:{" "}
+                      {/* {formatTimeDifference(race.registrationEndDate!)} */}
+                      {format(race.registrationEndDate!, "dd MMM yyyy HH:mm", {
+                        locale: pl,
+                      })}
                     </span>
                   </div>
                 </div>
               </div>
             ))}
           </div>
-
-          {/* <div className="flex justify-between items-center mb-4 px-2">
-            <button
-              className={`px-4 py-2 text-white rounded hover:bg-whiteNeutral ${
-                pagination?.currentPage === 1
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-lightYellow hover:bg-whiteNeutral"
-              }`}
-              onClick={handleGetBack}
-              disabled={pagination?.currentPage === 1}
-            >
-              {loadingBack ? "Loading..." : "Show Less"}
-            </button>
-
-            <button
-              className={`px-4 py-2 text-white rounded hover:bg-whiteNeutral ${
-                pagination?.currentPage === pagination?.totalPages
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-lightYellow hover:bg-whiteNeutral"
-              }`}
-              onClick={handleGetNext}
-              disabled={pagination?.currentPage === pagination?.totalPages}
-            >
-              {loadingNext ? "Loading..." : "Show More"}
-            </button>
-          </div> */}
-
-          <div className=" flex justify-between items-center mb-4 px-2">
+          <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-2">
             <Pagination
               activePage={currentPage}
               totalPages={pagination ? pagination.totalPages : 1}
@@ -242,5 +233,3 @@ const Races = observer(function Races() {
     </div>
   );
 });
-
-export default Races;

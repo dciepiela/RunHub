@@ -1,4 +1,6 @@
-﻿namespace RunHub.Contracts.DTOs.Distance
+﻿using RunHub.Domain.Enums;
+
+namespace RunHub.Contracts.DTOs.Distance
 {
     public class UpdateDistanceDto
     {
@@ -9,5 +11,7 @@
         public int AvailableSlots { get; set; }
         public int TotalSlots { get; set; }
         public decimal Price { get; set; }
+        public DistanceStatus Status { get; set; } = DistanceStatus.Active;
+
     }
 }

@@ -1,11 +1,13 @@
-﻿namespace RunHub.Domain.Entity
+﻿using RunHub.Domain.Enums;
+
+namespace RunHub.Domain.Entity
 {
     public class Distance
     {
         public int DistanceId { get; set; }
 
         // Distance details
-        public string Name { get; set; } // e.g., "5k", "10k", "Half Marathon", "Marathon"
+        public string Name { get; set; }
         public double LengthInKilometers { get; set; }
         public string Description { get; set; }
 
@@ -19,10 +21,15 @@
         // Foreign Key
         public int RaceId { get; set; }
         public Race Race { get; set; }
+        public DistanceStatus Status { get; set; } = DistanceStatus.Active;
+        public bool IsReadyToShow { get; set; } = false;
+
 
         // Relation
         public ICollection<DistanceAttendee> DistanceAttendees { get; set; } = new List<DistanceAttendee>();
-        //public ICollection<Result> Results { get; set; }
+        public ICollection<Result> Results { get; set; } = new List<Result>();
 
     }
+
+
 }

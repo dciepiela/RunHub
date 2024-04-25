@@ -23,7 +23,7 @@ namespace RunHub.API.Controllers
         }
 
         [HttpGet("{userName}/distances")]
-        public async Task<IActionResult> GetUserActivities(string userName, string predicate)
+        public async Task<IActionResult> GetUserDistances(string userName, string predicate)
         {
             var result = await Mediator.Send(new ListDistancesQuery(userName, predicate));
             return HandleResult(result);

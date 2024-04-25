@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Http;
 using RunHub.Contracts.DTOs.Race;
 using RunHub.Contracts.Errors;
 

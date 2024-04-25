@@ -1,15 +1,24 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using RunHub.Application.Commands.Addresses.UpdateAddress;
+using RunHub.Application.Commands.Distances.DeleteDistance;
 using RunHub.Application.Commands.Distances.UpdateDistance;
+using RunHub.Application.Commands.Races.AddRacePhoto;
+using RunHub.Application.Commands.Races.ChangeRaceStatus;
 using RunHub.Application.Commands.Races.CreateRace;
+using RunHub.Application.Commands.Races.CreateRaceWithCloudinary;
 using RunHub.Application.Commands.Races.DeleteRace;
+using RunHub.Application.Commands.Races.UpdateOnlyRace;
 using RunHub.Application.Commands.Races.UpdateRace;
 using RunHub.Application.Commands.Sponsors.CreateSponsor;
+using RunHub.Application.Commands.Sponsors.DeleteSponsor;
 using RunHub.Application.Commands.Sponsors.UpdateSponsor;
 using RunHub.Application.Queries.Addresses.GetAddressById;
+using RunHub.Application.Queries.Distances.GetAllDistances;
 using RunHub.Application.Queries.Races.GetRaceById;
 using RunHub.Application.Queries.Races.GetRaces;
+using RunHub.Application.Queries.Races.GetRacesForHost;
 using RunHub.Application.Queries.Sponsors.GetSponsorById;
 using RunHub.Application.Queries.Sponsors.GetSponsors;
 using RunHub.Contracts.DTOs;
@@ -17,6 +26,7 @@ using RunHub.Contracts.DTOs.Distance;
 using RunHub.Contracts.DTOs.Race;
 using RunHub.Contracts.DTOs.Sponsor;
 using RunHub.Contracts.Requests;
+using RunHub.Domain.Enum;
 
 namespace RunHub.API.Controllers
 {
@@ -34,6 +44,13 @@ namespace RunHub.API.Controllers
             return HandlePagedResult(races);
         }
 
+        [HttpGet("isHost")]
+        public async Task<IActionResult> GetAllRacesWhereHost(CancellationToken ct)
+        {
+            var races = await Mediator.Send(new GetRacesForHostQuery(), ct);
+            return HandleResult(races);
+        }
+
         [AllowAnonymous]
         [HttpGet("{raceId}")] //api/races/fdfdfdfdf
         public async Task<IActionResult> GetRaceById(int raceId, CancellationToken ct)
@@ -44,7 +61,7 @@ namespace RunHub.API.Controllers
 
         [Authorize(Roles = "Organizer")]
         [HttpPost]
-        public async Task<IActionResult> CreateRace(CreateRaceDto raceDto,CancellationToken ct)
+        public async Task<IActionResult> CreateRace(CreateRaceDto raceDto, CancellationToken ct)
         {
             var command = new CreateRaceCommand(raceDto);
             
@@ -53,12 +70,35 @@ namespace RunHub.API.Controllers
             return HandleResult(result);
         }
 
-        //[Authorize(Policy = "IsRaceCreator")]
+        [HttpPost("withPhoto")]
+        public async Task<IActionResult> CreateRace([FromForm] CreateRaceDto raceDto, IFormFile imageFile, CancellationToken ct)
+        {
+            var command = new CreateRaceWithCloudinaryCommand(raceDto, imageFile);
+
+            var result = await Mediator.Send(command, ct);
+
+            return HandleResult(result);
+        }
+
+        [Authorize(Policy = "IsRaceCreator")]
         [HttpPut("{raceId}")]
         public async Task<IActionResult> EditRace(int raceId, UpdateRaceDto raceDto, CancellationToken ct)
         {
             raceDto.RaceId = raceId;
             var command = new UpdateRaceCommand(raceDto);
+
+            var result = await Mediator.Send(command, ct);
+
+            return HandleResult(result);
+        }
+
+        //[AllowAnonymous]
+        [Authorize(Policy = "IsRaceCreator")]
+        [HttpPut("{raceId}/2")]
+        public async Task<IActionResult> EditRace2(int raceId, UpdateOnlyRaceDto raceDto, CancellationToken ct)
+        {
+            raceDto.RaceId = raceId;
+            var command = new UpdateOnlyRaceCommand(raceDto);
 
             var result = await Mediator.Send(command, ct);
 
@@ -123,16 +163,35 @@ namespace RunHub.API.Controllers
             return HandleResult(result);
         }
 
-
-
         [Authorize(Policy = "IsRaceCreator")]
         [HttpPut("{raceId}/sponsor/{sponsorId}")]
-        public async Task<IActionResult> EditDistance(int raceId, int sponsorId, UpdateSponsorDto sponsorDto, CancellationToken ct)
+        public async Task<IActionResult> EditSponsor(int raceId, int sponsorId, UpdateSponsorDto sponsorDto, CancellationToken ct)
         {
             sponsorDto.SponsorId = sponsorId;
             var updateCommand = new UpdateSponsorCommand(raceId, sponsorDto);
 
             var result = await Mediator.Send(updateCommand, ct);
+
+            return HandleResult(result);
+        }
+
+        [Authorize(Policy = "IsRaceCreator")]
+        [HttpDelete("{raceId}/sponsor/{sponsorId}")]
+        public async Task<IActionResult> DeleteSponsor([FromRoute] int raceId, [FromRoute] int sponsorId, CancellationToken ct)
+        {
+            var command = new DeleteSponsorCommand(raceId, sponsorId);
+            var result = await Mediator.Send(command, ct);
+            return HandleResult(result);
+        }
+
+        //change race status
+        //[Authorize(Policy = "IsRaceCreator")]
+        [Authorize(Policy = "IsRaceCreator")]
+        [HttpPut("{raceId}/status/{status}")]
+        public async Task<IActionResult> ChangeRaceStatus(int raceId, RaceStatus status)
+        {
+            var command = new ChangeRaceStatusCommand(raceId, status);
+            var result = await Mediator.Send(command);
 
             return HandleResult(result);
         }

@@ -6,25 +6,27 @@ import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import "semantic-ui-css/components/container.min.css";
 import DistanceDetails from "./DistanceDetails";
-import DistanceDetails2 from "./DistanceDetails2";
 
 export default observer(function RaceDetails() {
-  const { raceStore } = useStore();
+  const { raceStore, distanceStore } = useStore();
   const { selectedRace: race, loadRace } = raceStore;
+  const { loadDistances, distances } = distanceStore;
   const { raceId } = useParams();
 
   useEffect(() => {
-    if (raceId) loadRace(raceId);
-  }, [raceId, loadRace]);
+    if (raceId) {
+      loadRace(Number(raceId));
+      loadDistances(Number(raceId));
+    }
+  }, [raceId, loadRace, loadDistances]);
 
-  // if (loadingInitial || !race) return <LoadingComponent />;
   if (!race) return;
 
   return (
     <>
       <RaceDetailsBanner race={race} />
       <RaceDetailsInfo race={race} />
-      <DistanceDetails2 race={race} />
+      <DistanceDetails race={race} distances={distances} />
     </>
   );
 });

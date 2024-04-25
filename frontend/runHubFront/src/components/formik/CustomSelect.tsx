@@ -1,14 +1,27 @@
 import { useField } from "formik";
 
-const CustomSelect = ({ label, options, ...props }) => {
-  const [field, meta] = useField(props);
+interface Option {
+  value: any;
+  text: string;
+}
 
-  // console.log("field", field);
-  // console.log("meta", meta);
+interface CustomSelectProps
+  extends React.SelectHTMLAttributes<HTMLSelectElement> {
+  label: string;
+  options: Option[];
+  name: string;
+}
+
+const CustomSelect: React.FC<CustomSelectProps> = ({
+  label,
+  options,
+  ...props
+}) => {
+  const [field, meta] = useField(props);
 
   return (
     <>
-      <label>{label}</label>
+      <label className="block font-bold text-deepBlack">{label}</label>
       <select
         {...field}
         {...props}
@@ -22,7 +35,9 @@ const CustomSelect = ({ label, options, ...props }) => {
           </option>
         ))}
       </select>
-      {meta.touched && meta.error && <div className="error">{meta.error}</div>}
+      {meta.touched && meta.error && (
+        <div className="error-message">{meta.error}</div>
+      )}
     </>
   );
 };

@@ -21,6 +21,10 @@ namespace RunHub.Persistence.Configuration
                 .HasForeignKey(d => d.RaceId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            eb.HasOne(r => r.Photo)
+                .WithOne()
+                .HasForeignKey<Race>(r => r.PhotoId);
+
             // Properties
 
             //eb.Property(r => r.RaceStatus).HasConversion(c => c.ToString(), c => Enum.Parse<RaceStatus>(c));

@@ -13,6 +13,10 @@ namespace RunHub.Persistence.Configuration
                 .WithOne(u => u.AppUser)
                 .HasForeignKey<Address>(u => u.AppUserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            eb.HasOne(r => r.Photo)
+                .WithOne()
+                .HasForeignKey<AppUser>(u => u.PhotoId);
         }
     }
 }

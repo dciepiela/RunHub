@@ -22,7 +22,7 @@ const panes = [
   {
     menuItem: "Jesteś organizatorem",
     pane: { key: "hosting" },
-    condition: (userRole) => userRole === "Organizer",
+    condition: (userRole: any) => userRole === "Organizer",
   },
 ];
 
@@ -38,23 +38,16 @@ export default observer(function ProfileDistances() {
 
   useEffect(() => {
     if (profile) {
-      loadUserDistances(profile.userName, panes[activeTabIndex].pane.key);
+      loadUserDistances(profile.userName!, panes[activeTabIndex].pane.key);
     }
   }, [loadUserDistances, profile, activeTabIndex]);
-
-  //   const handleTabChange = (e: SyntheticEvent, data) => {
-  //     loadUserDistances(
-  //       profile!.userName,
-  //       panes[data.activeIndex as number].pane.key
-  //     );
-  //   };
 
   const handleTabChange = (index: number) => {
     if (index === activeTabIndex) {
       return;
     }
     setActiveTabIndex(index); // Update the active tab index state
-    loadUserDistances(profile!.userName, panes[index].pane.key);
+    loadUserDistances(profile!.userName!, panes[index].pane.key);
   };
 
   if (loadingDistances) {
@@ -111,7 +104,7 @@ export default observer(function ProfileDistances() {
                 <Link to={`/races/${distance.raceId}`}>
                   <img
                     className="w-full h-32 md:h-48 object-cover"
-                    src={distance.image ? distance.image : DEFAULT_RACE_URL}
+                    src={DEFAULT_RACE_URL}
                     alt={distance.name}
                   />
                   <div className="px-6 py-4">

@@ -21,13 +21,13 @@ namespace RunHub.Application.Queries.Profiles.ListDistances
                 .Include(d => d.Distance)
                     .ThenInclude(d => d.Race)
                         .ThenInclude(r => r.CreatorAppUser)
-                .Where(u => u.Participator.UserName == request.UserName)
+                .Where(u => u.Participator.UserName == request.UserName || u.Distance.Race.CreatorAppUser.UserName == request.UserName)
                 .OrderBy(a => a.Distance.Race.StartDateRace)
                 .AsQueryable();
 
             query = request.Predicate switch
             {
-                "future" => query.Where(a => a.Distance.Race.StartDateRace >= DateTime.Now),
+                "future" => query.Where(a => a.Distance.Race.StartDateRace >= DateTime.Now && a.Distance.Race.CreatorAppUser.UserName != request.UserName),
                 "hosting" => query.Where(a => a.Distance.Race.CreatorAppUser.UserName ==
                 request.UserName),
                 _ => query.Where(a => a.Distance.Race.StartDateRace <= DateTime.Now)

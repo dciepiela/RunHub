@@ -112,7 +112,6 @@ namespace RunHub.API.Controllers
                 {
                     City = registerDto?.AddressDto.City,
                     Street = registerDto?.AddressDto.Street,
-                    Country = registerDto?.AddressDto.Country,
                     PostalCode = registerDto?.AddressDto.PostalCode
                 } : null
             };

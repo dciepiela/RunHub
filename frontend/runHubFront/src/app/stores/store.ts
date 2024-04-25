@@ -4,13 +4,17 @@ import DistanceStore from "./distanceStore";
 import CommonStore from "./commonStore";
 import UserStore from "./userStore";
 import ProfileStore from "./profileStore";
+import ResultStore from "./resultStore";
+import SponsorStore from "./sponsorStore";
 
 interface Store {
     commonStore: CommonStore;
     raceStore: RaceStore,
     distanceStore: DistanceStore,
     userStore: UserStore,
-    profileStore: ProfileStore
+    profileStore: ProfileStore,
+    resultStore: ResultStore,
+    sponsorStore: SponsorStore
 }
 
 export const store: Store = {
@@ -18,7 +22,9 @@ export const store: Store = {
     raceStore: new RaceStore(),
     distanceStore: new DistanceStore(),
     userStore: new UserStore(),
-    profileStore: new ProfileStore()
+    profileStore: new ProfileStore(),
+    resultStore: new ResultStore(),
+    sponsorStore: new SponsorStore()
 }
 
 export const StoreContext = createContext(store);

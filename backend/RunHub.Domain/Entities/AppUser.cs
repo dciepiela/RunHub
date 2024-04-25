@@ -14,12 +14,13 @@ namespace RunHub.Domain.Entity
         public string Bio { get; set; }
         public string ContactNumber { get; set; }
         public string Club { get; set; }
-        
-        //photo
-        public Photo Photo { get; set; }
 
-        //relation
+        //photo
+        public string PhotoId { get; set; } // Foreign key
+        public Photo Photo { get; set; }
+        //address
         public Address Address { get; set; }
         public ICollection<DistanceAttendee> Distances { get; set; }
+        public ICollection<Result> Results { get; set; }
     }
 }

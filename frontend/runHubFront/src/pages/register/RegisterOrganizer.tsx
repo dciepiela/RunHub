@@ -1,6 +1,5 @@
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useAuth } from "../../app/context/useAuth";
 import { Resolver, useForm } from "react-hook-form";
 import { UserFormRegister } from "../../app/models/user";
 import ReactFlagsSelect from "react-flags-select";
@@ -10,6 +9,7 @@ import { FaInfoCircle } from "react-icons/fa";
 import "react-datepicker/dist/react-datepicker.css";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
+import { useStore } from "../../app/stores/store";
 
 const validation = Yup.object().shape({
   username: Yup.string().required("Nazwa użytkownika jest wymagana"),
@@ -40,9 +40,10 @@ const validation = Yup.object().shape({
   }),
 });
 function RegisterCompetitor() {
-  const { registerUser } = useAuth();
+  const { userStore } = useStore();
+  const { registerUser } = userStore;
+
   const [selectedCountry, setSelectedCountry] = useState("PL");
-  // const [date, setDate] = useState<Date | null>(null);
   const [phone, setPhone] = useState("");
   const [postalCode, setPostalCode] = useState("");
 
@@ -69,7 +70,6 @@ function RegisterCompetitor() {
       /^(\d{2})(\d{0,3})$/,
       "$1-$2"
     );
-
     setPostalCode(formattedPostalCode);
   };
 
@@ -289,8 +289,8 @@ function RegisterCompetitor() {
                     {...register("gender")}
                   >
                     <option value="">Wybierz płeć</option>
-                    <option value="male">Mężczyzna</option>
-                    <option value="female">Kobieta</option>
+                    <option value="M">Mężczyzna</option>
+                    <option value="K">Kobieta</option>
                   </select>
                   {errors.gender ? (
                     <div
@@ -456,7 +456,7 @@ function RegisterCompetitor() {
                     {...register("addressDto.street")}
                   />
                 </div>
-                <div className="py-2">
+                {/* <div className="py-2">
                   <span className="mb-2 text-md">Kraj</span>
                   <input
                     type="text"
@@ -465,7 +465,7 @@ function RegisterCompetitor() {
                     className="w-full p-2 border border-gray-300 rounded-md placeholder:font-light placeholder:text-gray-500"
                     {...register("addressDto.country")}
                   />
-                </div>
+                </div> */}
               </div>
             </div>
             <div className="text-center">

@@ -24,6 +24,10 @@ namespace RunHub.Application.Commands.Races.DeleteRace
 
             if (raceToDelete == null) return null;
 
+            if (raceToDelete.Photo != null)
+            {
+                _context.Remove(raceToDelete.Photo);
+            }
 
             _context.Remove(raceToDelete);
 

@@ -1,6 +1,6 @@
-import { observer } from "mobx-react-lite";
 import contactPhoto from "../../assets/contactPhoto.jpg";
-function Contact() {
+
+export default function Contact() {
   return (
     <div className="md:min-h-[80vh] grid md:grid-cols-2 gap-5 max-w-[1240px] mx-auto items-center">
       <div>
@@ -23,5 +23,3 @@ function Contact() {
     </div>
   );
 }
-
-export default observer(Contact);

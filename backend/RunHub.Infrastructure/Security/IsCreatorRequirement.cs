@@ -15,8 +15,6 @@ namespace RunHub.Infrastructure.Security
     {
         private readonly DataContext _dbContext;
         private readonly IHttpContextAccessor _httpContextAccessor;
-
-
         public IsCreatorRequirementHandler(DataContext dbContext, IHttpContextAccessor httpContextAccessor)
         {
             _dbContext = dbContext;
@@ -33,11 +31,11 @@ namespace RunHub.Infrastructure.Security
             var segments = request.TrimStart('/').Split('/');
             if (segments.Length < 3 || !int.TryParse(segments[2], out int raceId)) return;
 
-                var isCreator = await _dbContext.Races
-                    .AsNoTracking()
-                    .Where(r => r.RaceId == raceId)
-                    .Select(r => r.CreatorAppUser.Id)
-                    .SingleOrDefaultAsync() == userId;
+            var isCreator = await _dbContext.Races
+                .AsNoTracking()
+                .Where(r => r.RaceId == raceId)
+                .Select(r => r.CreatorAppUser.Id)
+                .SingleOrDefaultAsync() == userId;
 
             if (isCreator)
             {

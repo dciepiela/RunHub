@@ -70,13 +70,15 @@ namespace RunHub.API.Extensions
             services.AddApplication();
             //services.AddExceptionHandler<ExceptionHandler>();
 
-            //STRIPE
+            //Stripe
             services.AddScoped<IStripeService, StripeService>();
 
+            //
             services.AddScoped<ITokenService, TokenService>();
             services.AddHttpContextAccessor();
             services.AddScoped<IUserAccessor, UserAccessor>();
             services.AddScoped<IPhotoAccessor, PhotoAccessor>();
+
             services.AddScoped<EmailSender>();
 
             services.Configure<CloudinarySettings>(config.GetSection("Cloudinary"));

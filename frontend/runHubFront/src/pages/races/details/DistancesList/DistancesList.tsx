@@ -5,6 +5,7 @@ import { DistanceStatus, IDistanceDto } from "../../../../app/models/distance";
 import { RaceDto, RaceStatus } from "../../../../app/models/race";
 import CheckoutForm from "../../../../components/payment/CheckoutForm";
 import AttendeesList from "../attendees/AttendeesList";
+import { useMediaQuery } from "react-responsive";
 
 interface Props {
   race: RaceDto;
@@ -14,6 +15,8 @@ interface Props {
 export default observer(function DistancesList({ race, distances }: Props) {
   const { userStore, distanceStore } = useStore();
   const { isLoggedIn } = userStore;
+
+  const isMobile = useMediaQuery({ maxWidth: 768 });
 
   const navigate = useNavigate();
   const {
@@ -38,6 +41,7 @@ export default observer(function DistancesList({ race, distances }: Props) {
             <th className="px-2 md:px-4 py-2 hidden md:block">
               Dostępne miejsca
             </th>
+            <th className="px-2 md:px-4 py-2">Zapisani</th>
             <th className="px-2 md:px-4 py-2">Cena</th>
             {race.raceStatus === RaceStatus.RegistrationOpen && (
               <th className="px-2 md:px-4 py-2">Rejestracja</th>
@@ -68,6 +72,12 @@ export default observer(function DistancesList({ race, distances }: Props) {
               </td>
               <td className="border px-2 md:px-4 py-2 text-center hidden md:table-cell">
                 {distance.availableSlots}/{distance.totalSlots}
+              </td>
+              <td className="border px-2 md:px-4 py-2 text-center">
+                {distance.distanceAttendees &&
+                distance.distanceAttendees.length > 0
+                  ? distance.distanceAttendees?.length
+                  : "Brak zapisanych"}
               </td>
               <td className="border px-2 md:px-4 py-2 text-center">
                 {distance.price} zł
@@ -133,8 +143,12 @@ export default observer(function DistancesList({ race, distances }: Props) {
                     style={{ whiteSpace: "nowrap" }}
                   >
                     {selectedAttendeesDistanceId === distance.distanceId
-                      ? "Ukryj listę startową"
-                      : "Pokaż listę startową"}
+                      ? !isMobile
+                        ? "Ukryj listę startową"
+                        : "Ukryj"
+                      : !isMobile
+                      ? "Pokaż listę startową"
+                      : "Pokaż"}
                   </button>
                 )}
               </td>

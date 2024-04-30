@@ -1,12 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using RunHub.API.Extensions;
 using RunHub.API.Middleware;
-using RunHub.Domain.Entity;
-using RunHub.Persistence;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,15 +19,6 @@ builder.Services.AddControllers(opt =>
     });
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddIdentityServices(builder.Configuration);
-
-//Log.Logger = new LoggerConfiguration()
-//    .MinimumLevel.Information()
-//    .WriteTo.Console()
-//    .WriteTo.File("logs/log-.txt", rollingInterval:RollingInterval.Day)
-//    .CreateLogger();
-
-Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration).CreateLogger();
 
 builder.Host.UseSerilog();
 
@@ -64,19 +51,18 @@ app.MapControllers();
 
 using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
-try
-{
-    var context = services.GetRequiredService<DataContext>();
-    var userManager = services.GetRequiredService<UserManager<AppUser>>();
-    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-    await context.Database.MigrateAsync();
-    await Seed2.SeedData(context, userManager,roleManager);
-}
-catch (Exception ex)
-{
-    var logger = services.GetRequiredService<ILogger<Program>>();
-    logger.LogError(ex, "An error occured during migration");
-}
-
+//try
+//{
+//    var context = services.GetRequiredService<DataContext>();
+//    var userManager = services.GetRequiredService<UserManager<AppUser>>();
+//    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+//    await context.Database.MigrateAsync();
+//    await Seed2.SeedData(context, userManager,roleManager);
+//}
+//catch (Exception ex)
+//{
+//    var logger = services.GetRequiredService<ILogger<Program>>();
+//    logger.LogError(ex, "An error occured during migration");
+//}
 
 app.Run();

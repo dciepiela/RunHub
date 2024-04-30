@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Button, Sidebar } from "flowbite-react";
 import { HiChartPie, HiHome, HiMenu, HiX } from "react-icons/hi";
 import { FaRunning } from "react-icons/fa";
@@ -12,13 +13,11 @@ import { FcSportsMode } from "react-icons/fc";
 
 export default observer(function DashboardSideBar() {
   const {
-    userStore: { user },
+    userStore: { user, logout },
   } = useStore();
   const [isOpen, setIsOpen] = useState(true); // Domyślnie pasek otwarty
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1000);
 
-  // Aktualizacja stanu isMobile w zależności od szerokości okna
-  // Function to handle resizing and adjust sidebar visibility
   const handleResize = () => {
     const mobile = window.innerWidth < 1000;
     setIsMobile(mobile);
@@ -32,7 +31,8 @@ export default observer(function DashboardSideBar() {
     window.addEventListener("resize", handleResize);
     // updateMedia(); // Wywołanie przy montowaniu
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [handleResize]);
+
   return (
     <>
       {/* Przycisk tylko dla urządzeń mobilnych */}
@@ -70,7 +70,7 @@ export default observer(function DashboardSideBar() {
               <p>Wszystkie biegi</p>
             </Sidebar.Item>
             <Sidebar.Item href="/admin/dashboard/create" icon={IoMdAdd}>
-              <p>Utwórz nowy bieg</p>
+              <p>Dodaj bieg</p>
             </Sidebar.Item>
             <Sidebar.Item href="/admin/dashboard/results" icon={MdSportsScore}>
               <p>Uzupełnij wyniki</p>
@@ -81,8 +81,8 @@ export default observer(function DashboardSideBar() {
             <Sidebar.Item href="/" icon={HiHome}>
               <p>Strona główna</p>
             </Sidebar.Item>
-            <Sidebar.Item href="/logout" icon={CiLogout}>
-              <p>Wyloguj</p>
+            <Sidebar.Item href="/" icon={CiLogout}>
+              <p onClick={logout}>Wyloguj</p>
             </Sidebar.Item>
           </Sidebar.ItemGroup>
         </Sidebar.Items>

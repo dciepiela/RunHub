@@ -57,7 +57,5 @@ namespace RunHub.Application.Photos
                 return Result<Photo>.Failure("Problem z dodniem zdjęcia");
             }
         }
-
-
     }
 }

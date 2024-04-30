@@ -24,7 +24,6 @@ export default class SponsorStore {
         return this.sponsorRegistry.get(sponsorId);
     }
 
-    // Load all sponsors for a specific race
     loadSponsors = async (raceId:number) => {
         this.loadingInitial = true;
         try {
@@ -32,13 +31,12 @@ export default class SponsorStore {
             runInAction(() => {
                 this.sponsorRegistry.clear(); // Clear existing data
                 sponsors.forEach(sponsor => {
-                // this.sponsorRegistry.set(sponsor.sponsorId!,  new SponsorDto(sponsor) /*sponsor*/ );
                     this.setSponsor(sponsor)
                 });
                 this.loadingInitial = false;
             });
         } catch (error) {
-            console.error('Failed to load sponsors:', error);
+            console.error(error);
             this.loadingInitial = false;
         }
     };
@@ -55,12 +53,11 @@ export default class SponsorStore {
                 this.setSponsor(sponsor)
                 runInAction(() => {
                     this.selectedSponsor = sponsor;
-                    // this.sponsorRegistry.set(sponsorId, sponsorData);
                     this.loadingInitial = false;
                 });
                 return sponsor;
             } catch (error) {
-                console.error('Błąd przy ładowaniu sponsora:', error);
+                console.error(error);
                 throw error;
             }
         }
@@ -71,17 +68,14 @@ export default class SponsorStore {
             await agent.Sponsors.update(raceId, sponsorId, sponsorData);
             runInAction(() => {
                 if (sponsorData.sponsorId) {
-                    // this.sponsorRegistry.set(sponsorId, new SponsorDto({ ...existingSponsor, ...updatedData }));
                     const updatedSponsor = {...this.getSponsor(sponsorData.sponsorId), ...sponsorData}
                     this.sponsorRegistry.set(sponsorData.sponsorId, updatedSponsor as SponsorDto)
                     this.sponsorRegistry.set(sponsorId!, updatedSponsor as SponsorDto)
                     this.selectedSponsor = updatedSponsor as SponsorDto;
                 }
-
             });
         } catch (error) {
-            console.error('Failed to update sponsor:', error);
-            throw error;
+            console.error( error);
         }
     };
 
@@ -91,11 +85,9 @@ export default class SponsorStore {
             await agent.Sponsors.create(raceId, sponsor);
             runInAction(() => {
                 const newSponsorDto = new SponsorDto(sponsor);
-
                 this.setSponsor(newSponsorDto);
                 this.selectedSponsor = newSponsorDto;
                 this.loading = false;
-                // router.navigate("/races"); // Update this route as necessary
             });
         } catch (error:any) {
             console.error('Error creating sponsor:', error);

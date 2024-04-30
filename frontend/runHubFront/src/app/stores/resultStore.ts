@@ -7,13 +7,10 @@ export default class ResultStore {
     loading = false;
     loadError = null;
 
-
     constructor() {
         makeAutoObservable(this);
-
     }
 
-    // Inside ResultStore class
     get results() {
         return Array.from(this.resultRegistry.values());
     }
@@ -42,14 +39,12 @@ export default class ResultStore {
     updateResult = async (resultId: number, field: keyof Result, value: any, distanceId: number) => {
         try {
             await agent.Results.update(resultId, field, value);
-            // Optionally fetch all results again if needed (especially for fields affecting multiple records)
             if (field === 'time') {
                 const updatedResults = await agent.Results.resultsForDistance(distanceId);
                 runInAction(() => {
                     updatedResults.forEach(result => {
                         this.resultRegistry.set(result.resultId, result);
                     });
-                    console.log("All related results updated");
                 });
             } else {
                 const result = this.resultRegistry.get(resultId);
@@ -58,11 +53,11 @@ export default class ResultStore {
                         (result as any)[field] = value;
                         this.resultRegistry.set(resultId, result);
                     });
-                    console.log("Result updated:", result);
+                    console.log(result);
                 }
             }
         } catch (error) {
-            console.error('Error updating result:', error);
+            console.log(error);
             throw error;
         }
     }
@@ -82,7 +77,7 @@ export default class ResultStore {
             })
         }
     }  
-    // Clear the result registry
+
     clearResults = () => {
         this.resultRegistry.clear();
     }

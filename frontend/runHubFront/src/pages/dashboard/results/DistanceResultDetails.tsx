@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   ColumnFilter,
   Row,
@@ -18,9 +18,11 @@ import { useStore } from "../../../app/stores/store";
 import { observer } from "mobx-react-lite";
 import Filters from "../../results/Table/Filters";
 import { Result } from "../../../app/models/result";
+import { Button } from "flowbite-react";
 
 export default observer(function DistanceResultDetails() {
   const { resultStore } = useStore();
+  const navigate = useNavigate();
   const {
     loadResults,
     resultsByPlace,
@@ -42,7 +44,6 @@ export default observer(function DistanceResultDetails() {
   const columns = [
     columnHelperResult.accessor("place", {
       header: "Miejsce open",
-      // cell: (info) => <EditableCell {...info} updateData={updateResultData} />,
       cell: (info) => info.getValue(),
     }),
     columnHelperResult.accessor("firstName", {
@@ -54,7 +55,7 @@ export default observer(function DistanceResultDetails() {
       cell: (info) => info.getValue(),
     }),
     columnHelperResult.accessor("time", {
-      header: "Czas",
+      header: "Czas (h-m-s)",
       cell: (info) => (
         <EditableCell
           {...info}
@@ -119,7 +120,7 @@ export default observer(function DistanceResultDetails() {
           filter="lastName"
           placeHolder="Wyszukaj wg. nazwiska"
         />
-        <DownloadBtn data={resultsByPlace} fileName="results" />
+        <DownloadBtn data={resultsByPlace} fileName={`wyniki`} />
       </div>
       <table className="border border-deepBlack w-full text-left">
         <thead className="bg-lightYellow">
@@ -228,6 +229,14 @@ export default observer(function DistanceResultDetails() {
           ))}
         </select>
       </div>
+      <Button
+        type="button"
+        color="failure"
+        onClick={() => navigate(-1)}
+        className="w-full text-white py-2 px-4 mt-2 rounded"
+      >
+        Wróć
+      </Button>
     </div>
   );
 });

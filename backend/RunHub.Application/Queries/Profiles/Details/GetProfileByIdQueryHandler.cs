@@ -1,11 +1,8 @@
 ﻿using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using RunHub.Contracts.DTOs.Distance;
-using RunHub.Contracts.DTOs.DistanceAttendee;
 using RunHub.Contracts.DTOs.Profile;
 using RunHub.Contracts.Errors;
-using RunHub.Domain.Entity;
 using RunHub.Persistence;
 
 namespace RunHub.Application.Queries.Profiles.Details
@@ -23,6 +20,7 @@ namespace RunHub.Application.Queries.Profiles.Details
         {
             var user = await _context.Users
                 .Include(u => u.Photo)
+                .Include(u=> u.Address)
                 .SingleOrDefaultAsync(x => x.UserName == request.UserName);
 
             if(user == null)

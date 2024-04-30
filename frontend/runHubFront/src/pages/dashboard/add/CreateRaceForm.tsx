@@ -108,7 +108,7 @@ export default observer(function CreateRaceForm() {
 
                   <div className="mb-4">
                     <CustomDateTimeInput
-                      labelText="Koniec zapisów"
+                      labelText="Data końca zapisów"
                       placeholderText="Koniec zapisów"
                       name="registrationEndDate"
                       showTimeSelect

@@ -19,6 +19,9 @@ export default observer(function ProfileEditForm({ setEditMode }: Props) {
     firstName: profile?.firstName || "",
     lastName: profile?.lastName || "",
     club: profile?.club || "",
+    city: profile?.city || "",
+    street: profile?.street || "",
+    postalCode: profile?.postalCode || "",
     bio: profile?.bio || "",
   };
   return (
@@ -60,6 +63,24 @@ export default observer(function ProfileEditForm({ setEditMode }: Props) {
             name="club"
             type="text"
             placeholder="Wprowadź nazwę klubu"
+          />
+          <CustomInput
+            label="Miasto"
+            name="city"
+            type="text"
+            placeholder="Wprowadź miasto"
+          />
+          <CustomInput
+            label="Ulica"
+            name="street"
+            type="text"
+            placeholder="Wprowadź ulicę"
+          />
+          <CustomInput
+            label="Kod pocztowy"
+            name="postalCode"
+            type="text"
+            placeholder="Wprowadź kod pocztowy"
           />
           <CustomTextarea
             label="Bio"

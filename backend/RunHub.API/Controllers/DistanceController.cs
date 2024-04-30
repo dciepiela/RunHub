@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using RunHub.Application.Commands.DistanceAttendees.Attend;
 using RunHub.Application.Commands.DistanceAttendees.AttendManually;
 using RunHub.Application.Commands.DistanceAttendees.AttendWithPayment;
 using RunHub.Application.Commands.Distances.CreateDistance;
@@ -12,7 +11,6 @@ using RunHub.Application.Queries.Attendance;
 using RunHub.Application.Queries.Distances.GetAllDistances;
 using RunHub.Application.Queries.Distances.GetDistanceById;
 using RunHub.Application.Queries.Distances.GetDistances;
-using RunHub.Application.Queries.Results.GetResultsForDistance;
 using RunHub.Contracts.DTOs.Distance;
 using RunHub.Contracts.DTOs.DistanceAttendee.Manually;
 using RunHub.Contracts.DTOs.Payments;
@@ -22,14 +20,6 @@ namespace RunHub.API.Controllers
     [Route("api/distances")]
     public class DistanceController : BaseApiController
     {
-        private readonly ILogger<DistanceController> _logger;
-
-        public DistanceController(ILogger<DistanceController> logger)
-        {
-
-            _logger = logger;
-        }
-
         [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetAllDistances(CancellationToken ct)
@@ -47,7 +37,6 @@ namespace RunHub.API.Controllers
         }
 
         [AllowAnonymous]
-
         [HttpGet("{raceId}/{distanceId}")]
         public async Task<IActionResult> GetDistanceById(int raceId, int distanceId, CancellationToken ct)
         {
@@ -66,6 +55,7 @@ namespace RunHub.API.Controllers
             return HandleResult(result);
         }
 
+        [Authorize(Policy = "IsRaceCreator")]
         [HttpPut("{raceId}/{distanceId}")]
         public async Task<IActionResult> EditDistance(int raceId, int distanceId, UpdateDistanceDto distanceDto, CancellationToken ct)
         {
@@ -86,7 +76,6 @@ namespace RunHub.API.Controllers
             return HandleResult(result);
         }
 
-        //GetDistanceAttendees
         [AllowAnonymous]
         [HttpGet("{raceId}/{distanceId}/attendees")]
         public async Task<IActionResult> GetDistanceAttendees(int raceId, int distanceId, CancellationToken ct)
@@ -97,34 +86,22 @@ namespace RunHub.API.Controllers
             return HandleResult(result);
         }
 
-        //Attend
-        [HttpPost("{raceId}/{distanceId}/attend")]
-        public async Task<IActionResult> Attend([FromRoute] int raceId, [FromRoute] int distanceId, CancellationToken ct)
-        {
-            var command = new UpdateAttendeeCommand(raceId, distanceId);
-            var result = await Mediator.Send(command,ct);
-            return HandleResult(result);
-        }
-
         [HttpPost("{raceId}/{distanceId}/attendWithPayment")]
         public async Task<IActionResult> AttendWithPayment(int raceId, int distanceId, [FromBody] StripePaymentDto paymentDto)
         {
             if (paymentDto == null)
             {
-                _logger.LogError("Payment details are missing in the request.");
-                return BadRequest("Payment details are required.");
+                return BadRequest("Szczegóły płatności są wymagane.");
             }
 
             if (string.IsNullOrWhiteSpace(paymentDto.StripeToken))
             {
-                _logger.LogError("Stripe token is missing in the payment details.");
-                return BadRequest("Stripe token is required.");
+                return BadRequest("Stripe token jest wymagany.");
             }
 
             if (paymentDto.Amount <= 0)
             {
-                _logger.LogError("Invalid payment amount: {Amount}", paymentDto.Amount);
-                return BadRequest("Amount must be greater than zero.");
+                return BadRequest("Kwota musi być większa od 0.");
             }
 
             var command = new UpdateAttendeePaymentCommand(raceId, distanceId, paymentDto.StripeToken, paymentDto.Amount);
@@ -133,6 +110,7 @@ namespace RunHub.API.Controllers
 
         }
 
+        [Authorize(Policy = "IsRaceCreator")]
         [HttpPost("{raceId}/{distanceId}/attendManually")]
         public async Task<IActionResult> ManualRegistration(int raceId, int distanceId, ManualRegistrationDto registrationDto)
         {
@@ -142,7 +120,6 @@ namespace RunHub.API.Controllers
             return HandleResult(result);
         }
 
-        [AllowAnonymous]
         [HttpPut("{distanceId}/show")]
         public async Task<IActionResult> ToggleIsReadyToShow(int distanceId, UpdateIsReadyToShowDto showDto, CancellationToken ct)
         {
@@ -152,7 +129,6 @@ namespace RunHub.API.Controllers
         }
 
         //generateReportIncome
-        [AllowAnonymous]
         [HttpPost("{distanceId}/generateReportIncome")]
         public async Task<IActionResult> GenerateDistanceIncomeReport(int distanceId, CancellationToken ct)
         {

@@ -19,7 +19,7 @@ export default observer(function RaceDetailsInfo({
               <h2 className="text-2xl mb-2 font-bold text-green-500">
                 Jesteś organizatorem tego wydarzenia
               </h2>
-              <Link to={`/admin/dashboard/races/edit/${race.raceId}`}>
+              <Link to={`/admin/dashboard/races`}>
                 <button className="px-2 py-2 mx-auto uppercase mb-2">
                   Edytuj
                 </button>

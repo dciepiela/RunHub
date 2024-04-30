@@ -23,7 +23,7 @@ namespace RunHub.Infrastructure.Payment
                 {
                     Email = email,
                     Name = $"{firstName} {lastName}",
-                    Source = stripeToken // This might be updated based on Stripe API changes to use PaymentMethod
+                    Source = stripeToken
                 };
 
                 var service = new CustomerService();

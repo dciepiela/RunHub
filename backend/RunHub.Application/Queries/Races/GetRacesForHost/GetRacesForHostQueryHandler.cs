@@ -33,6 +33,7 @@ namespace RunHub.Application.Queries.Races.GetRacesForHost
             }
 
             var races = await _context.Races
+                .Include(r => r.Address)
                 .Where(x => x.CreatorAppUser.UserName ==  _userAccessor.GetUsername())
                 .AsQueryable()
                 .ToListAsync(cancellationToken);

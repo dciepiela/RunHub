@@ -6,7 +6,6 @@ import About from "../../pages/about/About";
 import Results from "../../pages/results/Results";
 import Login from "../../pages/login/Login";
 import RegisterCompetitor from "../../pages/register/RegisterCompetitor";
-import ProtectedRoute from "./ProtectedRoute";
 import RegisterOrganizer from "../../pages/register/RegisterOrganizer";
 import DashboardLayout from "../../pages/dashboard/DashboardLayout";
 import TestErrors from "../../pages/errors/TestError";
@@ -16,7 +15,6 @@ import RaceDetails from "../../pages/races/details/RaceDetails";
 import Races from "../../pages/races/Races";
 import CreateRaceForm from "../../pages/dashboard/add/CreateRaceForm";
 import ProfilePage from "../../pages/profiles/ProfilePage";
-import RequireAuth from "./RequireAuth";
 import ResetPasswordForm from "../../pages/login/ResetPasswordForm";
 import ForgotPasswordForm from "../../pages/login/ForgotPasswordForm";
 import PaymentSuccessPage from "../../components/payment/PaymentSuccessPage";
@@ -39,7 +37,6 @@ export const routes: RouteObject[] = [
     element: <App />,
     children: [
       {
-        // element: <RequireAuth />,
         children: [
           {
             path: "contact",
@@ -67,11 +64,7 @@ export const routes: RouteObject[] = [
       },
       {
         path: "about",
-        element: (
-          // <ProtectedRoute allowedRoles={["Organizer", "Competitor"]}>
-          <About />
-          // </ProtectedRoute>
-        ),
+        element: <About />,
       },
       {
         path: "login",
@@ -109,21 +102,15 @@ export const routes: RouteObject[] = [
         path: "payment-success",
         element: <PaymentSuccessPage />,
       },
+      //dashboard
       {
         path: `/admin/dashboard`,
-        element: (
-          // <ProtectedRoute allowedRoles={["Organizer"]}>
-          <DashboardLayout />
-        ),
+        element: <DashboardLayout />,
         children: [
           {
             path: "/admin/dashboard",
             element: <DashboardMain />,
           },
-          // {
-          //   path: "/admin/dashboard/edit/:raceId",
-          //   element: <CreateRaceForm key="edit" />,
-          // },
           {
             path: "/admin/dashboard/results",
             element: <DashboardResult />,
@@ -176,17 +163,8 @@ export const routes: RouteObject[] = [
             path: "/admin/dashboard/races/:raceId/distances/:distanceId/addCompetitor",
             element: <AddAttendanceManually />,
           },
-
-          // {
-          //   path: "/admin/dashboard/edit-race/:id",
-          //   element: <EditRaces />,
-          //   loader: ({ params }) =>
-          //     fetch(`http://localhost:5000/races/${params.id}`),
-          // },
         ],
-        // </ProtectedRoute>
       },
-
       { path: "*", element: <Navigate replace to="/not-found" /> },
     ],
   },

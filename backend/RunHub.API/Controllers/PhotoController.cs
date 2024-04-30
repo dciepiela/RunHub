@@ -15,14 +15,6 @@ namespace RunHub.API.Controllers
             return HandleResult(result);
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(string id)
-        {
-            var result = await Mediator.Send(new Delete.DeletePhotoCommand(id));
-            return HandleResult(result);
-        }
-
-
         [HttpPost("{raceId}/photoRace")]
         public async Task<IActionResult> AddRacePhoto(int raceId, [FromForm] AddRacePhotoCommand command)
         {
@@ -30,5 +22,13 @@ namespace RunHub.API.Controllers
             var result = await Mediator.Send(command);
             return HandleResult(result);
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePhoto(string id)
+        {
+            var result = await Mediator.Send(new Delete.DeletePhotoCommand(id));
+            return HandleResult(result);
+        }
+
     }
 }

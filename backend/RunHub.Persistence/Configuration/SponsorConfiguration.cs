@@ -8,7 +8,6 @@ namespace RunHub.Persistence.Configuration
     {
         public void Configure(EntityTypeBuilder<Sponsor> eb)
         {
-            // One-to-Many relationship between Race and Sponsor
             eb.HasOne(s => s.Race)
                 .WithMany(r => r.Sponsors)
                 .HasForeignKey(s => s.RaceId);

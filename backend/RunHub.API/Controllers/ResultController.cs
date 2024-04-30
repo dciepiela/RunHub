@@ -13,7 +13,6 @@ namespace RunHub.API.Controllers
 
     public class ResultController : BaseApiController
     {
-
         [AllowAnonymous]
         [HttpGet("distance/{distanceId}")]
         public async Task<IActionResult> GetResultsForDistance(int distanceId, CancellationToken ct)
@@ -22,27 +21,10 @@ namespace RunHub.API.Controllers
             return HandleResult(distances);
         }
 
-        [AllowAnonymous]
-        [HttpGet("{raceId}")]
-        public async Task<IActionResult> GetDistances(int raceId, CancellationToken ct)
-        {
-            var distances = await Mediator.Send(new GetDistancesQuery(raceId), ct);
-            return HandleResult(distances);
-        }
-
-        [AllowAnonymous]
-        [HttpGet("{raceId}/{distanceId}")]
-        public async Task<IActionResult> GetDistanceById(int raceId, int distanceId, CancellationToken ct)
-        {
-            var distance = await Mediator.Send(new GetDistanceByIdQuery(raceId, distanceId), ct);
-
-            return HandleResult(distance);
-        }
-
         [HttpPut("update/{resultId}")]
-        public async Task<IActionResult> UpdateResult(int resultId, [FromBody] UpdateResultDto dto, CancellationToken ct)
+        public async Task<IActionResult> UpdateResult(int resultId, [FromBody] UpdateResultDto resultDto, CancellationToken ct)
         {
-            var command = new UpdateResultCommand(resultId, dto.Time, dto.Place,dto.PlaceGender);
+            var command = new UpdateResultCommand(resultId, resultDto.Time, resultDto.Place, resultDto.PlaceGender);
             var result = await Mediator.Send(command, ct);
             return HandleResult(result);
         }

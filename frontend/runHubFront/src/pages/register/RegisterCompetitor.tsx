@@ -16,7 +16,6 @@ import {
 } from "react-icons/fa";
 import { CiFlag1, CiPhone, CiLogin } from "react-icons/ci";
 import { BsCalendarDate, BsGenderMale } from "react-icons/bs";
-
 import { RiLockPasswordLine } from "react-icons/ri";
 import { AiOutlineMail } from "react-icons/ai";
 import "react-datepicker/dist/react-datepicker.css";
@@ -33,7 +32,6 @@ const validation = Yup.object().shape({
   lastName: Yup.string().required("Nazwisko jest wymagane"),
   gender: Yup.string().required("Płeć jest wymagana"),
   dateOfBirth: Yup.string().required("Data urodzenia jest wymagana"),
-  // nationality: Yup.string().required("Narodowość jest wymagana"),
   contactNumber: Yup.string().required("Numer kontaktowy jest wymagany"),
   club: Yup.string(),
   password: Yup.string()

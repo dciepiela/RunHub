@@ -10,18 +10,15 @@ namespace RunHub.Persistence
         public DataContext(DbContextOptions options) : base(options) { }
 
         public DbSet<Address> Addresses { get; set; }
-        //public DbSet<AgeGroup> AgeGroups { get; set; }
         public DbSet<Distance> Distances { get; set; }
         public DbSet<DistanceAttendee> DistanceAttendees { get; set; }
         public DbSet<Race> Races { get; set; }
-        //public DbSet<RaceAgeGroup> RaceAgeGroups { get; set; }
         public DbSet<Result> Results { get; set; }
         public DbSet<Sponsor> Sponsors { get; set; }
         public DbSet<Photo> Photos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Define relationships here
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(this.GetType().Assembly);
         }

@@ -12,6 +12,7 @@ import CustomTextarea from "../../../../components/formik/CustomTextarea";
 import CustomDateTimeInput from "../../../../components/formik/CustomDateTimeInput";
 import CustomSelect from "../../../../components/formik/CustomSelect";
 import {
+  RaceFormValues,
   raceStatusOptions,
   raceTypeOptions,
 } from "../../../../app/models/race";
@@ -45,7 +46,7 @@ const validationSchema = Yup.object().shape({
 export default observer(function RaceEditForm({ raceId }: Props) {
   const navigate = useNavigate();
   const { raceStore } = useStore();
-  const { loadRace, updateRace2, selectedRace } = raceStore;
+  const { loadRace, updateRace, selectedRace } = raceStore;
 
   useEffect(() => {
     if (raceId) {
@@ -62,10 +63,10 @@ export default observer(function RaceEditForm({ raceId }: Props) {
       </h2>
       <Formik
         initialValues={selectedRace}
-        validationSchema={validationSchema}
         enableReinitialize
+        validationSchema={validationSchema}
         onSubmit={(values) => {
-          updateRace2(raceId, values).then(() => {
+          updateRace(raceId, values as RaceFormValues).then(() => {
             toast.success("Zaaktualizowano dane biegu");
             navigate(-1);
           });
@@ -89,36 +90,33 @@ export default observer(function RaceEditForm({ raceId }: Props) {
             </div>
             <div>
               <CustomDateTimeInput
-                labelText="Koniec zapisów"
-                placeholderText="Date"
+                labelText="Data końca zapisów"
+                placeholderText="Koniec zapisów"
                 name="registrationEndDate"
                 showTimeSelect
                 timeCaption="time"
-                dateFormat="MMMM d, yyyy h:mm"
+                dateFormat="MMMM d, yyyy HH:mm"
               />
             </div>
             <div>
               <CustomDateTimeInput
-                labelText="Początek biegu"
-                placeholderText="Date"
+                labelText="Data początku biegu"
+                placeholderText="Początek biegu"
                 name="startDateRace"
                 showTimeSelect
                 timeCaption="time"
-                dateFormat="MMMM d, yyyy h:mm"
+                dateFormat="MMMM d, yyyy HH:mm"
               />
             </div>
             <div>
               <CustomDateTimeInput
-                labelText="Koniec biegu"
-                placeholderText="Date"
+                labelText="Data końca biegu"
+                placeholderText="Zakończenie biegu"
                 name="endDateRace"
                 showTimeSelect
                 timeCaption="time"
-                dateFormat="MMMM d, yyyy h:mm"
+                dateFormat="MMMM d, yyyy HH:mm"
               />
-            </div>
-            <div>
-              <CustomInput name="image" placeholder="Zdjęcie" label="Zdjęcie" />
             </div>
             <div>
               <CustomSelect

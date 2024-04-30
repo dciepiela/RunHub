@@ -32,7 +32,10 @@ export default function CustomPagination({ table, totalItems }: Props) {
         <span className="text-xs md:text-base flex items-center gap-1">
           <div>Strona</div>
           <strong>
-            {table.getState().pagination.pageIndex + 1} z {table.getPageCount()}
+            {table.getPageCount() === 0
+              ? table.getState().pagination.pageIndex
+              : table.getState().pagination.pageIndex + 1}{" "}
+            z {table.getPageCount()}
           </strong>
         </span>
         <span className="text-xs md:text-base flex items-center gap-1">
@@ -46,11 +49,10 @@ export default function CustomPagination({ table, totalItems }: Props) {
               );
               let page = parseInt(e.target.value);
               if (isNaN(page) || page < 1) {
-                page = 1; // Set to first page if NaN or less than 1
+                page = 1;
               } else if (page > totalPages) {
-                page = totalPages; // Set to last page if greater than total pages
+                page = totalPages;
               }
-              // Ensure page value stays within bounds
               e.target.value = page.toString();
               table.setPageIndex(page - 1);
             }}

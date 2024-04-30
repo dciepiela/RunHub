@@ -8,7 +8,6 @@ namespace RunHub.Persistence.Configuration
     {
         public void Configure(EntityTypeBuilder<AppUser> eb)
         {
-            // One-to-One relationship between AppUser and Address
             eb.HasOne(a => a.Address)
                 .WithOne(u => u.AppUser)
                 .HasForeignKey<Address>(u => u.AppUserId)

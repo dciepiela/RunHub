@@ -22,10 +22,6 @@ namespace RunHub.Application.Queries.Races.GetRaces
         {
             var getRacesQuery = _context.Races
                 .Include(r => r.Photo)
-                //.Include(r => r.Distances)
-                //    .ThenInclude(d => d.DistanceAttendees)
-                //        .ThenInclude(da => da.Participator)
-                            //.ThenInclude(p => p.Photo)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(request.SearchName))
@@ -41,7 +37,8 @@ namespace RunHub.Application.Queries.Races.GetRaces
                 }
             }
 
-            var paginatedList = await PaginetedList<RaceDto>.CreateAsync(getRacesQuery.ProjectToType<RaceDto>(), request.PaginationParams.PageNumber, request.PaginationParams.PageSize); 
+            var paginatedList = await PaginetedList<RaceDto>.CreateAsync(getRacesQuery.ProjectToType<RaceDto>(), request.PaginationParams.PageNumber, 
+                request.PaginationParams.PageSize); 
             
             return Result<PaginetedList<RaceDto>>.Success(paginatedList);
         }

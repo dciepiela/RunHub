@@ -12,6 +12,9 @@ namespace RunHub.Contracts.DTOs.Profile
         public int DateOfBirth {  get; set; }
         public string Bio { get; set; }
         public string Image { get; set; }
+        public string City {  get; set; }
+        public string Street { get; set; }
+        public string PostalCode {  get; set; }
         public Photo Photo { get; set; }
     }
 }

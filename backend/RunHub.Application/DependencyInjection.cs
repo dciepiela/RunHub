@@ -13,8 +13,6 @@ namespace RunHub.Application
             services.AddMediatR(config =>
             {
                 config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
-
-                //config.AddOpenBehavior(typeof(ValidationBehavior<,>)); //it will be generic so ,
             });
 
             MappingConfig.Configure();

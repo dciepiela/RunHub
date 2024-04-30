@@ -37,8 +37,6 @@ namespace RunHub.API.Controllers
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            //var user = await _userManager.Users.FirstOrDefaultAsync(u => u.UserName == loginDto.Username.ToLower());
-
             var user = await _userManager.Users
                 .Include(p => p.Photo)
                 .FirstOrDefaultAsync(x => x.Email == loginDto.Email);
@@ -52,9 +50,8 @@ namespace RunHub.API.Controllers
             {
                 return Ok(CreateUserObject(user));
             }
-            //return Unauthorized("Username not found and/or password incorrect");
-            return Unauthorized("Niepoprawne hasło!");
 
+            return Unauthorized("Niepoprawne hasło!");
         }
 
         [AllowAnonymous]
@@ -139,26 +136,22 @@ namespace RunHub.API.Controllers
 
         [Authorize]
         [HttpPost("changePassword")]
-        public async Task<IActionResult> ChangePassword(ChangePasswordDto changePasswordDto)
+        public async Task<IActionResult> ChangePassword(ChangePasswordDto passwordDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // Get the currently logged-in user
             var user = await _userManager.GetUserAsync(User);
-            if (user == null) return Unauthorized("User not found.");
+            if (user == null) return Unauthorized("Użytkownik nie znaleziony.");
 
-            // Change the user's password
-            var result = await _userManager.ChangePasswordAsync(user, changePasswordDto.CurrentPassword, changePasswordDto.NewPassword);
+            var result = await _userManager.ChangePasswordAsync(user, passwordDto.CurrentPassword, passwordDto.NewPassword);
 
-            // Check if the operation succeeded
             if (result.Succeeded)
             {
                 return Ok("Hasło zostało zmienione pomyślnie");
             }
             else
             {
-                // If it failed, add the errors to the ModelState and return it
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
@@ -169,47 +162,38 @@ namespace RunHub.API.Controllers
 
         [AllowAnonymous]
         [HttpPost("forgotPassword")]
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordDto forgotPasswordDto)
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordDto passwordDto)
         {
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var user = await _userManager.FindByEmailAsync(forgotPasswordDto.Email);
+            var user = await _userManager.FindByEmailAsync(passwordDto.Email);
             if (user == null)
-                // Optionally, consider returning Ok() to avoid enumeration attacks
-                return Ok("If an account with this email exists, a reset link has been sent.");
+                return Ok("Jeśli użytkownik istniej, zostanie wysłany link resetujący.");
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            // Encode the token to be URL safe
             var encodedToken = Uri.EscapeDataString(token);
 
-            // Debug log the token
-            Log.Information("Received Token for Validation => {@encodedToken}", encodedToken);
             var emailSender = _serviceProvider.GetRequiredService<EmailSender>();
             await emailSender.SendPasswordResetEmailAsync(user.Email, encodedToken);
 
-            return Ok("A reset link has been sent.");
+            return Ok("Link resetujący został wysłany");
         }
 
         [AllowAnonymous]
         [HttpPost("resetPassword")]
-        public async Task<IActionResult> ResetPassword(ResetPasswordDto resetPasswordDto)
+        public async Task<IActionResult> ResetPassword(ResetPasswordDto passwordDto)
         {
-            var user = await _userManager.FindByEmailAsync(resetPasswordDto.Email);
-            if (user == null) return BadRequest("Invalid request");
+            var user = await _userManager.FindByEmailAsync(passwordDto.Email);
+            if (user == null) return BadRequest();
 
-            // Decode the token received from the request
-            var decodedToken = Uri.UnescapeDataString(resetPasswordDto.Token);
+            var decodedToken = Uri.UnescapeDataString(passwordDto.Token);
 
-            //Log.Information($"Received Token for Validation: {decodedToken}");
-            Log.Information("Received Token for Validation => {@decodedToken}",decodedToken);
-            //_logger.LogInformation($"Received Token for Validation: {decodedToken}");
-
-            var result = await _userManager.ResetPasswordAsync(user, decodedToken, resetPasswordDto.NewPassword);
+            var result = await _userManager.ResetPasswordAsync(user, decodedToken, passwordDto.NewPassword);
             if (result.Succeeded)
             {
-                return Ok("Password has been reset successfully");
+                return Ok("Hasło zostało zresetowane pomyślnie");
             }
             else
             {
@@ -233,10 +217,8 @@ namespace RunHub.API.Controllers
 
         private IList<string> GetUserRoles(AppUser appUser)
         {
-            // Get user manager instance
             var userManager = _serviceProvider.GetRequiredService<UserManager<AppUser>>();
 
-            // Get roles associated with the user
             var userRoles = userManager.GetRolesAsync(appUser).Result;
 
             return userRoles.ToList();

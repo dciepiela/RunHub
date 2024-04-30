@@ -35,8 +35,11 @@ namespace RunHub.Application.Commands.Races.UpdateOnlyRace
             // Update address properties if provided
             if (request.RaceDto.AddressDto != null)
             {
-                race.Address = request.RaceDto.AddressDto.Adapt<Address>(); // Assuming you are using a mapping library like Mapster
+                race.Address = request.RaceDto.AddressDto.Adapt<Address>();
+                _context.Addresses.Update(race.Address);
             }
+
+            _context.Races.Update(race);
 
             var result = await _context.SaveChangesAsync() > 0;
 

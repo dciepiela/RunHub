@@ -26,8 +26,6 @@ export default observer(function ProfileHeader({ profile }: Props) {
               {profile.displayName}
             </h1>
           </div>
-
-          {/* <button className="px-4 py-2 rounded-lg">Click me</button> */}
         </div>
         <p className="mt-4 text-sm md:text-md font-bold text-gray-800 ">
           {truncate(profile.bio)}

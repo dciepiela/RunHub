@@ -69,12 +69,12 @@ export default observer(function ProfileDistances() {
         <div className="flex justify-center items-center">
           <FaCalendar className="mr-2 md:mr-4" />
           <h1 className="font-bold text-md md:text-3xl">
-            Informacje o {profile?.displayName}
+            Biegi {profile?.displayName}
           </h1>
         </div>
         <div>
-          <div className="border-b border-gray-200">
-            <ul className="flex -mb-px text-sm font-medium text-center text-gray-500 overflow-x-auto">
+          <div className="border-b border-mediumGray">
+            <ul className="flex -mb-px text-sm font-medium text-center text-darkGray overflow-x-auto">
               {panes.map((pane, index) =>
                 user?.role === "Organizer" || pane.condition(user?.role) ? (
                   <li key={index} className="mr-2">
@@ -82,8 +82,8 @@ export default observer(function ProfileDistances() {
                       onClick={() => handleTabChange(index)}
                       className={`text-black inline-block p-2 md:p-4 rounded-t-lg border-b-2 ${
                         activeTabIndex === index
-                          ? "bg-mediumGray text-black"
-                          : "border-transparent hover:text-gray-600 hover:border-gray-300"
+                          ? "border-transparent hover:text-gray-600 hover:border-gray-300"
+                          : "bg-mediumGray text-black"
                       }`}
                       disabled={activeTabIndex === index}
                     >

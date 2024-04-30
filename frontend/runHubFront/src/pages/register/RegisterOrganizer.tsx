@@ -20,8 +20,6 @@ const validation = Yup.object().shape({
   lastName: Yup.string().required("Nazwisko jest wymagane"),
   gender: Yup.string().required("Płeć jest wymagana"),
   dateOfBirth: Yup.string().required("Data urodzenia jest wymagana"),
-  // nationality: Yup.string().required("Narodowość jest wymagana"),
-  // contactNumber: Yup.string().required("Numer kontaktowy jest wymagany"),
   club: Yup.string(),
   password: Yup.string()
     .required("Hasło jest wymagane")
@@ -33,10 +31,7 @@ const validation = Yup.object().shape({
     .oneOf([Yup.ref("password")], "Hasło musi być takie samo"),
 
   addressDto: Yup.object().shape({
-    // city: Yup.string().required("City is required"),
     postalCode: Yup.string().matches(/^\d{2}-\d{3}$/, "Niepoprawny format"),
-    // country: Yup.string().required("Country is required"),
-    // street: Yup.string().required("Street is required"),
   }),
 });
 function RegisterCompetitor() {
@@ -58,7 +53,6 @@ function RegisterCompetitor() {
   const handleRegister = (form: UserFormRegister) => {
     form.nationality = getName(selectedCountry);
     form.contactNumber = phone;
-    console.log(form);
     registerUser(form, "Organizer");
   };
 
@@ -317,23 +311,6 @@ function RegisterCompetitor() {
                     className="w-full p-2 border border-gray-300 rounded-md placeholder:font-light placeholder:text-gray-500"
                     {...register("dateOfBirth")}
                   />
-                  {/* <div className="w-full rounded-md">
-                    <DatePicker
-                      wrapperClassName="w-full"
-                      id="dateOfBirth"
-                      placeholderText="MM/DD/YYYY"
-                      className="w-full p-2 border border-gray-300 rounded-md placeholder:font-light placeholder:text-gray-500 "
-                      showPopperArrow={false}
-                      selected={date}
-                      showIcon
-                      onChange={(date) => {
-                        setDate(date!);
-                        register("dateOfBirth", {
-                          value: date!,
-                        });
-                      }}
-                    />
-                  </div> */}
                   {errors.dateOfBirth ? (
                     <div
                       className="flex items-center p-4 mb-4 text-sm rounded-lg dark:bg-red-100 dark:text-red-500"

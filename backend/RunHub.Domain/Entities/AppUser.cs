@@ -15,10 +15,8 @@ namespace RunHub.Domain.Entity
         public string ContactNumber { get; set; }
         public string Club { get; set; }
 
-        //photo
-        public string PhotoId { get; set; } // Foreign key
+        public string PhotoId { get; set; }
         public Photo Photo { get; set; }
-        //address
         public Address Address { get; set; }
         public ICollection<DistanceAttendee> Distances { get; set; }
         public ICollection<Result> Results { get; set; }

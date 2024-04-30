@@ -148,7 +148,7 @@ export default observer(function DistanceTable({ distances }: Props) {
             ))
           ) : (
             <tr className="text-center h-32">
-              <td colSpan={12}>Brak rekordów!</td>
+              <td colSpan={12}>Brak wyników!</td>
             </tr>
           )}
         </tbody>

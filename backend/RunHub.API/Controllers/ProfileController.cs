@@ -16,7 +16,7 @@ namespace RunHub.API.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> Edit(UpdateProfileCommand command)
+        public async Task<IActionResult> EditProfile(UpdateProfileCommand command)
         {
             var result = await Mediator.Send(command);
             return HandleResult(result);

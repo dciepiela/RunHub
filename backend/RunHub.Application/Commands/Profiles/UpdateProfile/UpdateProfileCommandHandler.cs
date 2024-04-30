@@ -20,6 +20,7 @@ namespace RunHub.Application.Commands.Profiles.UpdateProfile
         public async Task<Result<Unit>> Handle(UpdateProfileCommand request, CancellationToken cancellationToken)
         {
             var user = await _context.Users
+                .Include(u => u.Address)
                 .FirstOrDefaultAsync(u => u.UserName == _userAccessor.GetUsername());
             
             user.DisplayName = request.DisplayName ?? user.DisplayName;
@@ -27,6 +28,9 @@ namespace RunHub.Application.Commands.Profiles.UpdateProfile
             user.LastName = request.LastName ?? user.LastName;
             user.Club = request.Club ?? user.Club;
             user.Bio = request.Bio ?? user.Bio;
+            user.Address.City = request.City ?? user.Address.City;
+            user.Address.Street = request.Street ?? user.Address.Street;
+            user.Address.PostalCode = request.PostalCode ?? user.Address.PostalCode;
 
             //always get code 200 when updating even if not change 
             _context.Entry(user).State = EntityState.Modified;

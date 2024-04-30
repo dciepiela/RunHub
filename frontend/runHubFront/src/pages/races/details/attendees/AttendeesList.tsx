@@ -19,7 +19,7 @@ export default observer(function AttendeesList({ attendees, distance }: Props) {
   const [currentPage, setCurrentPage] = useState(1);
   const attendeesPerPage = 10;
 
-  if (!attendees.length) {
+  if (attendees.length == 0) {
     return (
       <div className="mt-2 flex justify-center">
         Nikt jeszcze nie jest zapisany na ten dystans {distance.name}.

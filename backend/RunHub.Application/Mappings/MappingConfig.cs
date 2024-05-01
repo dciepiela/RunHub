@@ -1,5 +1,6 @@
 ﻿using Mapster;
 using RunHub.Contracts.DTOs;
+using RunHub.Contracts.DTOs.Comment;
 using RunHub.Contracts.DTOs.Distance;
 using RunHub.Contracts.DTOs.Distance.Report;
 using RunHub.Contracts.DTOs.DistanceAttendee;
@@ -8,6 +9,7 @@ using RunHub.Contracts.DTOs.Profile;
 using RunHub.Contracts.DTOs.Race;
 using RunHub.Contracts.DTOs.Result;
 using RunHub.Contracts.DTOs.Sponsor;
+using RunHub.Domain.Entities;
 using RunHub.Domain.Entity;
 
 namespace RunHub.Application.Mappings
@@ -120,6 +122,13 @@ namespace RunHub.Application.Mappings
                 .Map(dest => dest.TotalAttendees, src => src.DistanceAttendees.Count)
                 .Map(dest => dest.TotalIncome, src => src.Price * src.DistanceAttendees.Count)
                 .Map(dest => dest.Attendees, src => src.DistanceAttendees.Adapt<List<DistanceAttendeeForReportDto>>());
+
+            //Comment
+            TypeAdapterConfig<Comment, CommentDto>
+                .NewConfig()
+                .Map(dest => dest.Username, src => src.Author.UserName)
+                .Map(dest => dest.DisplayName, src => src.Author.DisplayName)
+                .Map(dest => dest.Image, src => src.Author.Photo.Url);
 
         }
     }

@@ -118,8 +118,9 @@ export default class RaceStore {
       this.loadingInitial = true;
       try {
         race = await agent.Races.details(id);
+        this.setRace(race!);
         runInAction(() => {
-          this.setRace(race!);
+          this.selectedRace = race;
           this.loadingInitial = false;
         });
         return race;
@@ -316,5 +317,9 @@ export default class RaceStore {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  clearSelectedRace = () => {
+    this.selectedRace = undefined;
   };
 }

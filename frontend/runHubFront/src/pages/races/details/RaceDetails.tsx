@@ -6,10 +6,11 @@ import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import "semantic-ui-css/components/container.min.css";
 import DistanceDetails from "./DistanceDetails";
+import RaceDetailsChat from "./RaceDetailsChat";
 
 export default observer(function RaceDetails() {
   const { raceStore, distanceStore } = useStore();
-  const { selectedRace: race, loadRace } = raceStore;
+  const { selectedRace: race, loadRace, clearSelectedRace } = raceStore;
   const { loadDistances, distances } = distanceStore;
   const { raceId } = useParams();
 
@@ -17,8 +18,9 @@ export default observer(function RaceDetails() {
     if (raceId) {
       loadRace(Number(raceId));
       loadDistances(Number(raceId));
+      return () => clearSelectedRace();
     }
-  }, [raceId, loadRace, loadDistances]);
+  }, [raceId, loadRace, loadDistances, clearSelectedRace]);
 
   if (!race) return;
 
@@ -27,6 +29,7 @@ export default observer(function RaceDetails() {
       <RaceDetailsBanner race={race} />
       <RaceDetailsInfo race={race} />
       <DistanceDetails race={race} distances={distances} />
+      <RaceDetailsChat race={race} />
     </>
   );
 });

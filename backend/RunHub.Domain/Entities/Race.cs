@@ -26,5 +26,8 @@ namespace RunHub.Domain.Entity
 
         public ICollection<Distance> Distances { get; set; } = new List<Distance>();
         public ICollection<Sponsor> Sponsors { get; set; } = new List<Sponsor>();
+
+        //comments
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>(); 
     }
 }

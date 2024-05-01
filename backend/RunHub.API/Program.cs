@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Newtonsoft.Json;
 using RunHub.API.Extensions;
 using RunHub.API.Middleware;
+using RunHub.API.SignalR;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -47,6 +48,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<ChatHub>("/chat");
 
 
 using var scope = app.Services.CreateScope();

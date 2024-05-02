@@ -62,6 +62,7 @@ namespace RunHub.API.Extensions
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials()
+                        .WithExposedHeaders("WWW-Authenticate","Pagination")
                         .WithOrigins("http://localhost:3001", "http://localhost:3000");
                         //.SetIsOriginAllowed(origin => true);
                 });

@@ -58,6 +58,7 @@ namespace RunHub.API.Extensions
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = key,
                     ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
                 };
                 options.Events = new JwtBearerEvents
                 {

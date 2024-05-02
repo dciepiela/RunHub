@@ -15,6 +15,7 @@ import { toast } from "react-toastify";
 export default class UserStore {
   user: User | null = null;
   googleLoading = false;
+  refreshTokenTimeout?: NodeJS.Timeout;
 
   constructor() {
     makeAutoObservable(this);
@@ -27,6 +28,7 @@ export default class UserStore {
   login = async (creds: UserFormLogin) => {
     const user = await agent.Account.login(creds);
     store.commonStore.setToken(user.token);
+    this.startRefreshTokenTimer(user);
     runInAction(() => (this.user = user));
     router.navigate("/");
     toast.success("Zalogowano");
@@ -110,6 +112,8 @@ export default class UserStore {
   getUser = async () => {
     try {
       const user = await agent.Account.current();
+      store.commonStore.setToken(user.token);
+      this.startRefreshTokenTimer(user);
       runInAction(() => (this.user = user));
     } catch (error) {
       console.log(error);
@@ -133,6 +137,7 @@ export default class UserStore {
       this.googleLoading = true;
       const user = await agent.Account.googleLogin(idToken);
       store.commonStore.setToken(user.token);
+      this.startRefreshTokenTimer(user);
       runInAction(() => {
         this.user = user;
         this.googleLoading = false;
@@ -143,4 +148,28 @@ export default class UserStore {
       runInAction(() => (this.googleLoading = false));
     }
   };
+
+  refreshToken = async () => {
+    this.stopRefreshTokenTimer();
+    try {
+      const user = await agent.Account.refreshToken();
+      runInAction(() => (this.user = user));
+      store.commonStore.setToken(user.token);
+      this.startRefreshTokenTimer(user);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  private startRefreshTokenTimer(user: User) {
+    const jwtToken = JSON.parse(atob(user.token.split(".")[1]));
+    const expires = new Date(jwtToken.exp * 1000);
+    const timeout = expires.getTime() - Date.now() - 60 * 1000;
+    this.refreshTokenTimeout = setTimeout(this.refreshToken, timeout);
+    console.log({ refresTimeout: this.refreshTokenTimeout });
+  }
+
+  private stopRefreshTokenTimer() {
+    clearTimeout(this.refreshTokenTimeout);
+  }
 }

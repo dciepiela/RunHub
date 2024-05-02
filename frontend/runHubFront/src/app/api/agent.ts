@@ -46,7 +46,7 @@ axios.interceptors.response.use(
     return response;
   },
   (error: AxiosError) => {
-    const { data, status, config } = error.response as AxiosResponse;
+    const { data, status, config, headers } = error.response as AxiosResponse;
     switch (status) {
       case 400:
         if (
@@ -68,7 +68,16 @@ axios.interceptors.response.use(
         }
         break;
       case 401:
-        toast.error("Błędne dane");
+        if (
+          status === 401 &&
+          headers["www-authenticate"]?.startsWith(
+            'Bearer error="invalid_token"'
+          )
+        ) {
+          toast.error("Sesja wygasła - proszę zaloguj się ponownie");
+        } else {
+          toast.error("Nieautoryzowany");
+        }
         break;
       case 403:
         toast.error("Zakazane");
@@ -114,6 +123,7 @@ const Account = {
     requests.post<void>("/account/forgotPassword", forgotPasswordDto),
   resetPassword: (resetPasswordDto: ResetPasswordDto) =>
     requests.post<void>("/account/resetPassword", resetPasswordDto),
+  refreshToken: () => requests.post<User>("/account/refreshToken", {}),
 };
 
 const Races = {

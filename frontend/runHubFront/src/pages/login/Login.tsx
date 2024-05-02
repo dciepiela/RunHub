@@ -8,7 +8,12 @@ import Logo from "../../assets/hero.jpg";
 import CustomInput from "../../components/formik/CustomInput";
 import { UserFormLogin } from "../../app/models/user";
 import LoadingButton from "../../components/button/LoadingButton";
-import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
+import {
+  CredentialResponse,
+  GoogleLogin,
+  useGoogleLogin,
+  useGoogleOneTapLogin,
+} from "@react-oauth/google";
 
 const initialValues = {
   email: "",
@@ -24,12 +29,21 @@ const validationSchema = Yup.object({
 
 export default function Login() {
   const { userStore } = useStore();
-  const { login } = userStore;
+  const { login, googleLogin } = userStore;
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async (values: UserFormLogin) => {
     await login(values);
   };
+
+  const googles = useGoogleOneTapLogin({
+    onSuccess: (credentialResponse) => {
+      console.log(credentialResponse);
+    },
+    onError: () => {
+      console.log("Login Failed");
+    },
+  });
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-whiteNeutral">
@@ -82,14 +96,17 @@ export default function Login() {
                   className="w-full bg-[#F2C46D] text-black p-2 rounded-lg mb-2 hover:text-lightYellow hover:border-whiteNeutral"
                   title="Zaloguj się"
                 />
-                <GoogleLogin
-                  onSuccess={(credentialResponse: CredentialResponse) => {
-                    userStore.googleLogin(credentialResponse.credential!);
-                  }}
-                  onError={() => {
-                    console.log("Login failed");
-                  }}
-                />
+                <div className="flex justify-center ">
+                  <GoogleLogin
+                    onSuccess={(credentialResponse: CredentialResponse) => {
+                      googleLogin(credentialResponse.credential!);
+                    }}
+                    onError={() => {
+                      console.log("Login failed");
+                    }}
+                  />
+                </div>
+
                 <div className="text-center text-gray-400 mt-2">
                   Nie masz jeszcze konta?{" "}
                   <Link

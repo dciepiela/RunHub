@@ -3,13 +3,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.SqlServer.Server;
 using RunHub.Application.Core;
 using RunHub.Contracts.DTOs.UserDtos;
 using RunHub.Domain.Entities;
 using RunHub.Domain.Entity;
 using RunHub.Infrastructure.Email;
-using Serilog;
 using System.Security.Claims;
 
 namespace RunHub.API.Controllers
@@ -79,7 +77,7 @@ namespace RunHub.API.Controllers
             var user = await _userManager.Users
                 .Include(p => p.Photo)
                 .FirstOrDefaultAsync(x => x.Email == User.FindFirstValue(ClaimTypes.Email));
-
+            await SetRefreshToken(user);
             return CreateUserObject(user);
         }
 
@@ -104,11 +102,13 @@ namespace RunHub.API.Controllers
             }
             else
             {
-                var newUser = new AppUser
+                user = new AppUser
                 {
                     Email = payload.Email,
                     UserName = payload.Email,
                     DisplayName = payload.Name,
+                    FirstName = payload.GivenName,
+                    LastName = payload.FamilyName,
                     Photo = new Photo
                     {
                         Id = "google_" + payload.JwtId,
@@ -116,13 +116,14 @@ namespace RunHub.API.Controllers
                     }
                 };
 
-                var result = await _userManager.CreateAsync(newUser);
+                var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
                     // Add the user to default role or any specific role you want
-                    await _userManager.AddToRoleAsync(newUser, "Competitor"); // Adjust role as needed
+                    await _userManager.AddToRoleAsync(user, "Competitor"); // Adjust role as needed
 
-                    return Ok(CreateUserObject(newUser));
+                    await SetRefreshToken(user);
+                    return Ok(CreateUserObject(user));
                 }
                 else
                 {
@@ -130,6 +131,27 @@ namespace RunHub.API.Controllers
                     return StatusCode(500, "Failed to create user.");
                 }
             }
+        }
+
+        [Authorize]
+        [HttpPost("refreshToken")]
+        public async Task<ActionResult<NewUserDto>> RefreshToken()
+        {
+            var refreshToken = Request.Cookies["refreshToken"];
+            var user = await _userManager.Users
+                .Include(x => x.RefreshTokens)
+                .Include(x => x.Photo)
+                .FirstOrDefaultAsync(x => x.UserName == User.FindFirstValue(ClaimTypes.Name));
+
+            if (user == null) return Unauthorized();
+
+            var oldToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken);
+
+            if (oldToken != null && !oldToken.IsActive) return Unauthorized();
+
+            if (oldToken != null) oldToken.Revoked = DateTime.UtcNow;
+
+            return CreateUserObject(user);
         }
 
         private async Task<GoogleJsonWebSignature.Payload> VerifyGoogleIdToken(string idToken)
@@ -269,6 +291,22 @@ namespace RunHub.API.Controllers
             {
                 return BadRequest(result.Errors);
             }
+        }
+
+
+        private async Task SetRefreshToken(AppUser user)
+        {
+            var refreshToken = _tokenService.GenerateRefreshToken();
+            user.RefreshTokens.Add(refreshToken);
+            await _userManager.UpdateAsync(user);
+
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = DateTime.UtcNow.AddDays(7)
+            };
+
+            Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
         }
 
         private NewUserDto CreateUserObject(AppUser appUser)

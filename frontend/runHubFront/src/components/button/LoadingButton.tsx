@@ -11,6 +11,7 @@ interface LoadingButtonProps {
   name?: string;
   type?: "button" | "submit" | "reset" | undefined;
   clipLoaderClassName?: string;
+  icon?: JSX.Element;
 }
 
 export default function LoadingButton({
@@ -23,6 +24,7 @@ export default function LoadingButton({
   name,
   type,
   clipLoaderClassName,
+  icon,
 }: LoadingButtonProps) {
   return (
     <button
@@ -41,7 +43,12 @@ export default function LoadingButton({
           className={`${clipLoaderClassName}`}
         />
       ) : (
-        title
+        <>
+          <span className="flex items-center">
+            {title}
+            {icon && <span className="ml-1">{icon}</span>}
+          </span>
+        </>
       )}
     </button>
   );

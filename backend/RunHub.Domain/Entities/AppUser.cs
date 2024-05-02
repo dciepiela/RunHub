@@ -20,5 +20,6 @@ namespace RunHub.Domain.Entity
         public Address Address { get; set; }
         public ICollection<DistanceAttendee> Distances { get; set; }
         public ICollection<Result> Results { get; set; }
+        public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     }
 }

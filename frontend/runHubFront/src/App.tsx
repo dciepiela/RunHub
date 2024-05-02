@@ -11,6 +11,7 @@ import { useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const stripePromise = loadStripe(
   "pk_test_51P5YyII1BRXK8HKtHP7ftnKMheOnCN1wE7r4l1kEUJacqdoQzIAmbkRdTrWSJUfxmysyUXU8rpt2sBq1hcH37sq600GfQS8sKt"
@@ -37,6 +38,7 @@ function App() {
     <>
       <ScrollRestoration />
       <ToastContainer position="bottom-right" hideProgressBar theme="colored" />
+
       <UserProvider>
         <Elements stripe={stripePromise}>
           {!isDashboardActive && <Navbar />}

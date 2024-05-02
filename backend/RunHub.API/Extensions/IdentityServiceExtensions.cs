@@ -72,6 +72,10 @@ namespace RunHub.API.Extensions
                         return Task.CompletedTask;
                     }
                 };
+            }).AddGoogle(opt =>
+            {
+                opt.ClientId = config["GoogleKeys:ClientId"];
+                opt.ClientSecret = config["GoogleKeys:ClientSecret"];
             }); 
 
             services.AddAuthorization(opt =>

@@ -14,6 +14,7 @@ import { toast } from "react-toastify";
 
 export default class UserStore {
   user: User | null = null;
+  googleLoading = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -124,6 +125,22 @@ export default class UserStore {
   setDisplayName = (name: string) => {
     if (this.user) {
       this.user.displayName = name;
+    }
+  };
+
+  googleLogin = async (idToken: string) => {
+    try {
+      this.googleLoading = true;
+      const user = await agent.Account.googleLogin(idToken);
+      store.commonStore.setToken(user.token);
+      runInAction(() => {
+        this.user = user;
+        this.googleLoading = false;
+      });
+      router.navigate("/");
+    } catch (error) {
+      console.log(error);
+      runInAction(() => (this.googleLoading = false));
     }
   };
 }

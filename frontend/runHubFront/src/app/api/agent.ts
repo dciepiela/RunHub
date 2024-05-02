@@ -102,6 +102,8 @@ const requests = {
 const Account = {
   current: () => requests.get<User>("/account"),
   login: (user: UserFormLogin) => requests.post<User>("/account/login", user),
+  googleLogin: (idToken: string) =>
+    requests.post<User>(`/account/googleLogin?idToken=${idToken}`, {}),
   registerCompetitor: (user: UserFormRegister) =>
     requests.post<User>("account/registerCompetitor", user),
   registerOrganizer: (user: UserFormRegister) =>

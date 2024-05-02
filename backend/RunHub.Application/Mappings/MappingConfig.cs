@@ -9,6 +9,7 @@ using RunHub.Contracts.DTOs.Profile;
 using RunHub.Contracts.DTOs.Race;
 using RunHub.Contracts.DTOs.Result;
 using RunHub.Contracts.DTOs.Sponsor;
+using RunHub.Contracts.DTOs.UserDtos;
 using RunHub.Domain.Entities;
 using RunHub.Domain.Entity;
 
@@ -129,7 +130,6 @@ namespace RunHub.Application.Mappings
                 .Map(dest => dest.Username, src => src.Author.UserName)
                 .Map(dest => dest.DisplayName, src => src.Author.DisplayName)
                 .Map(dest => dest.Image, src => src.Author.Photo.Url);
-
         }
     }
 }

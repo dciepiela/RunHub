@@ -8,6 +8,7 @@ import Logo from "../../assets/hero.jpg";
 import CustomInput from "../../components/formik/CustomInput";
 import { UserFormLogin } from "../../app/models/user";
 import LoadingButton from "../../components/button/LoadingButton";
+import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 
 const initialValues = {
   email: "",
@@ -78,10 +79,18 @@ export default function Login() {
                   loading={isSubmitting}
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-[#F2C46D] text-black p-2 rounded-lg mb-6 hover:text-lightYellow hover:border-whiteNeutral"
+                  className="w-full bg-[#F2C46D] text-black p-2 rounded-lg mb-2 hover:text-lightYellow hover:border-whiteNeutral"
                   title="Zaloguj się"
                 />
-                <div className="text-center text-gray-400">
+                <GoogleLogin
+                  onSuccess={(credentialResponse: CredentialResponse) => {
+                    userStore.googleLogin(credentialResponse.credential!);
+                  }}
+                  onError={() => {
+                    console.log("Login failed");
+                  }}
+                />
+                <div className="text-center text-gray-400 mt-2">
                   Nie masz jeszcze konta?{" "}
                   <Link
                     to="/registerCompetitor"

@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Google.Apis.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.SqlServer.Server;
 using RunHub.Application.Core;
 using RunHub.Contracts.DTOs.UserDtos;
+using RunHub.Domain.Entities;
 using RunHub.Domain.Entity;
 using RunHub.Infrastructure.Email;
 using Serilog;
@@ -19,15 +22,16 @@ namespace RunHub.API.Controllers
         private readonly ITokenService _tokenService;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly IServiceProvider _serviceProvider;
-
+        private readonly IConfiguration _config;
 
         public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService, 
-            IServiceProvider serviceProvider)
+            IServiceProvider serviceProvider, IConfiguration config)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _tokenService = tokenService;
             _serviceProvider = serviceProvider;
+            _config = config;
         }
 
         [AllowAnonymous]
@@ -78,6 +82,72 @@ namespace RunHub.API.Controllers
 
             return CreateUserObject(user);
         }
+
+        [AllowAnonymous]
+        [HttpPost("googleLogin")]
+        public async Task<ActionResult<NewUserDto>> GoogleLogin(string idToken)
+        {
+            var payload = await VerifyGoogleIdToken(idToken);
+
+            if (payload == null)
+            {
+                return BadRequest("Invalid Google ID token.");
+            }
+
+            var user = await _userManager.Users
+                .Include(p => p.Photo)
+                .FirstOrDefaultAsync(x => x.Email == payload.Email);
+
+            if (user != null)
+            {
+                return Ok(CreateUserObject(user));
+            }
+            else
+            {
+                var newUser = new AppUser
+                {
+                    Email = payload.Email,
+                    UserName = payload.Email,
+                    DisplayName = payload.Name,
+                    Photo = new Photo
+                    {
+                        Id = "google_" + payload.JwtId,
+                        Url = payload.Picture
+                    }
+                };
+
+                var result = await _userManager.CreateAsync(newUser);
+                if (result.Succeeded)
+                {
+                    // Add the user to default role or any specific role you want
+                    await _userManager.AddToRoleAsync(newUser, "Competitor"); // Adjust role as needed
+
+                    return Ok(CreateUserObject(newUser));
+                }
+                else
+                {
+                    // Failed to create user
+                    return StatusCode(500, "Failed to create user.");
+                }
+            }
+        }
+
+        private async Task<GoogleJsonWebSignature.Payload> VerifyGoogleIdToken(string idToken)
+        {
+            var settings = new GoogleJsonWebSignature.ValidationSettings();
+            settings.Audience = new[] { _config["GoogleKeys:ClientId"] };
+
+            try
+            {
+                var payload = await GoogleJsonWebSignature.ValidateAsync(idToken, settings);
+                return payload;
+            }
+            catch (InvalidJwtException)
+            {
+                return null;
+            }
+        }
+
 
         private async Task<IActionResult> RegisterUser(RegisterDto registerDto, string role)
         {

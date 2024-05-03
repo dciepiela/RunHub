@@ -1,5 +1,6 @@
 ﻿using Mapster;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using RunHub.Contracts.Errors;
 using RunHub.Domain.Entity;
 using RunHub.Persistence;
@@ -21,20 +22,24 @@ namespace RunHub.Application.Commands.DistanceAttendees.AttendManually
             var registrationDto = request.RegistrationDto;
 
             var user = registrationDto.Adapt<AppUser>();
-
-            // Sprawdzenie, czy wymagane pola są uzupełnione
-            if (string.IsNullOrWhiteSpace(registrationDto.FirstName) || string.IsNullOrWhiteSpace(registrationDto.LastName))
-            {
-                return Result<Unit>.Failure("First name and last name are required for manual registration.");
-            }
             
             _context.Users.Add(user);
 
             DateTime currentTime = DateTime.UtcNow;
 
-            var distance = await _context.Distances.FindAsync(request.DistanceId);
+            var distance = await _context.Distances
+                .Include(x => x.DistanceAttendees)
+                .FirstOrDefaultAsync(x => x.DistanceId == request.DistanceId);
 
             if (distance == null) return null;
+
+            var raceBib = 1;
+
+            if (distance.DistanceAttendees.Any())
+            {
+                var distanceAttendeesCount = distance.DistanceAttendees.Count();
+                raceBib = distanceAttendeesCount + 1;
+            }
 
             var distanceAttendee = new DistanceAttendee
             {
@@ -42,7 +47,8 @@ namespace RunHub.Application.Commands.DistanceAttendees.AttendManually
                 DistanceId = request.DistanceId,
                 PaidDate = currentTime,
                 IsPaid = true,
-                Price = distance.Price
+                Price = distance.Price,
+                RaceBib = raceBib
             };
 
             var score = new Result

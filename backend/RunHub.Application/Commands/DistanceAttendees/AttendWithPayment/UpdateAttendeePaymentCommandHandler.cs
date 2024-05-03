@@ -44,32 +44,27 @@ namespace RunHub.Application.Commands.DistanceAttendees.AttendWithPayment
                 return Result<Unit>.Failure("User already registered.");
             }
 
-            //// Create or update the customer and get the customer ID
-            ////string customerId = await _stripeService.CreateOrUpdateCustomerAsync(request.StripeToken, user.Email, user.FirstName, user.LastName);
-
-            //// Process payment
-            //bool paymentSuccessful = await _stripeService.ProcessPaymentAsync(request.StripeToken, distance.Price, user.Email, user.FirstName, user.LastName);
-            //if (!paymentSuccessful)
-            //{
-            //    return Result<Unit>.Failure("Payment failed.");
-            //}
-
-            // Create or update the customer and get the customer ID
             string customerId = await _stripeService.CreateOrUpdateCustomerAsync(request.StripeToken, user.Email, user.FirstName, user.LastName);
             if (string.IsNullOrEmpty(customerId))
             {
                 return Result<Unit>.Failure("Failed to create or update Stripe customer.");
             }
 
-            // Charge the customer
             var chargeResult = await _stripeService.ChargeCustomerAsync(customerId, distance.Price, "Payment for " + distance.Name);
             if (!chargeResult)
             {
                 return Result<Unit>.Failure("Failed to charge the customer.");
             }
 
-            // Automatically set Time if not provided
             DateTime currentTime = DateTime.UtcNow;
+
+            var raceBib = 1;
+
+            if (distance.DistanceAttendees.Any())
+            {
+                var distanceAttendeesCount = distance.DistanceAttendees.Count();
+                raceBib = distanceAttendeesCount + 1;
+            }
 
             distanceAttendee = new DistanceAttendee
             {
@@ -77,23 +72,18 @@ namespace RunHub.Application.Commands.DistanceAttendees.AttendWithPayment
                 Distance = distance,
                 IsPaid = true,
                 Price = distance.Price,
-                PaidDate = currentTime
+                PaidDate = currentTime,
+                RaceBib = raceBib,
             };
 
-            // Create a Result object
             var score = new Result
             {
                 User = user,
                 Distance = distance,
                 Gender = user.Gender
-                //Time = null, // Set Time
-                //Place = 0, // You may need to set the place based on some logic
             };
 
-            // Add result to context
             _context.Results.Add(score);
-
-
 
             distance.DistanceAttendees.Add(distanceAttendee);
             distance.AvailableSlots--;

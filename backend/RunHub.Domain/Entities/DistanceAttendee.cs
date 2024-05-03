@@ -10,5 +10,6 @@
         public bool IsPaid { get; set; }
         public DateTime? PaidDate { get; set; }
         public decimal? Price { get; set; }
+        public int RaceBib {  get; set; }
     }
 }

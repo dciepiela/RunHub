@@ -30,17 +30,8 @@ namespace RunHub.Application.Queries.Attendance
             // Pobranie uczestników dla określonego dystansu
             var attendees = await _context.DistanceAttendees
                  .Where(da => da.DistanceId == request.DistanceId)
-                 .Include(da => da.Participator) // Join with user
-                                                 //.Select(da => new DistanceAttendeeDto
-                                                 //{
-                                                 //    ParticipatorId = da.Participator.Id,
-                                                 //    UserName = da.Participator.UserName,
-                                                 //    ParticipatorFirstName = da.Participator.FirstName,
-                                                 //    ParticipatorLastName = da.Participator.LastName,
-                                                 //    IsPaid = da.IsPaid,
-                                                 //    PaidDate = da.PaidDate,
-                                                 //    Price = da.Price
-                                                 //})
+                 .Include(da => da.Participator)
+                 .OrderBy(x=>x.RaceBib)
                  .ToListAsync();
 
             var result = attendees.Adapt<List<DistanceAttendeeDto>>();

@@ -14,6 +14,7 @@ export interface IProfile {
   postalCode?: string;
   bio?: string;
   photo?: Photo | null;
+  raceBib?: number | null;
 }
 
 export class Profile implements IProfile {
@@ -46,6 +47,7 @@ export class Profile implements IProfile {
   dateOfBirth?: number | undefined;
   bio?: string;
   photo?: Photo | null;
+  raceBib?: number | null;
 }
 
 export interface Photo {

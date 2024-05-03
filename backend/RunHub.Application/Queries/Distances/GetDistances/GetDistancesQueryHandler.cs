@@ -24,7 +24,7 @@ namespace RunHub.Application.Queries.Distances.GetDistances
             if (race == null) return null;
 
             var distances = await _context.Distances
-                .Include(d => d.DistanceAttendees)
+                .Include(d => d.DistanceAttendees.OrderBy(x => x.RaceBib))
                     .ThenInclude(da => da.Participator)
                 .Where(d => d.RaceId == request.RaceId)
                 .ToListAsync(cancellationToken);

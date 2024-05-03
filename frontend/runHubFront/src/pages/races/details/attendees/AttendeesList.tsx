@@ -71,7 +71,8 @@ export default observer(function AttendeesList({ attendees, distance }: Props) {
               {currentAttendees.map((attendee, index) => (
                 <tr className="border border-gray-300 text-center" key={index}>
                   <td className="px-4 py-2 border">
-                    {indexOfFirstAttendee + index + 1}
+                    {/* {indexOfFirstAttendee + index + 1} */}
+                    {attendee.raceBib ? attendee.raceBib : ""}
                   </td>
                   <td className="px-4 py-2 border">
                     <Link

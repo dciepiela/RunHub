@@ -142,7 +142,11 @@ export default class UserStore {
         this.user = user;
         this.googleLoading = false;
       });
-      router.navigate("/");
+      if (user.isFirstLogin) {
+        router.navigate(`/fillData/${user.userName}`);
+      } else {
+        router.navigate("/");
+      }
     } catch (error) {
       console.log(error);
       runInAction(() => (this.googleLoading = false));

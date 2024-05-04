@@ -98,6 +98,14 @@ namespace RunHub.API.Controllers
 
             if (user != null)
             {
+                if (user.IsFirstLogin)
+                {
+                    user.IsFirstLogin = false;
+
+                    await _userManager.UpdateAsync(user);
+
+                    return Ok(CreateUserObject(user, isFirstLogin: true));
+                }
                 return Ok(CreateUserObject(user));
             }
             else
@@ -113,21 +121,20 @@ namespace RunHub.API.Controllers
                     {
                         Id = "google_" + payload.JwtId,
                         Url = payload.Picture
-                    }
+                    },
+                    IsFirstLogin = true
                 };
 
-                var result = await _userManager.CreateAsync(user);
+                var result = await _userManager.CreateAsync(newUser);
+
                 if (result.Succeeded)
                 {
-                    // Add the user to default role or any specific role you want
-                    await _userManager.AddToRoleAsync(user, "Competitor"); // Adjust role as needed
+                    await _userManager.AddToRoleAsync(newUser, "Competitor");
 
-                    await SetRefreshToken(user);
-                    return Ok(CreateUserObject(user));
+                    return Ok(CreateUserObject(newUser, isFirstLogin:true));
                 }
                 else
                 {
-                    // Failed to create user
                     return StatusCode(500, "Failed to create user.");
                 }
             }
@@ -293,33 +300,18 @@ namespace RunHub.API.Controllers
             }
         }
 
-
-        private async Task SetRefreshToken(AppUser user)
-        {
-            var refreshToken = _tokenService.GenerateRefreshToken();
-            user.RefreshTokens.Add(refreshToken);
-            await _userManager.UpdateAsync(user);
-
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Expires = DateTime.UtcNow.AddDays(7)
-            };
-
-            Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
-        }
-
-        private NewUserDto CreateUserObject(AppUser appUser)
+        private NewUserDto CreateUserObject(AppUser appUser, bool isFirstLogin = false)
         {
             IList<string> userRoles = GetUserRoles(appUser);
 
-            return new NewUserDto
-            {
-                UserName = appUser.UserName,
-                DisplayName = appUser.DisplayName,
-                Image = appUser?.Photo?.Url,
-                Token = _tokenService.CreateToken(appUser, userRoles),
-                Role = userRoles.FirstOrDefault()
+                return new NewUserDto
+                {
+                    UserName = appUser.UserName,
+                    DisplayName = appUser.DisplayName,
+                    Image = appUser?.Photo?.Url,
+                    Token = _tokenService.CreateToken(appUser, userRoles),
+                    Role = userRoles.FirstOrDefault(),
+                    IsFirstLogin = isFirstLogin
             };
         }
 

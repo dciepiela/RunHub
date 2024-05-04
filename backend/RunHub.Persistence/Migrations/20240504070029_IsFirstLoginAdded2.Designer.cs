@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RunHub.Persistence;
 
@@ -11,9 +12,11 @@ using RunHub.Persistence;
 namespace RunHub.Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240504070029_IsFirstLoginAdded2")]
+    partial class IsFirstLoginAdded2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -195,33 +198,6 @@ namespace RunHub.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Photos");
-                });
-
-            modelBuilder.Entity("RunHub.Domain.Entities.RefreshToken", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AppUserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("Expires")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("Revoked")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Token")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
-
-                    b.ToTable("RefreshToken");
                 });
 
             modelBuilder.Entity("RunHub.Domain.Entity.Address", b =>
@@ -423,9 +399,6 @@ namespace RunHub.Persistence.Migrations
                         .HasPrecision(14, 2)
                         .HasColumnType("decimal(14,2)");
 
-                    b.Property<int>("RaceBib")
-                        .HasColumnType("int");
-
                     b.HasKey("ParticipatorId", "DistanceId");
 
                     b.HasIndex("DistanceId");
@@ -623,15 +596,6 @@ namespace RunHub.Persistence.Migrations
                     b.Navigation("Race");
                 });
 
-            modelBuilder.Entity("RunHub.Domain.Entities.RefreshToken", b =>
-                {
-                    b.HasOne("RunHub.Domain.Entity.AppUser", "AppUser")
-                        .WithMany("RefreshTokens")
-                        .HasForeignKey("AppUserId");
-
-                    b.Navigation("AppUser");
-                });
-
             modelBuilder.Entity("RunHub.Domain.Entity.Address", b =>
                 {
                     b.HasOne("RunHub.Domain.Entity.AppUser", "AppUser")
@@ -736,8 +700,6 @@ namespace RunHub.Persistence.Migrations
                     b.Navigation("Address");
 
                     b.Navigation("Distances");
-
-                    b.Navigation("RefreshTokens");
 
                     b.Navigation("Results");
                 });

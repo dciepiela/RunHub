@@ -220,6 +220,8 @@ const Profiles = {
     requests.get<UserDistance[]>(
       `/profiles/${userName}/distances?predicate=${predicate}`
     ),
+  updateProfileAfterGoogleLogin: (profile: Partial<Profile>) =>
+    requests.put(`/profiles/afterGoogleLogin`, profile),
 };
 
 const Results = {

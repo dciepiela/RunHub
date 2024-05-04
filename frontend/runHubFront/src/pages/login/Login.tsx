@@ -8,12 +8,7 @@ import Logo from "../../assets/hero.jpg";
 import CustomInput from "../../components/formik/CustomInput";
 import { UserFormLogin } from "../../app/models/user";
 import LoadingButton from "../../components/button/LoadingButton";
-import {
-  CredentialResponse,
-  GoogleLogin,
-  useGoogleLogin,
-  useGoogleOneTapLogin,
-} from "@react-oauth/google";
+import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 
 const initialValues = {
   email: "",
@@ -35,15 +30,6 @@ export default function Login() {
   const handleLogin = async (values: UserFormLogin) => {
     await login(values);
   };
-
-  const googles = useGoogleOneTapLogin({
-    onSuccess: (credentialResponse) => {
-      console.log(credentialResponse);
-    },
-    onError: () => {
-      console.log("Login Failed");
-    },
-  });
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-whiteNeutral">

@@ -130,6 +130,17 @@ namespace RunHub.Application.Mappings
                 .Map(dest => dest.Username, src => src.Author.UserName)
                 .Map(dest => dest.DisplayName, src => src.Author.DisplayName)
                 .Map(dest => dest.Image, src => src.Author.Photo.Url);
+
+
+            //google login
+            TypeAdapterConfig<AppUser, ProfileAfterRegisterDto>
+             .NewConfig()
+                 .Map(dest => dest.Club, src => src.Club)
+                 .Map(dest => dest.DateOfBirth, src => src.DateOfBirth)
+                 .Map(dest => dest.Gender, src => src.Gender)
+                 .Map(dest => dest.City, src => src.Address.City)
+                 .Map(dest => dest.Street, src => src.Address.Street)
+                 .Map(dest => dest.PostalCode, src => src.Address.PostalCode);
         }
     }
 }

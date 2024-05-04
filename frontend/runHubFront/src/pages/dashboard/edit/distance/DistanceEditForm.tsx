@@ -73,16 +73,11 @@ export default observer(function DistanceEditForm({
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
-        // onSubmit={(values) => {
-        //   updateDistance(Number(raceId), Number(distanceId), values);
-        //   toast.success("Dystans został zaktualizowany pomyślnie!");
-        // }}
         onSubmit={(values, { setSubmitting }) => {
           setSubmitting(true);
           const action = distance
             ? updateDistance(raceId, values.distanceId!, values)
             : createDistance(raceId, values as DistanceDto);
-
           action
             .then(() => {
               toast.success(
@@ -91,8 +86,6 @@ export default observer(function DistanceEditForm({
                 } pomyślnie!`
               );
               setFormSubmitted(true);
-
-              // If in create mode, navigate back after creating the distance
               if (!distance) {
                 navigate(-1);
               }

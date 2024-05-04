@@ -16,6 +16,7 @@ export type User = {
   contactNumber?: string;
   club?: string;
   addressDto?: AddressDto;
+  isFirstLogin: boolean;
 };
 
 export type UserFormLogin = {

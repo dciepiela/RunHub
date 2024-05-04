@@ -8,7 +8,7 @@ export interface IProfile {
   lastName?: string;
   gender?: string;
   club?: string;
-  dateOfBirth?: number | undefined;
+  dateOfBirth?: Date | number | string | undefined;
   city?: string;
   street?: string;
   postalCode?: string;
@@ -43,7 +43,7 @@ export class Profile implements IProfile {
   city?: string;
   street?: string;
   postalCode?: string;
-  dateOfBirth?: number | undefined;
+  dateOfBirth?: Date | number | string | undefined;
   bio?: string;
   photo?: Photo | null;
 }

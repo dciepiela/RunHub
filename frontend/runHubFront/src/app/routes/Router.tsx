@@ -30,6 +30,7 @@ import SponsorDisplay from "../../pages/dashboard/edit/sponsor/SponsorDisplay";
 import AddAttendanceManually from "../../pages/dashboard/edit/attendanceManually/AddAttendanceManually";
 import DashboardMain from "../../pages/dashboard/DashboardMain";
 import PhotoUploadForm from "../../pages/dashboard/add/PhotoUploadForm";
+import EditProfile from "../../pages/login/EditProfile";
 
 export const routes: RouteObject[] = [
   {
@@ -54,6 +55,7 @@ export const routes: RouteObject[] = [
       },
       { path: "races/:raceId", element: <RaceDetails /> },
       { path: "profiles/:userName", element: <ProfilePage /> },
+      { path: "fillData/:userName", element: <EditProfile /> },
       {
         path: "results",
         element: <Results />,

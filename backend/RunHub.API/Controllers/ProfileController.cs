@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using RunHub.Application.Commands.Profiles.AddInfoAfterRegister;
 using RunHub.Application.Commands.Profiles.UpdateProfile;
 using RunHub.Application.Queries.Profiles.Details;
 using RunHub.Application.Queries.Profiles.ListDistances;
+using RunHub.Contracts.DTOs.Profile;
 
 namespace RunHub.API.Controllers
 {
@@ -26,6 +28,14 @@ namespace RunHub.API.Controllers
         public async Task<IActionResult> GetUserDistances(string userName, string predicate)
         {
             var result = await Mediator.Send(new ListDistancesQuery(userName, predicate));
+            return HandleResult(result);
+        }
+
+        [HttpPut("afterGoogleLogin")]
+        public async Task<IActionResult> EditProfileAfterGoogleLogin(ProfileAfterRegisterDto profileDto)
+        {
+            var command = new AddInfoAfterRegisterCommand(profileDto);
+            var result = await Mediator.Send(command);
             return HandleResult(result);
         }
     }

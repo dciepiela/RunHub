@@ -100,6 +100,14 @@ namespace RunHub.API.Controllers
 
             if (user != null)
             {
+                if (user.IsFirstLogin)
+                {
+                    user.IsFirstLogin = false;
+
+                    await _userManager.UpdateAsync(user);
+
+                    return Ok(CreateUserObject(user, isFirstLogin: true));
+                }
                 return Ok(CreateUserObject(user));
             }
             else
@@ -109,24 +117,26 @@ namespace RunHub.API.Controllers
                     Email = payload.Email,
                     UserName = payload.Email,
                     DisplayName = payload.Name,
+                    FirstName = payload.GivenName,
+                    LastName = payload.FamilyName,
                     Photo = new Photo
                     {
                         Id = "google_" + payload.JwtId,
                         Url = payload.Picture
-                    }
+                    },
+                    IsFirstLogin = true
                 };
 
                 var result = await _userManager.CreateAsync(newUser);
+
                 if (result.Succeeded)
                 {
-                    // Add the user to default role or any specific role you want
-                    await _userManager.AddToRoleAsync(newUser, "Competitor"); // Adjust role as needed
+                    await _userManager.AddToRoleAsync(newUser, "Competitor");
 
-                    return Ok(CreateUserObject(newUser));
+                    return Ok(CreateUserObject(newUser, isFirstLogin:true));
                 }
                 else
                 {
-                    // Failed to create user
                     return StatusCode(500, "Failed to create user.");
                 }
             }
@@ -271,17 +281,18 @@ namespace RunHub.API.Controllers
             }
         }
 
-        private NewUserDto CreateUserObject(AppUser appUser)
+        private NewUserDto CreateUserObject(AppUser appUser, bool isFirstLogin = false)
         {
             IList<string> userRoles = GetUserRoles(appUser);
 
-            return new NewUserDto
-            {
-                UserName = appUser.UserName,
-                DisplayName = appUser.DisplayName,
-                Image = appUser?.Photo?.Url,
-                Token = _tokenService.CreateToken(appUser, userRoles),
-                Role = userRoles.FirstOrDefault()
+                return new NewUserDto
+                {
+                    UserName = appUser.UserName,
+                    DisplayName = appUser.DisplayName,
+                    Image = appUser?.Photo?.Url,
+                    Token = _tokenService.CreateToken(appUser, userRoles),
+                    Role = userRoles.FirstOrDefault(),
+                    IsFirstLogin = isFirstLogin
             };
         }
 

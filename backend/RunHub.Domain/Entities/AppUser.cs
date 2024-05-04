@@ -14,6 +14,7 @@ namespace RunHub.Domain.Entity
         public string Bio { get; set; }
         public string ContactNumber { get; set; }
         public string Club { get; set; }
+        public bool IsFirstLogin { get; set; }
 
         public string PhotoId { get; set; }
         public Photo Photo { get; set; }

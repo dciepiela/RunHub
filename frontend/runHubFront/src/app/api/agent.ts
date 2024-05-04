@@ -124,6 +124,13 @@ const Account = {
   resetPassword: (resetPasswordDto: ResetPasswordDto) =>
     requests.post<void>("/account/resetPassword", resetPasswordDto),
   refreshToken: () => requests.post<User>("/account/refreshToken", {}),
+  verifyEmail: (token: string, email: string) =>
+    requests.post<void>(
+      `/account/verifyEmail?token=${token}&email=${email}`,
+      {}
+    ),
+  resendEmailConfirm: (email: string) =>
+    requests.get(`account/resendEmailConfirmationLink?email=${email}`),
 };
 
 const Races = {

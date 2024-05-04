@@ -31,6 +31,8 @@ import AddAttendanceManually from "../../pages/dashboard/edit/attendanceManually
 import DashboardMain from "../../pages/dashboard/DashboardMain";
 import PhotoUploadForm from "../../pages/dashboard/add/PhotoUploadForm";
 import EditProfile from "../../pages/login/EditProfile";
+import RegisterSuccess from "../../pages/register/RegisterSuccess";
+import ConfirmEmail from "../../pages/register/ConfirmEmail";
 
 export const routes: RouteObject[] = [
   {
@@ -103,6 +105,14 @@ export const routes: RouteObject[] = [
       {
         path: "payment-success",
         element: <PaymentSuccessPage />,
+      },
+      {
+        path: "account/registerSuccess",
+        element: <RegisterSuccess />,
+      },
+      {
+        path: "account/verifyEmail",
+        element: <ConfirmEmail />,
       },
       //dashboard
       {

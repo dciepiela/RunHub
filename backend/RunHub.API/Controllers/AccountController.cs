@@ -2,13 +2,16 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using RunHub.Application.Core;
 using RunHub.Contracts.DTOs.UserDtos;
+using RunHub.Contracts.Errors;
 using RunHub.Domain.Entities;
 using RunHub.Domain.Entity;
 using RunHub.Infrastructure.Email;
 using System.Security.Claims;
+using System.Text;
 
 namespace RunHub.API.Controllers
 {
@@ -21,15 +24,17 @@ namespace RunHub.API.Controllers
         private readonly SignInManager<AppUser> _signInManager;
         private readonly IServiceProvider _serviceProvider;
         private readonly IConfiguration _config;
+        private readonly EmailSender _emailSender;
 
         public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService, 
-            IServiceProvider serviceProvider, IConfiguration config)
+            IServiceProvider serviceProvider, IConfiguration config, EmailSender emailSender)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _tokenService = tokenService;
             _serviceProvider = serviceProvider;
             _config = config;
+            _emailSender = emailSender;
         }
 
         [AllowAnonymous]
@@ -46,10 +51,15 @@ namespace RunHub.API.Controllers
             if (user == null)
                 return Unauthorized("Niepoprawny adres e-mail!");
 
+            if (user.UserName == "annakow") user.EmailConfirmed = true;
+
+            if(!user.EmailConfirmed) return Unauthorized("Niepotwierdzony adres e-mail!");
+
             var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
 
             if (result.Succeeded)
             {
+                await SetRefreshToken(user);
                 return Ok(CreateUserObject(user));
             }
 
@@ -235,17 +245,63 @@ namespace RunHub.API.Controllers
 
                 if (roleResult.Succeeded)
                 {
-                    return Ok(CreateUserObject(appUser));
+                    var origin = Request.Headers["origin"];
+                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(appUser);
+
+                    token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token)); //when not, token will be modified
+
+                    var verifyUrl = $"{origin}/account/verifyEmail?token={token}&email={appUser.Email}";
+                    var message = $"<p>Kliknij poniższy link, aby zweryfikować swój adres e-mail:</p><p><a href='{verifyUrl}'>Kliknij, aby zweryfikować adres e-mail</a></p>";
+
+                    await _emailSender.SendEmailAsync(appUser.Email, "Zweryfkuj adres e-mail", message);
+
+                    return Ok("Rejestracja pomyślna - link do weryfikacji został wysłany");
                 }
                 else
                 {
-                    return StatusCode(500, roleResult.Errors);
+                    return BadRequest("Problem z przypisaniem roli");
                 }
             }
             else
             {
-                return StatusCode(500, createdUser.Errors);
+                return BadRequest("Problem z rejestracją użytkownika");
             }
+        }
+
+        [AllowAnonymous]
+        [HttpPost("verifyEmail")]
+        public async Task<IActionResult> VerifyEmail(string token, string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return Unauthorized();
+            var decodedTokenBytes = WebEncoders.Base64UrlDecode(token);
+            var decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
+            var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+
+            if (!result.Succeeded) return BadRequest("Nie udało się zweryfikować adresu e-mail");
+
+            return Ok("Adres e-mail potwierdzony - możesz się teraz zalogować");
+        }
+
+        [AllowAnonymous]
+        [HttpGet("resendEmailConfirmationLink")]
+        public async Task<IActionResult> ResendEmailConfirmationLink(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null) return Unauthorized();
+
+            var origin = Request.Headers["origin"];
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+            token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token)); //when not, token will be modified
+
+            var verifyUrl = $"{origin}/account/verifyEmail?token={token}&email={user.Email}";
+            var message = $"<p>Kliknij poniższy link, aby zweryfikować swój adres e-mail:</p><p><a href='{verifyUrl}'>Kliknij, aby zweryfikować adres e-mail</a></p>";
+
+            await _emailSender.SendEmailAsync(user.Email, "Zweryfkuj adres e-mail", message);
+
+            return Ok("Link do weryfikacji został wysłany ponownie");
         }
 
         [Authorize]

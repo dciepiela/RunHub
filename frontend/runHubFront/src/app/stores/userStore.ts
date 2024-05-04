@@ -41,11 +41,11 @@ export default class UserStore {
     try {
       if (registrationType === "Competitor") {
         await agent.Account.registerCompetitor(user);
-        router.navigate("/");
+        router.navigate(`/account/registerSuccess?email=${user.email}`);
         toast.success("Zarejestrowano, możesz się teraz zalogować");
       } else if (registrationType === "Organizer") {
         await agent.Account.registerOrganizer(user);
-        router.navigate("/");
+        router.navigate(`/account/registerSuccess?email=${user.email}`);
         toast.success("Zarejestrowano, możesz się teraz zalogować");
       }
     } catch (error) {

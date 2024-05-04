@@ -125,13 +125,13 @@ namespace RunHub.API.Controllers
                     IsFirstLogin = true
                 };
 
-                var result = await _userManager.CreateAsync(newUser);
+                var result = await _userManager.CreateAsync(user);
 
                 if (result.Succeeded)
                 {
-                    await _userManager.AddToRoleAsync(newUser, "Competitor");
+                    await _userManager.AddToRoleAsync(user, "Competitor");
 
-                    return Ok(CreateUserObject(newUser, isFirstLogin:true));
+                    return Ok(CreateUserObject(user, isFirstLogin:true));
                 }
                 else
                 {
@@ -161,6 +161,22 @@ namespace RunHub.API.Controllers
             return CreateUserObject(user);
         }
 
+        private async Task SetRefreshToken(AppUser user)
+        {
+            var refreshToken = _tokenService.GenerateRefreshToken();
+
+            user.RefreshTokens.Add(refreshToken);
+            await _userManager.UpdateAsync(user);
+
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = DateTime.UtcNow.AddDays(7)
+            };
+
+            Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
+        }
+
         private async Task<GoogleJsonWebSignature.Payload> VerifyGoogleIdToken(string idToken)
         {
             var settings = new GoogleJsonWebSignature.ValidationSettings();
@@ -176,7 +192,6 @@ namespace RunHub.API.Controllers
                 return null;
             }
         }
-
 
         private async Task<IActionResult> RegisterUser(RegisterDto registerDto, string role)
         {

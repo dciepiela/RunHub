@@ -36,7 +36,7 @@ This project is a comprehensive system designed to assist in run management, int
 
 ## Demo
 
-![Demo](https://res.cloudinary.com/dxe84cnj6/image/upload/v1715151604/kjo57neza4aqrimflfyk.png)
+[MainPage](https://res.cloudinary.com/dxe84cnj6/image/upload/v1715151604/kjo57neza4aqrimflfyk.png)
 
 
 ## Installation
